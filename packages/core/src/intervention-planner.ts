@@ -10,6 +10,7 @@ import type { DiagnosticErrorType } from "./schemas";
 import type { PlayerConceptSnapshot, PlayerIntelligenceSnapshot } from "./player-intelligence";
 import { createNeutralAdaptiveCoachingProfile } from "./adaptive-coaching";
 import { collectPatternBiases, type PatternInterventionBias } from "./patterns";
+import { computeRetentionPlanningBoost, type RetentionScheduleLike } from "./retention-scheduler";
 import type { SessionGeneratorSrsRow, SessionPlan, SessionPlanMetadata, SelectedDrill } from "./session-generator";
 import type { CanonicalDrill } from "./schemas";
 import type { WeaknessPool, WeaknessTarget } from "./weakness-analytics";
@@ -102,12 +103,13 @@ export function buildInterventionPlan(args: {
   playerIntelligence: PlayerIntelligenceSnapshot;
   recentAttempts: InterventionPlannerRecentAttempt[];
   activePool: WeaknessPool;
+  retentionSchedules?: RetentionScheduleLike[];
   now?: Date;
 }): InterventionPlan {
   const now = args.now ?? new Date();
   const byConcept = aggregateDiagnostics(args.recentAttempts);
   const conceptsByKey = new Map(args.playerIntelligence.concepts.map((concept) => [concept.conceptKey, concept]));
-  const ranked = rankConceptCandidates(args.playerIntelligence.concepts, byConcept, args.playerIntelligence.patterns.patterns);
+  const ranked = rankConceptCandidates(args.playerIntelligence.concepts, byConcept, args.playerIntelligence.patterns.patterns, args.retentionSchedules, now);
 
   const lead = ranked[0];
   const fallback = args.playerIntelligence.priorities[0] ?? args.playerIntelligence.concepts[0];
@@ -338,10 +340,11 @@ export function buildInterventionSessionPlan(args: {
 function rankConceptCandidates(
   concepts: PlayerConceptSnapshot[],
   byConcept: Map<string, { label: string; count: number; errorCounts: Map<DiagnosticErrorType, number> }>,
-  playerPatterns: PlayerIntelligenceSnapshot["patterns"]["patterns"]
+  playerPatterns: PlayerIntelligenceSnapshot["patterns"]["patterns"],
+  retentionSchedules: RetentionScheduleLike[] = [],
+  now = new Date()
 ): RankedConceptCandidate[] {
   return concepts
-    .filter((concept) => concept.status !== "strength" || getPlanningReasons(concept).includes("retention_check"))
     .map((concept) => {
       const group = byConcept.get(concept.conceptKey);
       const diagnosticWeight = [...(group?.errorCounts.entries() ?? [])].reduce(
@@ -350,17 +353,29 @@ function rankConceptCandidates(
       );
       const recentMissCount = group?.count ?? 0;
       const patternBiases = collectPatternBiases(playerPatterns, [concept.conceptKey, ...concept.supportingConceptKeys]);
-      const score = scoreConceptCandidate(concept, diagnosticWeight, recentMissCount, patternBiases);
+      const latestRetentionSchedule = [...retentionSchedules]
+        .filter((schedule) => schedule.conceptKey === concept.conceptKey)
+        .sort((a, b) => new Date(b.scheduledFor).getTime() - new Date(a.scheduledFor).getTime() || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+      const retentionBoost = computeRetentionPlanningBoost({
+        recoveryStage: concept.recoveryStage,
+        recurrenceCount: concept.recurrenceCount,
+        regressionCount: concept.recoveryStage === "regressed" ? 1 : 0,
+        latestRetentionSchedule,
+        now,
+      });
+      const planningReasons = dedupeReasons([...getPlanningReasons(concept), ...retentionBoost.reasons]);
+      const score = scoreConceptCandidate(concept, diagnosticWeight, recentMissCount, patternBiases, retentionBoost.pressure, planningReasons);
       return {
         conceptKey: concept.conceptKey,
         snapshot: concept,
         score,
         diagnosticWeight,
         recentMissCount,
-        planningReasons: getPlanningReasons(concept),
+        planningReasons,
         patternBiases,
       };
     })
+    .filter((candidate) => candidate.snapshot.status !== "strength" || candidate.planningReasons.includes("retention_check"))
     .sort((a, b) => b.score - a.score || a.snapshot.label.localeCompare(b.snapshot.label));
 }
 
@@ -368,10 +383,12 @@ function scoreConceptCandidate(
   snapshot: PlayerConceptSnapshot,
   diagnosticWeight: number,
   recentMissCount: number,
-  patternBiases: PatternInterventionBias[]
+  patternBiases: PatternInterventionBias[],
+  retentionPressure: number,
+  planningReasons: SessionPlanningReason[]
 ): number {
-  const planningReasons = getPlanningReasons(snapshot);
   let score = snapshot.trainingUrgency * 20 + diagnosticWeight * 5 + recentMissCount * 3 + snapshot.reviewPressure * 2;
+  score += retentionPressure * 26;
 
   for (const reason of planningReasons) {
     score += planningReasonWeight(reason) * 10;

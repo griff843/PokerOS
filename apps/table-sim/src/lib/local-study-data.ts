@@ -10,9 +10,11 @@ import {
   getUserDiagnosisHistory,
   getUserInterventionDecisionSnapshots,
   getUserInterventions,
+  getUserRetentionSchedules,
 } from "../../../../packages/db/src/repository";
 import { ImportedHandSchema, type ImportedHand } from "@poker-coach/core/browser";
 import { getLocalCoachingUserId } from "./coaching-memory";
+import { refreshRetentionSchedules } from "./retention-scheduling";
 
 export function resolveDrillsDir(): string {
   const candidates = [
@@ -51,15 +53,19 @@ export function loadLocalStudyData() {
       diagnoses: [],
       interventions: [],
       decisionSnapshots: [],
+      retentionSchedules: [],
     };
   }
 
   const db = openDatabase(dbPath);
   try {
     const userId = getLocalCoachingUserId();
+    const attempts = getAllAttempts(db);
+    const diagnoses = getUserDiagnosisHistory(db, userId);
+    refreshRetentionSchedules({ db, attempts, diagnoses });
     return {
       drills,
-      attempts: getAllAttempts(db),
+      attempts,
       srs: getAllSrs(db),
       importedHands: getAllImportedHands(db).map((row) => parseImportedHand(row)),
       handImports: getRecentHandImports(db).map((row) => ({
@@ -73,9 +79,10 @@ export function loadLocalStudyData() {
         createdAt: row.created_at,
         updatedAt: row.updated_at,
       })),
-      diagnoses: getUserDiagnosisHistory(db, userId),
+      diagnoses,
       interventions: getUserInterventions(db, userId),
       decisionSnapshots: getUserInterventionDecisionSnapshots(db, userId),
+      retentionSchedules: getUserRetentionSchedules(db, userId),
     };
   } finally {
     db.close();

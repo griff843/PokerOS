@@ -6,10 +6,11 @@ import { ensureInterventionForPlan, toDiagnosisHistoryEntries, toInterventionHis
 import { loadLocalStudyData, resolveDbPath } from "../../../lib/local-study-data";
 import { createRecommendedInterventionDecision, createRecommendedInterventionPlan } from "../../../lib/session-plan-server";
 import { openDatabase } from "../../../../../../packages/db/src";
+import { buildConceptRetentionSummary } from "../../../lib/retention-scheduling";
 
 export async function GET(request: NextRequest) {
   try {
-    const { drills, attempts, srs, diagnoses, interventions } = loadLocalStudyData();
+    const { drills, attempts, srs, diagnoses, interventions, retentionSchedules } = loadLocalStudyData();
     const activePool = (request.nextUrl.searchParams.get("pool") ?? attempts[0]?.active_pool ?? "baseline") as WeaknessPool;
     const now = new Date();
     const decision = createRecommendedInterventionDecision({
@@ -53,7 +54,11 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ ...plan, nextInterventionDecision: decision });
+    const retentionSummary = decision
+      ? buildConceptRetentionSummary(decision.conceptKey, retentionSchedules, now)
+      : undefined;
+
+    return NextResponse.json({ ...plan, nextInterventionDecision: decision, retentionSummary });
   } catch (error) {
     console.error("Failed to build intervention plan:", error);
     return NextResponse.json({ error: "Failed to build intervention plan" }, { status: 500 });

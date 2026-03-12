@@ -19,3 +19,4 @@ export * from "./real-hands";
 export * from "./coaching-memory";
 export * from "./patterns";
 export * from "./intervention-recommendations";
+export * from "./retention-scheduler";

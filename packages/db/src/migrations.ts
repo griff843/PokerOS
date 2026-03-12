@@ -94,6 +94,25 @@ const MIGRATIONS: string[] = [
     supersedes_decision_id TEXT REFERENCES intervention_decision_snapshots(id)
   )`,
 
+  `CREATE TABLE IF NOT EXISTS retention_schedules (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    concept_key TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    scheduled_for TEXT NOT NULL,
+    status TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    linked_intervention_id TEXT REFERENCES coaching_interventions(id),
+    linked_decision_snapshot_id TEXT REFERENCES intervention_decision_snapshots(id),
+    recovery_stage_at_scheduling TEXT NOT NULL,
+    priority INTEGER NOT NULL DEFAULT 0,
+    completed_at TEXT,
+    result TEXT,
+    supersedes_schedule_id TEXT REFERENCES retention_schedules(id),
+    superseded_by_schedule_id TEXT REFERENCES retention_schedules(id),
+    evidence_json TEXT NOT NULL DEFAULT '[]'
+  )`,
+
   `CREATE TABLE IF NOT EXISTS intervention_outcomes (
     id TEXT PRIMARY KEY,
     intervention_id TEXT NOT NULL UNIQUE REFERENCES coaching_interventions(id),
@@ -161,6 +180,8 @@ const MIGRATIONS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_coaching_interventions_concept ON coaching_interventions(user_id, concept_key, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_intervention_decisions_concept ON intervention_decision_snapshots(user_id, concept_key, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_intervention_decisions_created ON intervention_decision_snapshots(user_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_retention_schedules_concept ON retention_schedules(user_id, concept_key, scheduled_for DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_retention_schedules_status ON retention_schedules(user_id, status, scheduled_for ASC)`,
   `CREATE INDEX IF NOT EXISTS idx_srs_due ON srs(due_at)`,
   `CREATE INDEX IF NOT EXISTS idx_hand_imports_created ON hand_imports(created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_imported_hands_played ON imported_hands(played_at DESC)`,

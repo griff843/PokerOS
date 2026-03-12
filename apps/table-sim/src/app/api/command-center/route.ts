@@ -15,7 +15,7 @@ const DEFAULT_COUNT = 10;
 
 export async function GET() {
   try {
-    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots } = loadLocalStudyData();
+    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots, retentionSchedules } = loadLocalStudyData();
     const drillMap = new Map(drills.map((drill) => [drill.drill_id, drill]));
     const activePool = (attempts[0]?.active_pool ?? "baseline") as WeaknessPool;
     const now = new Date();
@@ -85,6 +85,7 @@ export async function GET() {
       interventionHistory,
       realPlaySignals,
       patternAttempts,
+      retentionSchedules,
       now,
     });
 

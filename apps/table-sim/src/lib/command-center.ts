@@ -12,11 +12,13 @@ import {
   type SessionPlanningReason,
   type WeaknessPool,
 } from "@poker-coach/core/browser";
+import type { RetentionScheduleRow } from "../../../../packages/db/src/repository";
 import type { TableSimSessionPlan } from "./session-plan";
 import { formatSessionLabel } from "./study-session-ui";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
 import { buildPrimaryInterventionRecommendation } from "./intervention-decision";
 import { buildPatternBriefs, type PatternBrief } from "./pattern-summaries";
+import { buildConceptRetentionSummary } from "./retention-scheduling";
 
 export interface CommandCenterRecentAttempt {
   drillId: string;
@@ -65,6 +67,10 @@ export interface CommandCenterSnapshot {
     active: Array<{ concept: string; status: string; detail: string }>;
     completed: Array<{ concept: string; status: string; detail: string }>;
   };
+  retention: {
+    due: Array<{ concept: string; status: string; detail: string }>;
+    upcoming: Array<{ concept: string; status: string; detail: string }>;
+  };
   coachingPatterns: PatternBrief[];
   nextInterventionDecision?: InterventionRecommendation;
   recommendedTrainingBlock: {
@@ -90,6 +96,7 @@ interface BuildCommandCenterSnapshotArgs {
   interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
   patternAttempts?: PatternAttemptSignal[];
+  retentionSchedules?: RetentionScheduleRow[];
   now?: Date;
 }
 
@@ -104,6 +111,7 @@ export function buildCommandCenterSnapshot({
   interventionHistory = [],
   realPlaySignals,
   patternAttempts,
+  retentionSchedules = [],
   now = new Date(),
 }: BuildCommandCenterSnapshotArgs): CommandCenterSnapshot {
   const playerIntelligence = buildTableSimPlayerIntelligence({
@@ -167,6 +175,7 @@ export function buildCommandCenterSnapshot({
       recommendation: `${interventionPlan.nextSessionFocus}`,
     },
     interventions: buildInterventionSection(interventionHistory, playerIntelligence),
+    retention: buildRetentionSection(playerIntelligence, retentionSchedules, now),
     coachingPatterns: buildPatternBriefs(playerIntelligence.patterns.topPatterns, 2),
     nextInterventionDecision,
     recommendedTrainingBlock: {
@@ -179,6 +188,40 @@ export function buildCommandCenterSnapshot({
       outcome: attempt.correct ? `Locked in at ${Math.round(attempt.score * 100)}%` : `Needs review at ${Math.round(attempt.score * 100)}%`,
       tsLabel: formatRecentDate(attempt.ts),
     })),
+  };
+}
+
+function buildRetentionSection(
+  playerIntelligence: ReturnType<typeof buildTableSimPlayerIntelligence>,
+  schedules: RetentionScheduleRow[],
+  now: Date
+): CommandCenterSnapshot["retention"] {
+  const summaries = playerIntelligence.concepts
+    .map((concept) => ({
+      concept: concept.label,
+      summary: buildConceptRetentionSummary(concept.conceptKey, schedules, now),
+    }))
+    .filter((entry) => entry.summary.latestSchedule);
+
+  return {
+    due: summaries
+      .filter((entry) => entry.summary.latestSchedule?.state === "due" || entry.summary.latestSchedule?.state === "overdue")
+      .slice(0, 3)
+      .map((entry) => ({
+        concept: entry.concept,
+        status: entry.summary.latestSchedule?.state === "overdue" ? "Overdue" : "Due",
+        detail: entry.summary.latestSchedule?.state === "overdue"
+          ? "Recovery is still provisional until this retention check is completed."
+          : "This concept is ready for a validation block to confirm the gain is holding.",
+      })),
+    upcoming: summaries
+      .filter((entry) => entry.summary.latestSchedule?.state === "upcoming")
+      .slice(0, 2)
+      .map((entry) => ({
+        concept: entry.concept,
+        status: "Scheduled",
+        detail: `Next validation check is set for ${formatRecentDate(entry.summary.latestSchedule?.scheduledFor ?? now.toISOString())}.`,
+      })),
   };
 }
 

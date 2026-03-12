@@ -258,6 +258,84 @@ describe("intervention planner", () => {
     expect(plan.nextSessionFocus).toContain("imported hands");
   });
 
+  it("prioritizes due retention checks for recovered concepts", () => {
+    const snapshot = makeSnapshot();
+    snapshot.concepts = [
+      {
+        conceptKey: "turn_defense",
+        label: "Turn Defense",
+        summary: "Turn defense recovered and now needs validation.",
+        scope: "overall",
+        recommendedPool: "B",
+        sampleSize: 6,
+        recentAverage: 0.78,
+        averageScore: 0.74,
+        recoveryStage: "recovered",
+        reviewPressure: 0,
+        failedCount: 0,
+        status: "strength",
+        weaknessRole: "none",
+        planningReasons: ["weakness_balance"],
+        trainingUrgency: 0.22,
+        recurrenceCount: 1,
+        evidence: ["Recovered once and now due for validation."],
+        inferredFrom: [],
+        supportingConceptKeys: [],
+        supportedConceptKeys: ["river_bluff_catching"],
+        relatedConceptKeys: [],
+        directSignalKeys: [],
+        relatedDrills: [],
+      },
+      {
+        conceptKey: "river_bluff_catching",
+        label: "River Bluff Catching",
+        summary: "River defense still needs work.",
+        scope: "overall",
+        recommendedPool: "B",
+        sampleSize: 4,
+        recentAverage: 0.46,
+        averageScore: 0.43,
+        recoveryStage: "unaddressed",
+        reviewPressure: 0,
+        failedCount: 2,
+        status: "weakness",
+        weaknessRole: "primary",
+        planningReasons: ["weakness_balance"],
+        trainingUrgency: 0.35,
+        recurrenceCount: 0,
+        evidence: ["The leak is still active."],
+        inferredFrom: [],
+        supportingConceptKeys: [],
+        supportedConceptKeys: [],
+        relatedConceptKeys: [],
+        directSignalKeys: [],
+        relatedDrills: [],
+      },
+    ] as never;
+
+    const plan = buildInterventionPlan({
+      playerIntelligence: snapshot,
+      recentAttempts: [],
+      activePool: "B",
+      retentionSchedules: [
+        {
+          conceptKey: "turn_defense",
+          createdAt: "2026-03-12T12:00:00.000Z",
+          scheduledFor: "2026-03-13T12:00:00.000Z",
+          status: "scheduled",
+          reason: "recovered_validation",
+          recoveryStageAtScheduling: "recovered",
+          priority: 68,
+        },
+      ],
+      now: new Date("2026-03-13T13:00:00.000Z"),
+    });
+
+    expect(plan.rootConceptKey).toBe("turn_defense");
+    expect(plan.planningReasons).toContain("retention_check");
+    expect(plan.trainingBlocks[0]?.role).toBe("retest");
+  });
+
 });
 
 

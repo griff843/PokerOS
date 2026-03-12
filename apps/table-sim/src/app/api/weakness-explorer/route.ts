@@ -9,7 +9,7 @@ import { buildConceptDecisionAuditSummary } from "../../../lib/intervention-deci
 
 export async function GET() {
   try {
-    const { drills, attempts, srs, importedHands, decisionSnapshots } = loadLocalStudyData();
+    const { drills, attempts, srs, importedHands, decisionSnapshots, retentionSchedules } = loadLocalStudyData();
     const activePool = (attempts[0]?.active_pool ?? "baseline") as WeaknessPool;
     const drillMap = new Map(drills.map((drill) => [drill.drill_id, drill]));
     const hydratedAttempts = hydratePersistedStudyAttempts(attempts, drills);
@@ -20,6 +20,7 @@ export async function GET() {
       activePool,
       realPlaySignals: buildRealPlayConceptSignals(importedHands),
       patternAttempts: buildPatternAttemptSignals(hydratedAttempts),
+      retentionSchedules,
       now: new Date(),
     });
 

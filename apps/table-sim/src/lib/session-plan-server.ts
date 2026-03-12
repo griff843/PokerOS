@@ -19,6 +19,13 @@ import {
   buildPatternAttemptSignals,
   hydratePersistedStudyAttempts,
 } from "./intervention-support";
+import { getLocalCoachingUserId } from "./coaching-memory";
+import {
+  getUserDiagnosisHistory,
+  getUserInterventionDecisionSnapshots,
+  getUserInterventions,
+} from "../../../../packages/db/src/repository";
+import { syncRetentionScheduling, toCoreRetentionSchedule } from "./retention-scheduling";
 
 interface CreateTableSimSessionPlanArgs {
   request: Pick<SessionRequest, "count" | "reviewRatio" | "activePool"> & { interventionId?: string | null };
@@ -68,10 +75,12 @@ export function createTableSimSessionPlan({
     interventionHistory,
     conceptKey: playerIntelligence.priorities[0]?.conceptKey,
   });
+  const retentionSchedules = syncPlannerRetentionSchedules(playerIntelligence, inputs.attempts, inputs.now);
   const interventionPlan = buildInterventionPlan({
     playerIntelligence,
     recentAttempts: buildInterventionRecentAttempts(hydratedAttempts),
     activePool: request.activePool ?? "baseline",
+    retentionSchedules,
     now: inputs.now,
   });
 
@@ -168,10 +177,40 @@ export function createRecommendedInterventionPlan(args: {
     now: args.now,
   });
 
+  const retentionSchedules = syncPlannerRetentionSchedules(playerIntelligence, args.attempts, args.now);
+
   return buildInterventionPlan({
     playerIntelligence,
     recentAttempts: buildInterventionRecentAttempts(hydratedAttempts),
     activePool: args.activePool ?? "baseline",
+    retentionSchedules,
     now: args.now,
   });
+}
+
+function syncPlannerRetentionSchedules(
+  playerIntelligence: ReturnType<typeof buildPlayerIntelligenceSnapshot>,
+  attempts: GeneratorInputs["attempts"],
+  now: Date | undefined
+) {
+  const dbPath = resolveDbPath();
+  if (!dbPath) {
+    return [];
+  }
+
+  const db = openDatabase(dbPath);
+  try {
+    const userId = getLocalCoachingUserId();
+    return syncRetentionScheduling({
+      db,
+      playerIntelligence,
+      attempts,
+      diagnoses: getUserDiagnosisHistory(db, userId),
+      interventions: getUserInterventions(db, userId),
+      decisionSnapshots: getUserInterventionDecisionSnapshots(db, userId),
+      now,
+    }).map((schedule) => toCoreRetentionSchedule(schedule));
+  } finally {
+    db.close();
+  }
 }

@@ -239,6 +239,21 @@ export type InterventionDecisionStrategy =
 
 export type InterventionDecisionConfidence = "low" | "medium" | "high";
 export type InterventionDecisionIntensity = "light" | "moderate" | "high" | "intensive";
+export type RetentionScheduleStatus =
+  | "scheduled"
+  | "due"
+  | "overdue"
+  | "completed_pass"
+  | "completed_fail"
+  | "canceled"
+  | "superseded";
+
+export type RetentionScheduleReason =
+  | "stabilizing_followup"
+  | "recovered_validation"
+  | "recurrence_guard"
+  | "regression_watch"
+  | "failed_retention_recheck";
 
 export interface InterventionDecisionSnapshotRow {
   id: string;
@@ -262,6 +277,25 @@ export interface InterventionDecisionSnapshotRow {
   linked_intervention_id?: string | null;
   source_context?: string | null;
   supersedes_decision_id?: string | null;
+}
+
+export interface RetentionScheduleRow {
+  id: string;
+  user_id: string;
+  concept_key: string;
+  created_at: string;
+  scheduled_for: string;
+  status: RetentionScheduleStatus;
+  reason: RetentionScheduleReason;
+  linked_intervention_id?: string | null;
+  linked_decision_snapshot_id?: string | null;
+  recovery_stage_at_scheduling: string;
+  priority: number;
+  completed_at?: string | null;
+  result?: "pass" | "fail" | null;
+  supersedes_schedule_id?: string | null;
+  superseded_by_schedule_id?: string | null;
+  evidence_json: string;
 }
 
 export interface InterventionOutcomeRow {
@@ -512,6 +546,147 @@ export function markInterventionDecisionActedUpon(
 
 export function getInterventionOutcome(db: Database.Database, interventionId: string): InterventionOutcomeRow | undefined {
   return db.prepare("SELECT * FROM intervention_outcomes WHERE intervention_id = ?").get(interventionId) as InterventionOutcomeRow | undefined;
+}
+
+export function createRetentionSchedule(db: Database.Database, row: RetentionScheduleRow): RetentionScheduleRow {
+  db.prepare(`
+    INSERT INTO retention_schedules (
+      id,
+      user_id,
+      concept_key,
+      created_at,
+      scheduled_for,
+      status,
+      reason,
+      linked_intervention_id,
+      linked_decision_snapshot_id,
+      recovery_stage_at_scheduling,
+      priority,
+      completed_at,
+      result,
+      supersedes_schedule_id,
+      superseded_by_schedule_id,
+      evidence_json
+    )
+    VALUES (
+      @id,
+      @user_id,
+      @concept_key,
+      @created_at,
+      @scheduled_for,
+      @status,
+      @reason,
+      @linked_intervention_id,
+      @linked_decision_snapshot_id,
+      @recovery_stage_at_scheduling,
+      @priority,
+      @completed_at,
+      @result,
+      @supersedes_schedule_id,
+      @superseded_by_schedule_id,
+      @evidence_json
+    )
+  `).run({
+    ...row,
+    linked_intervention_id: row.linked_intervention_id ?? null,
+    linked_decision_snapshot_id: row.linked_decision_snapshot_id ?? null,
+    completed_at: row.completed_at ?? null,
+    result: row.result ?? null,
+    supersedes_schedule_id: row.supersedes_schedule_id ?? null,
+    superseded_by_schedule_id: row.superseded_by_schedule_id ?? null,
+  });
+  return row;
+}
+
+export function getConceptRetentionSchedules(
+  db: Database.Database,
+  userId: string,
+  conceptKey: string,
+  limit = 20
+): RetentionScheduleRow[] {
+  return db.prepare(`
+    SELECT * FROM retention_schedules
+    WHERE user_id = ? AND concept_key = ?
+    ORDER BY scheduled_for DESC, created_at DESC, id DESC
+    LIMIT ?
+  `).all(userId, conceptKey, limit) as RetentionScheduleRow[];
+}
+
+export function getUserRetentionSchedules(
+  db: Database.Database,
+  userId: string,
+  limit = 100
+): RetentionScheduleRow[] {
+  return db.prepare(`
+    SELECT * FROM retention_schedules
+    WHERE user_id = ?
+    ORDER BY scheduled_for DESC, created_at DESC, id DESC
+    LIMIT ?
+  `).all(userId, limit) as RetentionScheduleRow[];
+}
+
+export function getDueRetentionSchedules(
+  db: Database.Database,
+  userId: string
+): RetentionScheduleRow[] {
+  return db.prepare(`
+    SELECT * FROM retention_schedules
+    WHERE user_id = ? AND status IN ('due', 'overdue')
+    ORDER BY scheduled_for ASC, created_at DESC
+  `).all(userId) as RetentionScheduleRow[];
+}
+
+export function getLatestRetentionSchedule(
+  db: Database.Database,
+  userId: string,
+  conceptKey: string
+): RetentionScheduleRow | undefined {
+  return db.prepare(`
+    SELECT * FROM retention_schedules
+    WHERE user_id = ? AND concept_key = ?
+    ORDER BY scheduled_for DESC, created_at DESC, id DESC
+    LIMIT 1
+  `).get(userId, conceptKey) as RetentionScheduleRow | undefined;
+}
+
+export function updateRetentionScheduleStatus(
+  db: Database.Database,
+  scheduleId: string,
+  status: RetentionScheduleStatus
+): void {
+  db.prepare("UPDATE retention_schedules SET status = ? WHERE id = ?").run(status, scheduleId);
+}
+
+export function completeRetentionSchedule(
+  db: Database.Database,
+  scheduleId: string,
+  result: "pass" | "fail",
+  completedAt: string
+): void {
+  db.prepare(`
+    UPDATE retention_schedules
+    SET status = ?,
+        result = ?,
+        completed_at = ?
+    WHERE id = ?
+  `).run(result === "pass" ? "completed_pass" : "completed_fail", result, completedAt, scheduleId);
+}
+
+export function cancelRetentionSchedule(db: Database.Database, scheduleId: string): void {
+  db.prepare("UPDATE retention_schedules SET status = 'canceled' WHERE id = ?").run(scheduleId);
+}
+
+export function supersedeRetentionSchedule(
+  db: Database.Database,
+  scheduleId: string,
+  supersededByScheduleId: string
+): void {
+  db.prepare(`
+    UPDATE retention_schedules
+    SET status = 'superseded',
+        superseded_by_schedule_id = ?
+    WHERE id = ?
+  `).run(supersededByScheduleId, scheduleId);
 }
 
 // SRS operations

@@ -4,27 +4,36 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { openDatabase } from "./index";
 import {
+  cancelRetentionSchedule,
   completeIntervention,
+  completeRetentionSchedule,
   createDiagnosis,
   createIntervention,
   createInterventionDecisionSnapshot,
+  createRetentionSchedule,
   createReflection,
   getAllAttempts,
   getAllImportedHands,
+  getConceptRetentionSchedules,
+  getDueRetentionSchedules,
   getInterventionOutcome,
   getLatestInterventionDecisionSnapshot,
+  getLatestRetentionSchedule,
   getRecentHandImports,
   getRecentInterventionDecisionSnapshots,
   getUserDiagnosisHistory,
   getUserInterventionDecisionSnapshots,
   getUserInterventions,
+  getUserRetentionSchedules,
   insertAttempt,
   insertHandImport,
   insertImportedHand,
   markInterventionDecisionActedUpon,
   recordInterventionOutcome,
   startIntervention,
+  supersedeRetentionSchedule,
   type ImportedHandRow,
+  updateRetentionScheduleStatus,
   updateAttemptReflection,
   upsertDrill,
   upsertNode,
@@ -332,5 +341,87 @@ describe("intervention decision snapshots", () => {
     expect(conceptHistory[1]?.acted_upon_bool).toBe(1);
     expect(conceptHistory[1]?.linked_intervention_id).toBe(intervention.id);
     expect(conceptHistory[0]?.supersedes_decision_id).toBe("decision-1");
+  });
+});
+
+describe("retention schedules", () => {
+  it("stores, updates, and reads retention schedules in audit order", () => {
+    const db = openDatabase(createTempDbPath());
+
+    createRetentionSchedule(db, {
+      id: "ret-1",
+      user_id: "local_user",
+      concept_key: "river_bluff_catching",
+      created_at: "2026-03-12T12:00:00.000Z",
+      scheduled_for: "2026-03-19T12:00:00.000Z",
+      status: "scheduled",
+      reason: "recovered_validation",
+      linked_intervention_id: null,
+      linked_decision_snapshot_id: null,
+      recovery_stage_at_scheduling: "recovered",
+      priority: 58,
+      completed_at: null,
+      result: null,
+      supersedes_schedule_id: null,
+      superseded_by_schedule_id: null,
+      evidence_json: JSON.stringify(["Recovered concepts need explicit validation."]),
+    });
+
+    createRetentionSchedule(db, {
+      id: "ret-2",
+      user_id: "local_user",
+      concept_key: "turn_defense",
+      created_at: "2026-03-12T12:10:00.000Z",
+      scheduled_for: "2026-03-14T12:00:00.000Z",
+      status: "due",
+      reason: "stabilizing_followup",
+      linked_intervention_id: null,
+      linked_decision_snapshot_id: null,
+      recovery_stage_at_scheduling: "stabilizing",
+      priority: 72,
+      completed_at: null,
+      result: null,
+      supersedes_schedule_id: null,
+      superseded_by_schedule_id: null,
+      evidence_json: JSON.stringify(["Stabilizing concepts need nearer follow-up."]),
+    });
+
+    updateRetentionScheduleStatus(db, "ret-1", "overdue");
+    completeRetentionSchedule(db, "ret-2", "pass", "2026-03-14T13:00:00.000Z");
+
+    createRetentionSchedule(db, {
+      id: "ret-3",
+      user_id: "local_user",
+      concept_key: "turn_defense",
+      created_at: "2026-03-14T14:00:00.000Z",
+      scheduled_for: "2026-03-17T12:00:00.000Z",
+      status: "scheduled",
+      reason: "recurrence_guard",
+      linked_intervention_id: null,
+      linked_decision_snapshot_id: null,
+      recovery_stage_at_scheduling: "recovered",
+      priority: 68,
+      completed_at: null,
+      result: null,
+      supersedes_schedule_id: "ret-2",
+      superseded_by_schedule_id: null,
+      evidence_json: JSON.stringify(["Recurring leaks justify another guardrail check."]),
+    });
+    supersedeRetentionSchedule(db, "ret-2", "ret-3");
+    cancelRetentionSchedule(db, "ret-3");
+
+    const latest = getLatestRetentionSchedule(db, "local_user", "turn_defense");
+    const conceptHistory = getConceptRetentionSchedules(db, "local_user", "turn_defense");
+    const due = getDueRetentionSchedules(db, "local_user");
+    const userSchedules = getUserRetentionSchedules(db, "local_user");
+    db.close();
+
+    expect(latest?.id).toBe("ret-3");
+    expect(latest?.status).toBe("canceled");
+    expect(conceptHistory.map((entry) => entry.id)).toEqual(["ret-3", "ret-2"]);
+    expect(conceptHistory[1]?.status).toBe("superseded");
+    expect(conceptHistory[1]?.superseded_by_schedule_id).toBe("ret-3");
+    expect(due.map((entry) => entry.id)).toEqual(["ret-1"]);
+    expect(userSchedules).toHaveLength(3);
   });
 });

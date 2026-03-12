@@ -12,11 +12,13 @@ import {
   type WeaknessPool,
   type WeaknessTarget,
 } from "@poker-coach/core/browser";
+import type { RetentionScheduleRow } from "../../../../packages/db/src/repository";
 import { analyzeWeaknessAnalyticsFromInsights } from "../../../../packages/core/src/weakness-analytics";
 import { formatSessionLabel } from "./study-session-ui";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
 import { buildTableSimInterventionRecommendations } from "./intervention-decision";
 import { buildPatternBriefs } from "./pattern-summaries";
+import { buildConceptRetentionSummary } from "./retention-scheduling";
 
 const DEFAULT_WEAKNESS_THRESHOLD = 0.5;
 const DEFAULT_MIN_ATTEMPTS = 2;
@@ -48,6 +50,10 @@ export interface WeaknessExplorerSnapshot {
     dimensions: string[];
     coachingPattern?: string;
     interventionDecision?: Pick<InterventionRecommendation, "action" | "recommendedStrategy" | "summary">;
+    retention?: {
+      state: string;
+      validation: "none" | "provisional" | "validated" | "failed";
+    };
     relatedDrills: Array<{
       drillId: string;
       title: string;
@@ -84,6 +90,7 @@ export function buildWeaknessExplorerSnapshot(args: {
   activePool: WeaknessPool;
   realPlaySignals?: RealPlayConceptSignal[];
   patternAttempts?: PatternAttemptSignal[];
+  retentionSchedules?: RetentionScheduleRow[];
   now?: Date;
 }): WeaknessExplorerSnapshot {
   const now = args.now ?? new Date();
@@ -111,7 +118,7 @@ export function buildWeaknessExplorerSnapshot(args: {
     weaknessReport: report,
     playerIntelligence,
   });
-  const weaknessCards = playerIntelligence.priorities.slice(0, 5).map((concept) => buildWeaknessCard(concept, topTargets, args.drills, args.srs, args.activePool, now, playerIntelligence.adaptiveProfile.surfaceSignals.weaknessExplorer, playerIntelligence.patterns.topPatterns, interventionRecommendations.find((entry) => entry.conceptKey === concept.conceptKey)));
+  const weaknessCards = playerIntelligence.priorities.slice(0, 5).map((concept) => buildWeaknessCard(concept, topTargets, args.drills, args.srs, args.activePool, now, playerIntelligence.adaptiveProfile.surfaceSignals.weaknessExplorer, playerIntelligence.patterns.topPatterns, args.retentionSchedules ?? [], interventionRecommendations.find((entry) => entry.conceptKey === concept.conceptKey)));
 
   return {
     generatedAt: report.generatedAt,
@@ -144,6 +151,7 @@ function buildWeaknessCard(
   now: Date,
   adaptiveSignal: string,
   topPatterns: ReturnType<typeof buildTableSimPlayerIntelligence>["patterns"]["topPatterns"],
+  retentionSchedules: RetentionScheduleRow[],
   interventionDecision?: InterventionRecommendation
 ): WeaknessExplorerSnapshot["priorityWeaknesses"][number] {
   const fallbackTarget = fallbackTargets.find((target) => formatSessionLabel(target.key) === concept.label);
@@ -159,6 +167,7 @@ function buildWeaknessCard(
         }));
   const dueReviewCount = srs.filter((row) => new Date(row.due_at) <= now && relatedDrills.some((drill) => drill.drillId === row.drill_id)).length;
   const pattern = buildPatternBriefs(topPatterns.filter((entry) => entry.implicatedConcepts.includes(concept.conceptKey)), 1)[0];
+  const retention = buildConceptRetentionSummary(concept.conceptKey, retentionSchedules, now);
 
   return {
     key: `${concept.conceptKey}:${concept.scope}:${concept.recommendedPool}`,
@@ -181,6 +190,7 @@ function buildWeaknessCard(
     dimensions: [...concept.evidence.slice(0, 2), ...concept.inferredFrom.slice(0, 1)].slice(0, 3),
     coachingPattern: pattern ? `${pattern.title}: ${pattern.detail}` : undefined,
     interventionDecision: interventionDecision ? { action: interventionDecision.action, recommendedStrategy: interventionDecision.recommendedStrategy, summary: interventionDecision.summary } : undefined,
+    retention: retention.latestSchedule ? { state: retention.latestSchedule.state, validation: retention.validationState } : undefined,
     relatedDrills,
   };
 }

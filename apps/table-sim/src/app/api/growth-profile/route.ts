@@ -14,7 +14,7 @@ import { loadLocalStudyData } from "../../../lib/local-study-data";
 
 export async function GET() {
   try {
-    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots } = loadLocalStudyData();
+    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots, retentionSchedules } = loadLocalStudyData();
     const drillMap = new Map(drills.map((drill) => [drill.drill_id, drill]));
     const activePool = (attempts[0]?.active_pool ?? "baseline") as WeaknessPool;
     const hydratedAttempts = hydratePersistedStudyAttempts(attempts, drills);
@@ -39,6 +39,7 @@ export async function GET() {
       activePool,
       realPlaySignals: buildRealPlayConceptSignals(importedHands),
       patternAttempts,
+      retentionSchedules,
       now: new Date(),
     });
 

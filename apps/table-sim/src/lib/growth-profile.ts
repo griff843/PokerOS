@@ -12,10 +12,12 @@ import {
   type RealPlayConceptSignal,
   type WeaknessPool,
 } from "@poker-coach/core/browser";
+import type { RetentionScheduleRow } from "../../../../packages/db/src/repository";
 import { buildWeaknessExplorerSnapshot, type WeaknessExplorerSnapshot } from "./weakness-explorer";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
 import { buildPrimaryInterventionRecommendation } from "./intervention-decision";
 import { buildPatternBriefs, type PatternBrief } from "./pattern-summaries";
+import { buildConceptRetentionSummary } from "./retention-scheduling";
 
 export interface GrowthProfileAttempt {
   drillId: string;
@@ -78,6 +80,11 @@ export interface GrowthProfileSnapshot {
     detail: string;
     tone: "warning" | "neutral";
   }>;
+  retentionValidation: Array<{
+    label: string;
+    detail: string;
+    tone: "good" | "warning" | "neutral";
+  }>;
   coachingPatterns: PatternBrief[];
   nextInterventionDecision?: InterventionRecommendation;
   coachPerspective: {
@@ -107,6 +114,7 @@ export function buildGrowthProfileSnapshot(args: {
   interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
   patternAttempts?: PatternAttemptSignal[];
+  retentionSchedules?: RetentionScheduleRow[];
   now?: Date;
 }): GrowthProfileSnapshot {
   const now = args.now ?? new Date();
@@ -259,6 +267,7 @@ export function buildGrowthProfileSnapshot(args: {
     interventionSuccess: buildInterventionSuccess(interventionHistory, playerIntelligence.memory.interventionSuccessRate),
     conceptRecovery: buildConceptRecovery(playerIntelligence.concepts, interventionHistory),
     recurringLeaks: buildRecurringLeaks(playerIntelligence.memory.recurringLeakConcepts, weakSpots),
+    retentionValidation: buildRetentionValidation(playerIntelligence.concepts, args.retentionSchedules ?? [], now),
     coachingPatterns: buildPatternBriefs(playerIntelligence.patterns.topPatterns, 3),
     nextInterventionDecision,
     coachPerspective: {
@@ -280,6 +289,37 @@ export function buildGrowthProfileSnapshot(args: {
     },
     nextActions: buildNextActions(weaknessExplorer, interventionPlan),
   };
+}
+
+function buildRetentionValidation(
+  concepts: ReturnType<typeof buildTableSimPlayerIntelligence>["concepts"],
+  schedules: RetentionScheduleRow[],
+  now: Date
+): GrowthProfileSnapshot["retentionValidation"] {
+  return concepts
+    .map((concept) => ({
+      label: concept.label,
+      summary: buildConceptRetentionSummary(concept.conceptKey, schedules, now),
+    }))
+    .filter((entry) => entry.summary.latestSchedule)
+    .slice(0, 3)
+    .map((entry) => ({
+      label: entry.label,
+      detail: entry.summary.latestSchedule?.state === "completed_pass"
+        ? "Recovery has been validated by a passed retention check."
+        : entry.summary.latestSchedule?.state === "completed_fail"
+          ? "The last retention check failed, so this concept should be treated as slipped."
+          : entry.summary.latestSchedule?.state === "overdue"
+            ? "A retention check is overdue, so recovery remains provisional."
+            : entry.summary.latestSchedule?.state === "due"
+              ? "A retention check is due now, so the next block should validate this concept."
+              : "A future retention check is already scheduled to validate this recovery.",
+      tone: entry.summary.latestSchedule?.state === "completed_pass"
+        ? "good"
+        : entry.summary.latestSchedule?.state === "completed_fail" || entry.summary.latestSchedule?.state === "overdue"
+          ? "warning"
+          : "neutral",
+    }));
 }
 
 function buildHeadline(delta: number, overallAverage: number, cadence: ReturnType<typeof buildCadenceProfile>): string {
