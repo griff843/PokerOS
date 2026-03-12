@@ -24,6 +24,16 @@ export interface ConceptCaseBundle {
   recommendation?: InterventionRecommendation;
 }
 
+export interface ConceptCaseResponse {
+  conceptKey: string;
+  history: ConceptCaseHistory;
+  explanation: ConceptCaseExplanation;
+  nextStep: ConceptCaseNextStep;
+  decisionAudit?: InterventionDecisionAuditSummary;
+  retention: RetentionSummary;
+  recommendation?: InterventionRecommendation;
+}
+
 export function buildConceptCaseMap(args: {
   playerIntelligence: PlayerIntelligenceSnapshot;
   diagnosisHistory?: PlayerDiagnosisHistoryEntry[];

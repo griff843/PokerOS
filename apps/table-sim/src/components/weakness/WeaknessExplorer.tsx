@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/session-context";
@@ -233,6 +234,13 @@ function PriorityWeaknessesSection({
                 <div className="space-y-3">
                   <p className="text-sm leading-6 text-slate-300">{weakness.whyItMatters}</p>
                   {weakness.interventionDecision ? <p className="text-sm leading-6 text-amber-50/90">{weakness.interventionDecision.summary}</p> : null}
+                  {weakness.caseSummary ? (
+                    <div className="rounded-[18px] border border-emerald-500/16 bg-emerald-500/8 p-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-200">Concept case</p>
+                      <p className="mt-2 text-sm font-semibold text-white">{weakness.caseSummary.statusLabel}</p>
+                      <p className="mt-2 text-sm leading-6 text-emerald-50/90">{weakness.caseSummary.priorityExplanation}</p>
+                    </div>
+                  ) : null}
                   <div className="flex flex-wrap gap-2">
                     {weakness.interventionDecision ? (
                       <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
@@ -254,6 +262,12 @@ function PriorityWeaknessesSection({
                 <div className="rounded-[22px] border border-white/8 bg-white/5 p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Recommended action</p>
                   <p className="mt-2 text-sm leading-6 text-slate-200">{weakness.recommendedAction}</p>
+                  <Link
+                    href={`/app/concepts/${encodeURIComponent(weakness.conceptKey)}`}
+                    className="mt-4 inline-flex rounded-[16px] border border-white/10 bg-black/20 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/18 hover:bg-white/10"
+                  >
+                    Open concept case
+                  </Link>
                   {weakness.trend ? (
                     <div className="mt-4 rounded-[18px] border border-white/8 bg-black/20 p-3">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Trend</p>
