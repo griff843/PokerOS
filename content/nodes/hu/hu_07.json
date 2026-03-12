@@ -1,0 +1,13 @@
+{
+  "node_id": "hu_07",
+  "name": "Facing River Donk Bet",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP",
+    "street": "river",
+    "pot_type": "SRP"
+  },
+  "triggers": ["paired_top_river", "scare_river_ace"],
+  "defaults": { "population_toggle": "B" }
+}

@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@poker-coach/core": ["packages/core/src"],
+      "@poker-coach/db": ["packages/db/src"]
+    }
+  },
+  "include": [
+    "apps/*/src/**/*.ts",
+    "packages/*/src/**/*.ts"
+  ]
+}

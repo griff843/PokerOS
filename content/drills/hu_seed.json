@@ -1,0 +1,3186 @@
+[
+  {
+    "drill_id": "d_01_01",
+    "node_id": "hu_01",
+    "version": "1.0.0",
+    "title": "SRP Bluffcatch River",
+    "prompt": "SRP, you called preflop in the BB with Jh9h. Board runs out Js 7c 3d 2h Jd. Villain bets 75% pot on the river. The top card paired on the river. Do you call or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Js",
+          "7c",
+          "3d"
+        ],
+        "turn": "2h",
+        "river": "Jd"
+      },
+      "hero_hand": [
+        "Jh",
+        "9h"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 33
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 75
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 75
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "paired_top_river"
+      ],
+      "explanation": "You have trips with a decent kicker. The paired top card on the river reduces villain's value combos. Even vs Pool B which underbluffs, trips is too strong to fold."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:paired",
+      "concept:blocker_effect",
+      "decision:bluff_catch",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "river_bluff_region",
+        "prompt": "What bluffs still reach this river after the turn checks through?",
+        "type": "range_construction",
+        "concept": "river bluff catching",
+        "expected_reasoning": "The turn check keeps in delayed floats and missed backdoor pressure, so trips still need to defend.",
+        "options": [
+          {
+            "id": "value_only",
+            "label": "Mostly boats and trapped value get here, so trips should overfold.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "delayed_floats",
+            "label": "Delayed floats and missed backdoors still arrive here, so high trips stay in the bluff-catcher region.",
+            "matches_expected": true
+          },
+          {
+            "id": "size_only",
+            "label": "The size is large enough that the range details barely matter.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "unsure",
+            "label": "Unsure",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ],
+    "coaching_context": {
+      "key_concept": "Trips on a paired river should defend more often than the raw bet size suggests.",
+      "range_context": "After the turn checks through, BTN still arrives with thin value, delayed bluffs, and missed backdoor floats instead of only full houses.",
+      "range_notes": [
+        "Jh9h sits high in BB's bluff-catching region because it blocks some value boats while still beating all missed backdoor pressure hands.",
+        "BTN's strongest value is partially capped by the turn check, so the river size alone cannot force trips into an overfold."
+      ],
+      "what_changed_by_street": [
+        {
+          "street": "flop",
+          "detail": "The small flop c-bet keeps BTN's range wide instead of immediately polar."
+        },
+        {
+          "street": "turn",
+          "detail": "The turn check removes some pure triple-barrel value and preserves more air that must decide whether to fire river."
+        },
+        {
+          "street": "river",
+          "detail": "The paired jack removes value combos while preserving enough missed floats to make trips a necessary bluff-catcher."
+        }
+      ],
+      "difficulty_reason": "Trips feels automatic, but paired rivers are really about value-combo removal and how the turn action filtered range density.",
+      "why_preferred_line_works": "Jh9h is simply too high in range after the turn checks through, and it blocks enough strong value that folding would over-defend villain's bluffs.",
+      "common_mistake": "Folding because the large river size looks scary without rechecking how many natural value hands survived the turn check.",
+      "common_mistakes": [
+        "Treating any paired river overbet as value-heavy even when the prior street checked through.",
+        "Ignoring that trips blocks some of villain's natural value continuations while still beating missed delayed floats."
+      ],
+      "follow_up": "Review paired-river bluff-catching spots where the turn checked through before a late large bet.",
+      "follow_up_concepts": [
+        "concept:blocker_effect",
+        "concept:board_connectivity"
+      ],
+      "range_support": {
+        "value_buckets": [
+          {
+            "label": "Boats and trapped nutted value",
+            "combos": [
+              "77",
+              "33",
+              "22",
+              "J7s"
+            ],
+            "note": "These are the cleanest hands that still want a large river bet after the turn checks through.",
+            "frequency_hint": "Mostly bet"
+          },
+          {
+            "label": "Trips for thinner value",
+            "combos": [
+              "AJ",
+              "KJ",
+              "QJ"
+            ],
+            "note": "Trips exist, but not every jack wants the same polar size once the turn checked back."
+          }
+        ],
+        "bluff_buckets": [
+          {
+            "label": "Missed delayed floats",
+            "combos": [
+              "T9",
+              "98",
+              "65s",
+              "A4s"
+            ],
+            "note": "The turn check leaves in backdoor floats and gutters that can still fire once checked to on the river."
+          }
+        ],
+        "bluff_catchers": [
+          {
+            "label": "High trips that must defend",
+            "combos": [
+              "Jh9h",
+              "JTo",
+              "J9s"
+            ],
+            "note": "These combos sit high enough to continue against the surviving missed-float bluffs.",
+            "frequency_hint": "Mostly call"
+          },
+          {
+            "label": "One-pair bluff catchers below threshold",
+            "combos": [
+              "7x",
+              "3x",
+              "55-99"
+            ],
+            "note": "These hands lose too much to the remaining value region once the size polarizes."
+          }
+        ],
+        "combo_groups": [
+          {
+            "label": "Hands that dislike the turn check-through",
+            "combos": [
+              "pure triple barrels",
+              "thin top-pair value"
+            ],
+            "note": "The skipped turn removes some of the cleanest value pressure Villain would normally bring to river."
+          }
+        ],
+        "threshold_notes": [
+          "Jh9h is above the river defense threshold because it beats every missed float and blocks part of the strongest jack-x and boat region."
+        ],
+        "blocker_notes": [
+          "Holding a jack trims Villain's trip value while leaving the missed backdoor floats intact, which is exactly what you want from a bluff-catcher."
+        ],
+        "hero_hand_bucket": {
+          "label": "This combo",
+          "summary": "High-end bluff catcher",
+          "note": "Strong enough to call, but only because the line still contains enough air after the turn checks through."
+        }
+      }
+    }
+  },
+  {
+    "drill_id": "d_01_02",
+    "node_id": "hu_01",
+    "version": "1.0.0",
+    "title": "SRP Bluffcatch River",
+    "prompt": "SRP, you called preflop IP with Ah5h. Board: Ks Qd 7c 4s As. River brings the ace as a scare card. Villain bets 66% pot. You have top pair weak kicker. Call or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Ks",
+          "Qd",
+          "7c"
+        ],
+        "turn": "4s",
+        "river": "As"
+      },
+      "hero_hand": [
+        "Ah",
+        "5h"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 66
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "scare_river_ace"
+      ],
+      "explanation": "Ace on river is a scare card but it gave you top pair. Villain's bluffs increased since the ace blocks AK/AQ. Call is correct even vs Pool B."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:monotone",
+      "concept:scare_card_pressure",
+      "decision:bluff_catch",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_01_03",
+    "node_id": "hu_01",
+    "version": "1.0.0",
+    "title": "SRP Bluffcatch River",
+    "prompt": "SRP, you defend BB with Tc9c. Board: Th 6s 3c 2d 5h. Four-liner straight possible (2-3-5-6 connects with 4). Villain bets 80% pot on the river. You have top pair. Call or fold vs Pool B?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Th",
+          "6s",
+          "3c"
+        ],
+        "turn": "2d",
+        "river": "5h"
+      },
+      "hero_hand": [
+        "Tc",
+        "9c"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 80
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "four_liner_river"
+      ],
+      "explanation": "Four-liner on the river means villain can credibly have straights. Pool B underbluffs big rivers. Top pair is a fold when the board runs out this connected."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:connected",
+      "concept:board_connectivity",
+      "decision:bluff_catch",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_02_01",
+    "node_id": "hu_02",
+    "version": "1.0.0",
+    "title": "Facing Turn Overbet",
+    "prompt": "SRP, you're OOP with As Qd on Kh 9c 4d. Villain checks back flop. Turn: 2s. You check, villain overbets 150% pot. You have two overcards and a backdoor. What do you do?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Kh",
+          "9c",
+          "4d"
+        ],
+        "turn": "2s",
+        "river": null
+      },
+      "hero_hand": [
+        "As",
+        "Qd"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "overbet",
+        "size_pct_pot": 150
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "turn_overbet_faced"
+      ],
+      "explanation": "Facing a turn overbet with just overcards is a clear fold. Pool B under-bluffs overbets, so this is heavily weighted toward value. You have no pair and poor equity."
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dynamic",
+      "concept:polarization",
+      "decision:facing_overbet",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_02_02",
+    "node_id": "hu_02",
+    "version": "1.0.0",
+    "title": "Facing Turn Overbet",
+    "prompt": "SRP, you're OOP with 8s 8d on 7h 5c 3d. You check, villain c-bets 33%, you call. Turn: 9s. You check, villain overbets 125% pot. You have an overpair. Call or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "7h",
+          "5c",
+          "3d"
+        ],
+        "turn": "9s",
+        "river": null
+      },
+      "hero_hand": [
+        "8s",
+        "8d"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "overbet",
+        "size_pct_pot": 125
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "turn_overbet_faced"
+      ],
+      "explanation": "You have an overpair on a low board. Even facing a turn overbet, 88 is near the top of your range. Pool B leans toward value overbets, but you're too strong to fold here."
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dynamic",
+      "concept:polarization",
+      "decision:facing_overbet",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_02_03",
+    "node_id": "hu_02",
+    "version": "1.0.0",
+    "title": "Facing Turn Overbet",
+    "prompt": "SRP, you're OOP with Jh Td on Qc 8s 4h. You check-call flop c-bet. Turn: 6d. Villain overbets 140% pot. You have an OESD. What's your play?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Qc",
+          "8s",
+          "4h"
+        ],
+        "turn": "6d",
+        "river": null
+      },
+      "hero_hand": [
+        "Jh",
+        "Td"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "overbet",
+        "size_pct_pot": 140
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [
+        "RAISE"
+      ],
+      "required_tags": [
+        "turn_overbet_faced"
+      ],
+      "explanation": "With an OESD you have 8 outs (~16% equity). The pot is offering enough to call. Check-raise all-in is also viable as a semi-bluff if stacks are right."
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dynamic",
+      "concept:polarization",
+      "decision:facing_overbet",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_03_01",
+    "node_id": "hu_03",
+    "version": "1.0.0",
+    "title": "River Raise as Bluff",
+    "prompt": "SRP, you're IP with 6s 5s on Ks 9d 3c 7h. Villain bets turn 50% pot, you call with OESD. River: 2d. Flush missed, straight missed. Villain bets 50% pot. Raise as bluff?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Ks",
+          "9d",
+          "3c"
+        ],
+        "turn": "7h",
+        "river": "2d"
+      },
+      "hero_hand": [
+        "6s",
+        "5s"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 50
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise to 2.5x"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [],
+      "required_tags": [
+        "overbet_opportunity"
+      ],
+      "explanation": "You have zero showdown value with missed draws. Raising the river as a bluff is profitable here because you can credibly rep strong hands. Pool B under-calls river raises."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:dynamic",
+      "concept:leverage",
+      "decision:raise_as_bluff",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_03_02",
+    "node_id": "hu_03",
+    "version": "1.0.0",
+    "title": "River Raise as Bluff",
+    "prompt": "SRP, you're IP with Qh Jh on Ah 8c 3h 5d Th. Flush and straight complete on river. Villain checks. You have a flush. Should you overbet for value?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Ah",
+          "8c",
+          "3h"
+        ],
+        "turn": "5d",
+        "river": "Th"
+      },
+      "hero_hand": [
+        "Qh",
+        "Jh"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 33
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 66
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": true
+    },
+    "options": [
+      {
+        "key": "CHECK",
+        "label": "Check back"
+      },
+      {
+        "key": "BET",
+        "label": "Bet 50% pot"
+      }
+    ],
+    "answer": {
+      "correct": "BET",
+      "accepted": [],
+      "correct_size": {
+        "size_bucket": 130,
+        "tolerance_pct": 15
+      },
+      "required_tags": [
+        "overbet_opportunity"
+      ],
+      "explanation": "With a very strong queen-high flush on a board where straights also complete, you still hold a premium polar value hand. Overbet is correct to extract max value from worse flushes, straights, two pair, and sticky bluff-catchers."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:monotone",
+      "concept:leverage",
+      "decision:raise_as_bluff",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    },
+    "coaching_context": {
+      "key_concept": "Overbets are best when the river shifts nut advantage sharply toward the aggressor.",
+      "range_context": "BTN arrives with all strong heart combos and some straights, while BB is capped by the earlier check-call line and still has many bluff-catchers.",
+      "range_notes": [
+        "QhJh is not the nut flush, but it is still high enough in BTN's river value region to support a polar overbet.",
+        "The river completes both flushes and straights, which lets BTN credibly overbet a narrow, powerful range without pretending every flush is the nuts."
+      ],
+      "what_changed_by_street": [
+        {
+          "street": "flop",
+          "detail": "BTN starts with a small c-bet that keeps BB wide."
+        },
+        {
+          "street": "turn",
+          "detail": "The second barrel keeps pressure on one-pair hands and draws while preserving a strong river-polar range."
+        },
+        {
+          "street": "river",
+          "detail": "The heart river collapses BTN's value into a premium polar region that can size up aggressively."
+        }
+      ],
+      "difficulty_reason": "Many players underbet premium river value because the made hand feels strong enough already, missing how much the river shifts BTN into a polar value region.",
+      "why_preferred_line_works": "A very strong flush on a coordinated river still wants a polar size because worse flushes, straights, and bluff-catchers continue too often versus smaller bets.",
+      "common_mistake": "Choosing a medium value size because the board looks scary, even though the scare card actually favors the bettor.",
+      "common_mistakes": [
+        "Failing to distinguish between a strong hand and a true nut-advantaged overbet candidate.",
+        "Checking back rivers that dramatically improve the aggressor's polar region."
+      ],
+      "follow_up": "Review more river overbet-for-value spots where the final card shifts nut advantage strongly toward the aggressor.",
+      "follow_up_concepts": [
+        "concept:leverage",
+        "concept:range_advantage"
+      ],
+      "range_support": {
+        "value_buckets": [
+          {
+            "label": "Premium flushes",
+            "combos": [
+              "KhXh",
+              "QhJh",
+              "Qh9h"
+            ],
+            "note": "These are the cleanest overbet candidates because they dominate the calling range once the river heart lands.",
+            "frequency_hint": "Mostly bet big"
+          },
+          {
+            "label": "Strong straights and sets",
+            "combos": [
+              "76s",
+              "88",
+              "55",
+              "TT"
+            ],
+            "note": "These hands still value bet often, but they do not own the same nut advantage as the strongest flushes."
+          }
+        ],
+        "combo_groups": [
+          {
+            "label": "Hands that can pay an overbet",
+            "combos": [
+              "worse flushes",
+              "straights",
+              "two pair",
+              "curious top pair"
+            ],
+            "note": "BB still arrives with enough second-best made hands that a polar value size prints."
+          }
+        ],
+        "threshold_notes": [
+          "QhJh is well above the value-threshold for a polar river size even without being the absolute nut flush."
+        ],
+        "blocker_notes": [
+          "QhJh removes some of BB's strongest flush continues while still leaving plenty of second-best flushes and straights to pay."
+        ],
+        "hero_hand_bucket": {
+          "label": "This combo",
+          "summary": "Upper value region overbet",
+          "note": "It is premium enough to polarize, even if only the king-high flush technically sits above it."
+        }
+      }
+    }
+  },
+  {
+    "drill_id": "d_03_03",
+    "node_id": "hu_03",
+    "version": "1.0.0",
+    "title": "River Raise as Bluff",
+    "prompt": "SRP, you're IP with 9c 8c on Tc 7d 2s 4c Jc. Board has a four-liner (7-8-9-T-J possible straight). Villain bets 60% pot. You made a flush. Do you raise?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Tc",
+          "7d",
+          "2s"
+        ],
+        "turn": "4c",
+        "river": "Jc"
+      },
+      "hero_hand": [
+        "9c",
+        "8c"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 60
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise to 3x"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [],
+      "required_tags": [
+        "four_liner_river"
+      ],
+      "explanation": "You have a flush on a four-liner board. Raising is for value since villain may also have a straight. The four-liner adds credibility to raising range."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:monotone",
+      "concept:board_connectivity",
+      "decision:raise_as_bluff",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_04_01",
+    "node_id": "hu_04",
+    "version": "1.0.0",
+    "title": "Turn Probe Bet",
+    "prompt": "SRP, villain raised BTN and you called BB. Villain checks back flop on Kd 8h 3c. Turn: 7d (second diamond). You're OOP with Ad Td. Should you probe bet?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Kd",
+          "8h",
+          "3c"
+        ],
+        "turn": "7d",
+        "river": null
+      },
+      "hero_hand": [
+        "Ad",
+        "Td"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": true
+    },
+    "options": [
+      {
+        "key": "CHECK",
+        "label": "Check"
+      },
+      {
+        "key": "BET",
+        "label": "Bet 50% pot"
+      }
+    ],
+    "answer": {
+      "correct": "BET",
+      "accepted": [],
+      "correct_size": {
+        "size_bucket": 50,
+        "tolerance_pct": 15
+      },
+      "required_tags": [
+        "flush_complete_turn"
+      ],
+      "explanation": "The turn diamond gives you a flush draw plus overcard. Probing is correct because villain showed weakness by checking back, and the flush draw turn favors your range."
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dynamic",
+      "concept:equity_denial",
+      "decision:probe",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "turn_probe_why",
+        "prompt": "Why does AdTd want to probe the turn instead of checking again?",
+        "type": "threshold",
+        "concept": "turn probe thresholds",
+        "expected_reasoning": "The diamond turn shifts leverage, and this combo clears the probing threshold because it combines fold equity with strong backup equity.",
+        "options": [
+          {
+            "id": "showdown_value",
+            "label": "Ace-high already has enough showdown value, so betting mostly burns equity.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "range_shift",
+            "label": "The turn shifts leverage to BB, and this combo has enough draw strength to pressure capped checks.",
+            "matches_expected": true
+          },
+          {
+            "id": "blockers_only",
+            "label": "The ace of diamonds matters by itself, even if the hand had no real draw backup.",
+            "diagnosis": "blocker_blindness"
+          },
+          {
+            "id": "unsure",
+            "label": "Unsure",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ],
+    "coaching_context": {
+      "key_concept": "Turn probes punish capped flop checks when the new card helps the caller more than the preflop raiser.",
+      "range_context": "BB keeps all suited backdoor diamonds and stronger king-x after the flop checks through, while BTN gives up some immediate c-bet leverage.",
+      "range_notes": [
+        "AdTd combines overcard equity with a strong nut-draw candidate, so it can bet for fold equity and equity realization at the same time.",
+        "The second diamond is better for the caller than for the delayed-checking raiser, which gives BB more incentive to seize initiative."
+      ],
+      "what_changed_by_street": [
+        {
+          "street": "flop",
+          "detail": "BTN checking back caps some top-pair density and leaves more immediate folds in range."
+        },
+        {
+          "street": "turn",
+          "detail": "The second diamond shifts nut potential toward BB and creates a clean probe window."
+        }
+      ],
+      "difficulty_reason": "Ace-high feels too weak to bet for many students, even when the turn creates one of the cleanest equity-denial probe cards in the node.",
+      "why_preferred_line_works": "AdTd can win immediately versus capped flop checks and still has robust equity when called.",
+      "common_mistake": "Checking because ace-high looks like showdown value instead of seeing the turn as a leverage card for the caller.",
+      "common_mistakes": [
+        "Missing that turn probes are often driven by range shift, not by already-made hand strength.",
+        "Failing to separate good bluff-candidates from weak give-ups after flop checks through."
+      ],
+      "follow_up": "Review more turn probe spots where the caller gains new nut potential after flop checks through.",
+      "follow_up_concepts": [
+        "concept:equity_denial",
+        "concept:board_connectivity"
+      ],
+      "range_support": {
+        "value_buckets": [
+          {
+            "label": "Strong made probes",
+            "combos": [
+              "Kx",
+              "two pair",
+              "sets"
+            ],
+            "note": "These hands can bet confidently once BTN checks back the flop."
+          }
+        ],
+        "bluff_buckets": [
+          {
+            "label": "Nut-draw probes",
+            "combos": [
+              "AdTd",
+              "Ad9d",
+              "QdJd"
+            ],
+            "note": "These hands gain fold equity immediately and retain strong backup equity when called.",
+            "frequency_hint": "Natural bet"
+          },
+          {
+            "label": "Weaker ace-high give-ups",
+            "combos": [
+              "AJo",
+              "ATo without diamonds"
+            ],
+            "note": "Ace-high alone is not enough. The draw and leverage card are what make the probe work."
+          }
+        ],
+        "combo_groups": [
+          {
+            "label": "BTN flop checks that stay capped",
+            "combos": [
+              "underpairs",
+              "ace-high",
+              "missed broadways"
+            ],
+            "note": "The flop check-back creates the fold equity BB wants to attack on the diamond turn."
+          }
+        ],
+        "threshold_notes": [
+          "AdTd is comfortably above the bluff-threshold because it has both fold equity now and robust equity realization when called."
+        ],
+        "blocker_notes": [
+          "The ace of diamonds blocks some of BTN's strongest continues while also giving BB the cleanest nut-draw candidate to probe."
+        ],
+        "hero_hand_bucket": {
+          "label": "This combo",
+          "summary": "Strong probe semi-bluff",
+          "note": "It is not betting because ace-high is good. It is betting because the turn shifted leverage and the draw quality is excellent."
+        }
+      }
+    },
+    "steps": [
+      {
+        "step_id": "turn_probe",
+        "street": "turn",
+        "prompt": "Turn decision after flop checks through.",
+        "decision_point": {
+          "street": "turn",
+          "facing": {
+            "action": "check"
+          },
+          "sizing_buttons_enabled": true
+        },
+        "options": [
+          {
+            "key": "CHECK",
+            "label": "Check"
+          },
+          {
+            "key": "BET",
+            "label": "Bet 50% pot"
+          }
+        ],
+        "answer": {
+          "correct": "BET",
+          "accepted": [],
+          "correct_size": {
+            "size_bucket": 50,
+            "tolerance_pct": 15
+          },
+          "required_tags": [
+            "flush_complete_turn"
+          ],
+          "explanation": "The turn diamond gives you a flush draw plus overcard. Probing is correct because villain showed weakness by checking back, and the flush draw turn favors your range."
+        },
+        "coaching_context": {
+          "what_changed_by_street": [
+            {
+              "street": "turn",
+              "detail": "The second diamond creates a clean leverage card for BB to probe."
+            }
+          ],
+          "why_preferred_line_works": "AdTd now has both fold equity and meaningful backup equity when called.",
+          "common_mistakes": [
+            "Passing on the probe because ace-high still feels too weak in absolute terms."
+          ],
+          "range_support": {
+            "bluff_buckets": [
+              {
+                "label": "Turn probe candidates",
+                "combos": [
+                  "AdTd",
+                  "Ad9d",
+                  "QdJd"
+                ],
+                "note": "The best probes combine overcard removal with nut-draw equity."
+              }
+            ],
+            "threshold_notes": [
+              "Hands without the diamond draw fall below the natural probing threshold much faster."
+            ],
+            "hero_hand_bucket": {
+              "label": "Turn combo",
+              "summary": "Above-threshold probe",
+              "note": "AdTd is exactly the kind of ace-high that should convert into pressure here."
+            }
+          }
+        }
+      },
+      {
+        "step_id": "river_follow_up",
+        "street": "river",
+        "prompt": "River plan after the turn probe gets called and the river bricks 2c.",
+        "board_update": {
+          "river": "2c"
+        },
+        "decision_point": {
+          "street": "river",
+          "facing": {
+            "action": "check"
+          },
+          "sizing_buttons_enabled": false
+        },
+        "options": [
+          {
+            "key": "CHECK",
+            "label": "Check"
+          },
+          {
+            "key": "BET",
+            "label": "Bet 66% pot"
+          }
+        ],
+        "answer": {
+          "correct": "CHECK",
+          "accepted": [],
+          "required_tags": [
+            "flush_complete_turn"
+          ],
+          "explanation": "Once the turn probe gets called and the river bricks, ace-high loses its best fold-equity story and should usually realize showdown instead of triple-barreling."
+        },
+        "coaching_context": {
+          "what_changed_by_street": [
+            {
+              "street": "river",
+              "detail": "The blank river removes the semi-bluff leverage that made the turn probe attractive."
+            }
+          ],
+          "why_preferred_line_works": "The caller's continuing range tightened on the turn, so a river bluff with ace-high now attacks too much made strength.",
+          "common_mistakes": [
+            "Auto-firing the river after a good turn probe without checking whether the brick improved fold equity or not."
+          ],
+          "range_support": {
+            "bluff_catchers": [
+              {
+                "label": "Hands that reached river too weakly",
+                "combos": [
+                  "A-high",
+                  "missed diamonds",
+                  "small pairs"
+                ],
+                "note": "These hands no longer enjoy the leverage that made the turn probe attractive."
+              }
+            ],
+            "threshold_notes": [
+              "Once the river bricks, ace-high without a made hand drops below the profitable bluffing threshold."
+            ],
+            "hero_hand_bucket": {
+              "label": "River combo",
+              "summary": "Below-threshold barrel",
+              "note": "The good turn bluff does not automatically become a good river bluff."
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "drill_id": "d_04_02",
+    "node_id": "hu_04",
+    "version": "1.0.0",
+    "title": "Turn Probe Bet",
+    "prompt": "SRP, villain checks back flop on Qs 7h 4c. Turn: 2s. You're OOP with Jc Th. Blank turn. Should you probe bet?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Qs",
+          "7h",
+          "4c"
+        ],
+        "turn": "2s",
+        "river": null
+      },
+      "hero_hand": [
+        "Jc",
+        "Th"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": true
+    },
+    "options": [
+      {
+        "key": "CHECK",
+        "label": "Check"
+      },
+      {
+        "key": "BET",
+        "label": "Bet 50% pot"
+      }
+    ],
+    "answer": {
+      "correct": "CHECK",
+      "accepted": [],
+      "required_tags": [
+        "polar_turn_big_bet"
+      ],
+      "explanation": "Blank turn on a dry board. Your JT has some equity but probing into a dry texture when villain checked back is less effective. Check and re-evaluate river."
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dynamic",
+      "concept:polarization",
+      "decision:probe",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_04_03",
+    "node_id": "hu_04",
+    "version": "1.0.0",
+    "title": "Turn Probe Bet",
+    "prompt": "SRP, villain checks back flop on 9h 6c 5d. Turn: 8h (flush draw and straight gets there). You're OOP with Th 7h. You have the straight. How do you proceed?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "9h",
+          "6c",
+          "5d"
+        ],
+        "turn": "8h",
+        "river": null
+      },
+      "hero_hand": [
+        "Th",
+        "7h"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": true
+    },
+    "options": [
+      {
+        "key": "CHECK",
+        "label": "Check to trap"
+      },
+      {
+        "key": "BET",
+        "label": "Bet 66% pot"
+      }
+    ],
+    "answer": {
+      "correct": "BET",
+      "accepted": [],
+      "correct_size": {
+        "size_bucket": 75,
+        "tolerance_pct": 15
+      },
+      "required_tags": [
+        "polar_turn_big_bet"
+      ],
+      "explanation": "You flopped an OESD and turned the nuts. Bet for value on a dynamic board. 66% pot or larger is correct on this polar texture. Don't slow-play on a wet board."
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dynamic",
+      "concept:polarization",
+      "decision:probe",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_05_01",
+    "node_id": "hu_05",
+    "version": "1.0.0",
+    "title": "Check-Raise Flop SRP",
+    "prompt": "SRP, you're BB vs BTN open. Flop: 8c 7d 6s. Villain c-bets 33% pot. You have 9h 8h (top pair + OESD). What do you do?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "8c",
+          "7d",
+          "6s"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "9h",
+        "8h"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "cbet",
+        "size_pct_pot": 33
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [],
+      "required_tags": [
+        "overbet_opportunity"
+      ],
+      "explanation": "On a wet connected board, check-raising with top pair + OESD is textbook. You have equity when called and can credibly rep strong hands. Pool B under-defends vs check-raises."
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dynamic",
+      "concept:leverage",
+      "decision:check_raise",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_05_02",
+    "node_id": "hu_05",
+    "version": "1.0.0",
+    "title": "Check-Raise Flop SRP",
+    "prompt": "SRP, you're BB vs BTN. Flop: As Kc 3d. Villain c-bets 33% pot. You have 5h 4h (gutshot + backdoor flush). Should you check-raise?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "As",
+          "Kc",
+          "3d"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "5h",
+        "4h"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "cbet",
+        "size_pct_pot": 33
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "overbet_opportunity"
+      ],
+      "explanation": "AK3 rainbow strongly favors the BTN's range. Check-raising is unprofitable on boards where villain has massive range advantage. Fold weak draws on dry, opponent-favored boards."
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dynamic",
+      "concept:leverage",
+      "decision:check_raise",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_05_03",
+    "node_id": "hu_05",
+    "version": "1.0.0",
+    "title": "Check-Raise Flop SRP",
+    "prompt": "SRP, you're BB vs BTN. Flop: Jh Td 5h. Villain c-bets 50% pot. You have Jd Ts (two pair). What's your play?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Jh",
+          "Td",
+          "5h"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Jd",
+        "Ts"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "cbet",
+        "size_pct_pot": 50
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call and slow-play"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [],
+      "required_tags": [
+        "overbet_opportunity"
+      ],
+      "explanation": "Two pair on a wet board is a premium check-raise candidate. Many turn cards can kill your action or give villain free equity. Raise for value now and charge draws."
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dynamic",
+      "concept:leverage",
+      "decision:check_raise",
+      "pool:baseline"
+    ],
+    "difficulty": 1,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_06_01",
+    "node_id": "hu_06",
+    "version": "1.0.0",
+    "title": "Triple Barrel Bluff",
+    "prompt": "SRP, you raised BTN with Ac 4c, c-bet flop (Qh 8c 3c), bet turn (6d). River: Ks. You still have ace-high (missed flush). Pot is $200, you have $300 behind. Triple barrel?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Qh",
+          "8c",
+          "3c"
+        ],
+        "turn": "6d",
+        "river": "Ks"
+      },
+      "hero_hand": [
+        "Ac",
+        "4c"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": true
+    },
+    "options": [
+      {
+        "key": "CHECK",
+        "label": "Check and give up"
+      },
+      {
+        "key": "BET",
+        "label": "Bet $150 (75% pot)"
+      }
+    ],
+    "answer": {
+      "correct": "BET",
+      "accepted": [],
+      "correct_size": {
+        "size_bucket": 75,
+        "tolerance_pct": 15
+      },
+      "required_tags": [
+        "scare_river_ace"
+      ],
+      "explanation": "King on the river is a great scare card to triple barrel. You rep AK, KQ, KK. Missed flush draw has zero showdown value. Pool B over-folds to third barrels. Size large for maximum fold equity."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:scare_ace",
+      "concept:scare_card_pressure",
+      "decision:triple_barrel",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_06_02",
+    "node_id": "hu_06",
+    "version": "1.0.0",
+    "title": "Triple Barrel Bluff",
+    "prompt": "SRP, you raised CO with Kh Qh, c-bet flop (9d 7s 4c), bet turn (3h). River: 9d board pairs. Villain has called twice. Should you fire the third barrel?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "CO",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "9d",
+          "7s",
+          "4c"
+        ],
+        "turn": "3h",
+        "river": "9s"
+      },
+      "hero_hand": [
+        "Kh",
+        "Qh"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": true
+    },
+    "options": [
+      {
+        "key": "CHECK",
+        "label": "Check and give up"
+      },
+      {
+        "key": "BET",
+        "label": "Bet 75% pot"
+      }
+    ],
+    "answer": {
+      "correct": "BET",
+      "accepted": [],
+      "correct_size": {
+        "size_bucket": 75,
+        "tolerance_pct": 15
+      },
+      "required_tags": [
+        "paired_top_river"
+      ],
+      "explanation": "The paired board on the river is a great bluff card. It reduces villain's sets and trips combos while you can rep a full house. Pool B over-folds to triple barrels on scary rivers."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_co",
+      "board:paired",
+      "concept:blocker_effect",
+      "decision:triple_barrel",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_06_03",
+    "node_id": "hu_06",
+    "version": "1.0.0",
+    "title": "Triple Barrel Bluff",
+    "prompt": "SRP, you raised BTN with Td 9d, c-bet flop (8s 5d 2d), bet turn (Jh). River: 7c completing a four-liner (5-6-7-8 or 7-8-9-T). Should you triple barrel?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "8s",
+          "5d",
+          "2d"
+        ],
+        "turn": "Jh",
+        "river": "7c"
+      },
+      "hero_hand": [
+        "Td",
+        "9d"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": true
+    },
+    "options": [
+      {
+        "key": "CHECK",
+        "label": "Check and give up"
+      },
+      {
+        "key": "BET",
+        "label": "Bet 75% pot"
+      }
+    ],
+    "answer": {
+      "correct": "BET",
+      "accepted": [],
+      "correct_size": {
+        "size_bucket": 75,
+        "tolerance_pct": 15
+      },
+      "required_tags": [
+        "four_liner_river"
+      ],
+      "explanation": "The four-liner river gives you a straight (6-7-8-9-T). This is actually a value bet now! But even without the straight, the four-liner would be an excellent bluff card. Bet large."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:connected",
+      "concept:board_connectivity",
+      "decision:triple_barrel",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_07_01",
+    "node_id": "hu_07",
+    "version": "1.0.0",
+    "title": "Facing River Donk Bet",
+    "prompt": "SRP, you raised BTN and villain called in BB. Board: Kd 9h 5c 3s Kh. River pairs the king. Villain donk bets 40% pot. You have AcJc. How do you respond?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Kd",
+          "9h",
+          "5c"
+        ],
+        "turn": "3s",
+        "river": "Kh"
+      },
+      "hero_hand": [
+        "Ac",
+        "Jc"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "donk_bet",
+        "size_pct_pot": 40
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "paired_top_river"
+      ],
+      "explanation": "Small donk bet on a paired king river is often a blocking bet with Kx. Pool B rarely donk-bluffs. With AJ high you have no showdown value and are behind the donk betting range."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:paired",
+      "concept:blocker_effect",
+      "decision:facing_donk",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_07_02",
+    "node_id": "hu_07",
+    "version": "1.0.0",
+    "title": "Facing River Donk Bet",
+    "prompt": "SRP, you raised BTN with Ks Qs. BB calls. Board: Th 7c 4d 2s Ac. River ace is a scare card. Villain donk bets 75% pot on the river. You have KQ high. What do you do?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Th",
+          "7c",
+          "4d"
+        ],
+        "turn": "2s",
+        "river": "Ac"
+      },
+      "hero_hand": [
+        "Ks",
+        "Qs"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "donk_bet",
+        "size_pct_pot": 75
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise as bluff"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "scare_river_ace"
+      ],
+      "explanation": "Large donk bet on a scare card ace river is heavily value-weighted from Pool B. They have Ax hands that checked to trap earlier streets. KQ has no showdown value. Fold."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:scare_ace",
+      "concept:scare_card_pressure",
+      "decision:facing_donk",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_07_03",
+    "node_id": "hu_07",
+    "version": "1.0.0",
+    "title": "Facing River Donk Bet",
+    "prompt": "SRP, you raised BTN, BB calls. Board: Qd 8c 5h 3d Qc. River pairs the queen. Villain donk bets 30% pot. You have Ah Kh. Ace-high. Call, fold, or raise?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Qd",
+          "8c",
+          "5h"
+        ],
+        "turn": "3d",
+        "river": "Qc"
+      },
+      "hero_hand": [
+        "Ah",
+        "Kh"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 33
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "bet",
+          "size_pct_pot": 30
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "donk_bet",
+        "size_pct_pot": 30
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise to 3x"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "paired_top_river"
+      ],
+      "explanation": "Small donk on a paired queen river is often a block bet. AK has decent showdown value as it beats all missed draws. Paired board reduces Qx combos. Call the small sizing."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:paired",
+      "concept:blocker_effect",
+      "decision:facing_donk",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "metadata": {
+      "source": "manual"
+    },
+    "answer_by_pool": {
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "paired_top_river",
+          "underfold_exploit"
+        ],
+        "explanation": "Pool B does not arrive with enough thin block bets or busted draws in this donk line, so ace-high should fold exploitatively."
+      }
+    },
+    "coaching_context": {
+      "key_concept": "Small river donks on paired boards are about line composition, not just showdown rank.",
+      "range_context": "BTN reaches river with ace-high after the turn checks through, while BB can hold thin Qx, under-realized pairs, and a small set of missed draws.",
+      "range_notes": [
+        "Ace-high only works if the donk line still contains enough cheap blocker bets and missed diamonds.",
+        "When the board pairs the top card, the bettor has fewer value combos than the river texture suggests at first glance."
+      ],
+      "what_changed_by_street": [
+        {
+          "street": "flop",
+          "detail": "The small flop c-bet gets called by a wide one-pair and draw-heavy defending range."
+        },
+        {
+          "street": "turn",
+          "detail": "The turn check-back leaves BTN capped and gives BB room to arrive at river with block bets."
+        },
+        {
+          "street": "river",
+          "detail": "The paired queen cuts down made-value density and makes the small donk more likely to be thin or blocking in baseline play."
+        }
+      ],
+      "difficulty_reason": "Ace-high feels weak, but the line is shallow enough that the river decision is really about whether small donks are blocking or value-heavy.",
+      "why_preferred_line_works": "Baseline play can still include enough thin queen-x, pocket-pair block bets, and missed diamond stabs that ace-high earns a bluff-catch at this size.",
+      "population_note": "Pool B under-bluffs this exact donk line and leans more toward thin value than cheap blockers.",
+      "common_mistake": "Over-folding baseline because ace-high looks trivial, or over-calling pool-specific play without checking whether the donk line is actually bluff-rich.",
+      "common_mistakes": [
+        "Treating every small donk as capped weakness without checking what the prior turn check-back removed from both ranges.",
+        "Ignoring how pool tendencies can turn a baseline bluff-catch into an exploit fold even when the board looks similar."
+      ],
+      "follow_up": "Compare more paired-river donk spots where baseline bluff-catching is acceptable but exploit pools over-value the line.",
+      "follow_up_concepts": [
+        "concept:blocker_effect",
+        "concept:population_pressure"
+      ],
+      "range_support": {
+        "value_buckets": [
+          {
+            "label": "Thin queen-x and slow-played value",
+            "combos": [
+              "Qx",
+              "88",
+              "55",
+              "Q5s"
+            ],
+            "note": "The paired queen trims total value density, but some thin value and traps still exist."
+          }
+        ],
+        "bluff_buckets": [
+          {
+            "label": "Missed diamonds and cheap blockers",
+            "combos": [
+              "AdX",
+              "KdJd",
+              "JdTd"
+            ],
+            "note": "These are the hands baseline can still turn into a small donk after the turn checks through.",
+            "frequency_hint": "Baseline only"
+          }
+        ],
+        "bluff_catchers": [
+          {
+            "label": "Ace-high bluff catchers",
+            "combos": [
+              "AhKh",
+              "AhJx",
+              "AK"
+            ],
+            "note": "The size is small enough that the top ace-highs can still pick off the thin bluff region in baseline play.",
+            "frequency_hint": "Mix / thin call"
+          }
+        ],
+        "combo_groups": [
+          {
+            "label": "Pool B shift",
+            "combos": [
+              "thin queen-x",
+              "underpairs that block bet"
+            ],
+            "note": "In tighter pools the same donk line leans more value-heavy and less bluff-rich."
+          }
+        ],
+        "threshold_notes": [
+          "AhKh is near the bluff-catching threshold: baseline can call, but a tighter pool can push the same combo just below that line."
+        ],
+        "blocker_notes": [
+          "Ace-high blocks some of the missed diamond bluffs you want Villain to have, which is why this is only a thin bluff-catch even before pool adjustments."
+        ],
+        "hero_hand_bucket": {
+          "label": "This combo",
+          "summary": "Thin baseline bluff catcher",
+          "note": "Good enough at the small size in baseline, but not robust enough to survive every exploit pool shift."
+        }
+      }
+    }
+  },
+  {
+    "drill_id": "d_08_01",
+    "node_id": "hu_08",
+    "version": "1.0.0",
+    "title": "Turn Delayed C-Bet",
+    "prompt": "SRP, you raised BTN, BB calls. Flop: Jd 8h 3c. You check back. Turn: 4h (second heart). Should you delayed c-bet?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Jd",
+          "8h",
+          "3c"
+        ],
+        "turn": "4h",
+        "river": null
+      },
+      "hero_hand": [
+        "Ah",
+        "Qh"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": true
+    },
+    "options": [
+      {
+        "key": "CHECK",
+        "label": "Check again"
+      },
+      {
+        "key": "BET",
+        "label": "Bet 50% pot"
+      }
+    ],
+    "answer": {
+      "correct": "BET",
+      "accepted": [],
+      "correct_size": {
+        "size_bucket": 50,
+        "tolerance_pct": 15
+      },
+      "required_tags": [
+        "flush_complete_turn"
+      ],
+      "explanation": "The turn heart brings a flush draw which adds equity to your range. Delayed c-bet is good here because villain's check-call range on the flop is now under pressure from a new draw. Pool B under-defends."
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:dynamic",
+      "concept:equity_denial",
+      "decision:delayed_cbet",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_08_02",
+    "node_id": "hu_08",
+    "version": "1.0.0",
+    "title": "Turn Delayed C-Bet",
+    "prompt": "SRP, you raised BTN with Ah Kd, BB calls. Flop: 9c 7d 4s. You check back. Turn: As. You now have top pair top kicker. How do you size your delayed c-bet?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "9c",
+          "7d",
+          "4s"
+        ],
+        "turn": "As",
+        "river": null
+      },
+      "hero_hand": [
+        "Ah",
+        "Kd"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": true
+    },
+    "options": [
+      {
+        "key": "CHECK",
+        "label": "Check again to trap"
+      },
+      {
+        "key": "BET",
+        "label": "Bet 66% pot"
+      }
+    ],
+    "answer": {
+      "correct": "BET",
+      "accepted": [],
+      "correct_size": {
+        "size_bucket": 75,
+        "tolerance_pct": 15
+      },
+      "required_tags": [
+        "polar_turn_big_bet"
+      ],
+      "explanation": "You checked back a whiffed flop and turned top pair. This is the ideal delayed c-bet scenario. Size 66% pot for value. The ace turn polarizes your range which supports bigger sizing."
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:dynamic",
+      "concept:polarization",
+      "decision:delayed_cbet",
+      "pool:baseline"
+    ],
+    "difficulty": 1,
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "delayed_cbet_size",
+        "prompt": "What changed on the turn that makes a bigger delayed c-bet better than checking again?",
+        "type": "street_shift",
+        "concept": "delayed c-bet leverage",
+        "expected_reasoning": "The ace turn flips range advantage back to BTN, so AK moves into a clear value region that can size up.",
+        "options": [
+          {
+            "id": "flop_still_weak",
+            "label": "The flop checked through, so this line should stay passive unless the river changes things.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "ace_flip",
+            "label": "The ace flips the range story back to BTN, so AK can value bet firmly right away.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_trap",
+            "label": "Pools call too wide, so checking to trap is usually stronger than rebuilding the pot.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "unsure",
+            "label": "Unsure",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ],
+    "coaching_context": {
+      "key_concept": "Delayed c-bets work best when the turn materially improves the aggressor after a flop range check.",
+      "range_context": "BTN checks back many whiffs on the flop, then turns top pair top kicker on the ace, reclaiming a clear value and protection edge.",
+      "range_notes": [
+        "AK is now near the top of the delayed-turn betting range and wants value from ace-x, nine-x, and sticky pocket pairs.",
+        "The ace turn is better for the preflop raiser than for the flop-checking caller, which supports a larger delayed size."
+      ],
+      "what_changed_by_street": [
+        {
+          "street": "flop",
+          "detail": "The flop check keeps BTN's range wide and disguises future top-pair turns."
+        },
+        {
+          "street": "turn",
+          "detail": "The ace sharply improves BTN while also creating a card that BB must defend carefully versus."
+        }
+      ],
+      "difficulty_reason": "Students often treat delayed c-bets as weak by default and miss when a turn card dramatically flips the leverage back to the raiser.",
+      "why_preferred_line_works": "AK now has a strong value target and the ace turn supports a firmer size because BTN owns more top-pair advantage than BB.",
+      "common_mistake": "Checking again because the flop checked through, even though the ace turn is exactly the kind of card that should restart aggression.",
+      "common_mistakes": [
+        "Using a timid delayed size after a card that actually supports stronger polarization.",
+        "Ignoring how the flop check protects strong hands that turn top pair later."
+      ],
+      "follow_up": "Review more delayed c-bet spots where a high overcard turn restores range advantage to the preflop raiser.",
+      "follow_up_concepts": [
+        "concept:polarization",
+        "concept:range_advantage"
+      ],
+      "range_support": {
+        "value_buckets": [
+          {
+            "label": "Top-pair advantage hands",
+            "combos": [
+              "AK",
+              "AQ",
+              "A9s"
+            ],
+            "note": "These hands improve hard enough on the ace turn to justify a firmer delayed size.",
+            "frequency_hint": "Mostly bet"
+          }
+        ],
+        "bluff_buckets": [
+          {
+            "label": "Delayed semi-bluffs",
+            "combos": [
+              "QJ",
+              "JT",
+              "backdoor clubs"
+            ],
+            "note": "The flop check keeps enough natural bluffs in range that BTN can still support a polar delayed bet."
+          }
+        ],
+        "combo_groups": [
+          {
+            "label": "Hands that pay the turn bet",
+            "combos": [
+              "worse ace-x",
+              "9x",
+              "77-TT"
+            ],
+            "note": "BB still arrives with many bluff-catchers that can continue once the ace lands."
+          }
+        ],
+        "threshold_notes": [
+          "AK sits comfortably above the delayed-turn value threshold, which is why the larger size is cleaner than a timid stab."
+        ],
+        "blocker_notes": [
+          "Holding AK blocks some of BB's strongest ace-x continues while still targeting plenty of worse one-pair hands."
+        ],
+        "hero_hand_bucket": {
+          "label": "This combo",
+          "summary": "Top-end delayed value bet",
+          "note": "It is strong enough to restart aggression immediately once the ace flips the range picture."
+        }
+      }
+    },
+    "steps": [
+      {
+        "step_id": "turn_delayed_cbet",
+        "street": "turn",
+        "prompt": "Turn delayed c-bet after the flop checks through.",
+        "decision_point": {
+          "street": "turn",
+          "facing": {
+            "action": "check"
+          },
+          "sizing_buttons_enabled": true
+        },
+        "options": [
+          {
+            "key": "CHECK",
+            "label": "Check again to trap"
+          },
+          {
+            "key": "BET",
+            "label": "Bet 66% pot"
+          }
+        ],
+        "answer": {
+          "correct": "BET",
+          "accepted": [],
+          "correct_size": {
+            "size_bucket": 75,
+            "tolerance_pct": 15
+          },
+          "required_tags": [
+            "polar_turn_big_bet"
+          ],
+          "explanation": "You checked back a whiffed flop and turned top pair. This is the ideal delayed c-bet scenario. Size 66% pot for value. The ace turn polarizes your range which supports bigger sizing."
+        },
+        "coaching_context": {
+          "what_changed_by_street": [
+            {
+              "street": "turn",
+              "detail": "The ace restores clear leverage to BTN after the flop checked through."
+            }
+          ],
+          "why_preferred_line_works": "AK can now bet larger for value and protection instead of drifting into a second passive street.",
+          "common_mistakes": [
+            "Treating the flop check as a reason to stay passive even when the turn radically changes the range picture."
+          ],
+          "range_support": {
+            "value_buckets": [
+              {
+                "label": "Turn restart bets",
+                "combos": [
+                  "AK",
+                  "AQ",
+                  "A9s"
+                ],
+                "note": "The ace turn moves these hands into the clear betting bucket after the flop check-back."
+              }
+            ],
+            "hero_hand_bucket": {
+              "label": "Turn combo",
+              "summary": "Premium delayed c-bet",
+              "note": "AK should not hide behind the flop check once the ace lands."
+            }
+          }
+        }
+      },
+      {
+        "step_id": "river_follow_up",
+        "street": "river",
+        "prompt": "River follow-up after the delayed c-bet gets called and the river bricks 2c.",
+        "board_update": {
+          "river": "2c"
+        },
+        "decision_point": {
+          "street": "river",
+          "facing": {
+            "action": "check"
+          },
+          "sizing_buttons_enabled": true
+        },
+        "options": [
+          {
+            "key": "CHECK",
+            "label": "Check back"
+          },
+          {
+            "key": "BET",
+            "label": "Bet 50% pot"
+          }
+        ],
+        "answer": {
+          "correct": "BET",
+          "accepted": [],
+          "correct_size": {
+            "size_bucket": 50,
+            "tolerance_pct": 15
+          },
+          "required_tags": [
+            "thin_value_deep"
+          ],
+          "explanation": "After the turn delayed c-bet gets called and the river bricks, top pair top kicker still wants a thinner value bet against ace-x and sticky middle pairs."
+        },
+        "coaching_context": {
+          "what_changed_by_street": [
+            {
+              "street": "river",
+              "detail": "The brick river keeps worse ace-x and bluff-catchers in range without adding many new strong hands."
+            }
+          ],
+          "why_preferred_line_works": "A smaller river size keeps value flowing from worse one-pair hands while avoiding unnecessary polarization.",
+          "common_mistakes": [
+            "Checking back too often after a delayed c-bet call because the line already feels like enough value."
+          ],
+          "range_support": {
+            "combo_groups": [
+              {
+                "label": "River bluff-catchers that pay small",
+                "combos": [
+                  "worse ace-x",
+                  "9x",
+                  "77-TT"
+                ],
+                "note": "The brick river keeps enough second-best one-pair hands in range for thin value."
+              }
+            ],
+            "threshold_notes": [
+              "After the delayed c-bet gets called, AK stays above the thin-value threshold but no longer wants to polarize as hard as the turn."
+            ],
+            "hero_hand_bucket": {
+              "label": "River combo",
+              "summary": "Thin value candidate",
+              "note": "Still ahead often enough to bet, but no longer in the part of range that wants a huge size."
+            }
+          }
+        }
+      }
+    ]
+  },
+  {
+    "drill_id": "d_08_03",
+    "node_id": "hu_08",
+    "version": "1.0.0",
+    "title": "Turn Delayed C-Bet",
+    "prompt": "SRP, BTN raise, BB calls. Flop: Kh 9c 2d. You check back with Qc Jc. Turn: Tc. You have an OESD + backdoor flush. Delayed c-bet or check?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Kh",
+          "9c",
+          "2d"
+        ],
+        "turn": "Tc",
+        "river": null
+      },
+      "hero_hand": [
+        "Qc",
+        "Jc"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": true
+    },
+    "options": [
+      {
+        "key": "CHECK",
+        "label": "Check"
+      },
+      {
+        "key": "BET",
+        "label": "Bet 50% pot"
+      }
+    ],
+    "answer": {
+      "correct": "BET",
+      "accepted": [],
+      "correct_size": {
+        "size_bucket": 50,
+        "tolerance_pct": 15
+      },
+      "required_tags": [
+        "flush_complete_turn"
+      ],
+      "explanation": "Turn gave you an OESD with backdoor flush. Delayed c-bet here as a semi-bluff is excellent. You have 8 straight outs + backdoor flush. The turn card also brings flush draws which favors your range."
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:dynamic",
+      "concept:equity_denial",
+      "decision:delayed_cbet",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_09_01",
+    "node_id": "hu_09",
+    "version": "1.0.0",
+    "title": "River Value Bet Sizing",
+    "prompt": "SRP, you're IP with Ah Kh on Ad 9c 5s 3h 7d. You have top pair top kicker. Villain checks river to you. Pot is $120. How should you size your value bet?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Ad",
+          "9c",
+          "5s"
+        ],
+        "turn": "3h",
+        "river": "7d"
+      },
+      "hero_hand": [
+        "Ah",
+        "Kh"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": true
+    },
+    "options": [
+      {
+        "key": "CHECK",
+        "label": "Check back"
+      },
+      {
+        "key": "BET",
+        "label": "Bet $80 (66% pot)"
+      }
+    ],
+    "answer": {
+      "correct": "BET",
+      "accepted": [],
+      "correct_size": {
+        "size_bucket": 33,
+        "tolerance_pct": 15
+      },
+      "required_tags": [
+        "overbet_opportunity"
+      ],
+      "explanation": "TPTK is a medium-strength value hand. Smaller sizing gets called by more Ax hands and pocket pairs. Pool B calls too wide vs small river bets, so thin value small is exploitative."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:dynamic",
+      "concept:leverage",
+      "decision:value_bet",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_09_02",
+    "node_id": "hu_09",
+    "version": "1.0.0",
+    "title": "River Value Bet Sizing",
+    "prompt": "SRP, you're IP with 9s 9d on 9h 6c 3d 2s Jh. You have a set of nines. Villain checks river. Board has a paired-adjacent feel. Pot is $150. How should you size?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "9h",
+          "6c",
+          "3d"
+        ],
+        "turn": "2s",
+        "river": "Jh"
+      },
+      "hero_hand": [
+        "9s",
+        "9d"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": true
+    },
+    "options": [
+      {
+        "key": "CHECK",
+        "label": "Check back"
+      },
+      {
+        "key": "BET",
+        "label": "Bet $100 (66% pot)"
+      }
+    ],
+    "answer": {
+      "correct": "BET",
+      "accepted": [],
+      "correct_size": {
+        "size_bucket": 130,
+        "tolerance_pct": 15
+      },
+      "required_tags": [
+        "overbet_opportunity"
+      ],
+      "explanation": "With a set you have a clear nut hand. Overbet maximizes value from Jx, 6x, and overpairs. This is the textbook overbet opportunity — you have a huge nut advantage."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:dynamic",
+      "concept:leverage",
+      "decision:value_bet",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_09_03",
+    "node_id": "hu_09",
+    "version": "1.0.0",
+    "title": "River Value Bet Sizing",
+    "prompt": "SRP, you're IP with Kd Qd on Ks 8h 4c 2d Kc. Board has paired top card (kings). You have trip kings with Q kicker. Villain checks to you. Pot is $100. Size?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Ks",
+          "8h",
+          "4c"
+        ],
+        "turn": "2d",
+        "river": "Kc"
+      },
+      "hero_hand": [
+        "Kd",
+        "Qd"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": true
+    },
+    "options": [
+      {
+        "key": "CHECK",
+        "label": "Check back"
+      },
+      {
+        "key": "BET",
+        "label": "Bet $50 (50% pot)"
+      }
+    ],
+    "answer": {
+      "correct": "BET",
+      "accepted": [],
+      "correct_size": {
+        "size_bucket": 75,
+        "tolerance_pct": 15
+      },
+      "required_tags": [
+        "paired_top_river"
+      ],
+      "explanation": "Paired top card reduces villain's calling range significantly. Many Kx hands are now impossible. Size moderately (50-75%) to get value from 8x, pocket pairs, and occasional Kx that didn't 3-bet pre."
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:paired",
+      "concept:blocker_effect",
+      "decision:value_bet",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_10_01",
+    "node_id": "hu_10",
+    "version": "1.0.0",
+    "title": "Facing Flop Check-Raise",
+    "prompt": "SRP, you raised BTN with Qd Qc. BB calls. Flop: Jh 8c 5d. You c-bet 33%, villain check-raises to 3x. You have an overpair. What do you do?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Jh",
+          "8c",
+          "5d"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Qd",
+        "Qc"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check_raise"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "overbet_opportunity"
+      ],
+      "explanation": "QQ is near the top of your range. On a wet J-8-5 flop, villain can check-raise with sets, two pair, and draws. Call and evaluate turn. Pool B check-raises are value-heavy but QQ is too strong to fold."
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:dynamic",
+      "concept:leverage",
+      "decision:facing_check_raise",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_10_02",
+    "node_id": "hu_10",
+    "version": "1.0.0",
+    "title": "Facing Flop Check-Raise",
+    "prompt": "SRP, you raised BTN with Ac Kc. BB calls. Flop: Td 7h 4c. You c-bet 33%, villain check-raises to 3x. You have two overcards + backdoor flush. What do you do?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Td",
+          "7h",
+          "4c"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Ac",
+        "Kc"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check_raise"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "polar_turn_big_bet"
+      ],
+      "explanation": "AKo with only backdoor equity is not strong enough to continue vs a check-raise on this texture. Pool B check-raises are heavily value-weighted. Fold and wait for a better spot."
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:dynamic",
+      "concept:polarization",
+      "decision:facing_check_raise",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "d_10_03",
+    "node_id": "hu_10",
+    "version": "1.0.0",
+    "title": "Facing Flop Check-Raise",
+    "prompt": "SRP, you raised BTN with 7s 6s. BB calls. Flop: 8s 5h 3c. You c-bet 33%, villain check-raises to 3x. You have an OESD. What do you do?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "8s",
+          "5h",
+          "3c"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "7s",
+        "6s"
+      ],
+      "action_history": []
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check_raise"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [
+        "RAISE"
+      ],
+      "required_tags": [
+        "overbet_opportunity"
+      ],
+      "explanation": "OESD gives you 8 clean outs (~32% equity by river). You're getting the right price to call the check-raise. 3-bet shoving is also viable as a semi-bluff given fold equity. Pool B may over-fold to aggression."
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:bb_vs_btn",
+      "board:dynamic",
+      "concept:leverage",
+      "decision:facing_check_raise",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "metadata": {
+      "source": "manual"
+    }
+  }
+]

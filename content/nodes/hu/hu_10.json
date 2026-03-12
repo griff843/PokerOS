@@ -1,0 +1,13 @@
+{
+  "node_id": "hu_10",
+  "name": "Facing Flop Check-Raise",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP",
+    "street": "flop",
+    "pot_type": "SRP"
+  },
+  "triggers": ["overbet_opportunity", "polar_turn_big_bet"],
+  "defaults": { "population_toggle": "B" }
+}

@@ -1,0 +1,202 @@
+import { describe, expect, it } from "vitest";
+import type { CanonicalDrill } from "../schemas";
+import type { PlayerIntelligenceSnapshot } from "../player-intelligence";
+import { buildInterventionPlan, buildInterventionSessionPlan } from "../intervention-planner";
+
+function makeDrill(options: {
+  drillId: string;
+  nodeId: string;
+  title: string;
+  tags: string[];
+  concept: string;
+}): CanonicalDrill {
+  return {
+    drill_id: options.drillId,
+    node_id: options.nodeId,
+    version: "1.0.0",
+    title: options.title,
+    prompt: "Choose the best line.",
+    scenario: {
+      game: "NLHE Cash",
+      street: "river",
+      pot_type: "SRP",
+      players_to_flop: 2,
+      hero_position: "BB",
+      villain_position: "BTN",
+      board: {
+        flop: ["As", "Kd", "2c"],
+        turn: "7h",
+        river: "3d",
+      },
+      hero_hand: ["Ah", "Qc"],
+      action_history: [],
+    },
+    decision_point: {
+      street: "river",
+      facing: { action: "bet", size_pct_pot: 75 },
+      sizing_buttons_enabled: false,
+    },
+    options: [
+      { key: "CALL", label: "Call" },
+      { key: "FOLD", label: "Fold" },
+    ],
+    answer: {
+      correct: "CALL",
+      accepted: [],
+      required_tags: ["paired_top_river"],
+      explanation: "Call the bluff-catcher.",
+    },
+    tags: options.tags,
+    difficulty: 2,
+    diagnostic_prompts: [
+      {
+        id: `${options.drillId}-diag`,
+        prompt: "What is the leak here?",
+        type: "threshold",
+        concept: options.concept,
+        expected_reasoning: "Threshold discipline matters.",
+        options: [
+          { id: "a", label: "Option A", diagnosis: "threshold_error" },
+          { id: "b", label: "Option B", matches_expected: true },
+        ],
+      },
+    ],
+  };
+}
+
+function makeSnapshot(): PlayerIntelligenceSnapshot {
+  return {
+    generatedAt: "2026-03-10T12:00:00.000Z",
+    activePool: "B",
+    graph: {
+      nodes: [
+        { id: "turn_defense", label: "Turn Defense", category: "upstream" },
+        { id: "river_bluff_catching", label: "River Bluff Catching", category: "core" },
+      ],
+      edges: [
+        { from: "turn_defense", to: "river_bluff_catching", type: "supports" },
+      ],
+    },
+    concepts: [
+      {
+        conceptKey: "turn_defense",
+        label: "Turn Defense",
+        status: "weakness",
+        scope: "overall",
+        weaknessRole: "upstream",
+        trainingUrgency: 0.88,
+        summary: "Turn pressure is still unstable.",
+        evidence: ["Repeated misses start on the turn."],
+        inferredFrom: [],
+        supportingConceptKeys: [],
+        recommendedPool: "B",
+      },
+      {
+        conceptKey: "river_bluff_catching",
+        label: "River Bluff Catching",
+        status: "weakness",
+        scope: "overall",
+        weaknessRole: "downstream",
+        trainingUrgency: 0.76,
+        summary: "River defense is leaking.",
+        evidence: ["River bluff-catch spots keep slipping."],
+        inferredFrom: ["Turn defense may be feeding this leak."],
+        supportingConceptKeys: ["turn_defense"],
+        recommendedPool: "B",
+      },
+    ],
+    priorities: [],
+    strengths: [],
+    recommendations: [
+      {
+        label: "Repair Turn Defense",
+        rationale: "Turn defense still feeds the next street.",
+        emphasis: "review",
+        conceptKey: "turn_defense",
+        recommendedPool: "B",
+      },
+    ],
+  } as unknown as PlayerIntelligenceSnapshot;
+}
+
+describe("intervention planner", () => {
+  it("turns diagnostic errors into an upstream-first training prescription", () => {
+    const plan = buildInterventionPlan({
+      playerIntelligence: makeSnapshot(),
+      recentAttempts: [
+        {
+          drillId: "d1",
+          nodeId: "hu_river_01",
+          title: "River Bluff Catch",
+          score: 0.24,
+          correct: false,
+          ts: "2026-03-10T10:00:00.000Z",
+          activePool: "B",
+          diagnosticErrorType: "threshold_error",
+          diagnosticConceptKey: "river_bluff_catching",
+          confidenceMiscalibration: true,
+        },
+        {
+          drillId: "d2",
+          nodeId: "hu_river_02",
+          title: "River Bluff Catch 2",
+          score: 0.28,
+          correct: false,
+          ts: "2026-03-09T10:00:00.000Z",
+          activePool: "B",
+          diagnosticErrorType: "threshold_error",
+          diagnosticConceptKey: "river_bluff_catching",
+          confidenceMiscalibration: true,
+        },
+      ],
+      activePool: "B",
+      now: new Date("2026-03-10T12:00:00.000Z"),
+    });
+
+    expect(plan.rootConceptKey).toBe("river_bluff_catching");
+    expect(plan.upstreamConceptKey).toBe("turn_defense");
+    expect(plan.trainingBlocks[0]?.conceptKey).toBe("turn_defense");
+    expect(plan.trainingBlocks.at(-1)?.role).toBe("calibration");
+  });
+
+  it("builds a truthful session artifact from the prescribed blocks", () => {
+    const interventionPlan = buildInterventionPlan({
+      playerIntelligence: makeSnapshot(),
+      recentAttempts: [
+        {
+          drillId: "d1",
+          nodeId: "hu_river_01",
+          title: "River Bluff Catch",
+          score: 0.24,
+          correct: false,
+          ts: "2026-03-10T10:00:00.000Z",
+          activePool: "B",
+          diagnosticErrorType: "threshold_error",
+          diagnosticConceptKey: "river_bluff_catching",
+          confidenceMiscalibration: true,
+        },
+      ],
+      activePool: "B",
+      now: new Date("2026-03-10T12:00:00.000Z"),
+    });
+
+    const session = buildInterventionSessionPlan({
+      interventionPlan,
+      drills: [
+        makeDrill({ drillId: "d1", nodeId: "hu_turn_01", title: "Turn Defense Lab", tags: ["concept:turn_probe", "concept:turn_defense"], concept: "turn defense" }),
+        makeDrill({ drillId: "d2", nodeId: "hu_river_01", title: "River Bluff Catch", tags: ["concept:blocker_effect", "concept:river_bluff_catching"], concept: "river bluff catching" }),
+        makeDrill({ drillId: "d3", nodeId: "hu_river_02", title: "River Bluff Catch 2", tags: ["concept:blocker_effect", "concept:river_bluff_catching"], concept: "river bluff catching" }),
+      ],
+      recentAttempts: [],
+      srs: [],
+      activePool: "B",
+      generatedAt: new Date("2026-03-10T12:00:00.000Z"),
+    });
+
+    expect(session.metadata.intervention?.id).toBe(interventionPlan.id);
+    expect(session.metadata.intervention?.trainingBlocks[0]?.plannedReps).toBeGreaterThanOrEqual(0);
+    expect(session.drills.every((drill) => drill.metadata.interventionConceptKey)).toBe(true);
+  });
+});
+
+

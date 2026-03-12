@@ -1,0 +1,13 @@
+{
+  "node_id": "hu_09",
+  "name": "River Value Bet Sizing",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP",
+    "street": "river",
+    "pot_type": "SRP"
+  },
+  "triggers": ["overbet_opportunity", "paired_top_river"],
+  "defaults": { "population_toggle": "B" }
+}

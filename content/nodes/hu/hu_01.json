@@ -1,0 +1,13 @@
+{
+  "node_id": "hu_01",
+  "name": "SRP Bluffcatch River",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP/OOP",
+    "street": "river",
+    "pot_type": "SRP"
+  },
+  "triggers": ["paired_top_river", "scare_river_ace", "four_liner_river"],
+  "defaults": { "population_toggle": "B" }
+}

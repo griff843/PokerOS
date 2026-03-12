@@ -1,0 +1,13 @@
+{
+  "node_id": "hu_08",
+  "name": "Turn Delayed C-Bet",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP",
+    "street": "turn",
+    "pot_type": "SRP"
+  },
+  "triggers": ["flush_complete_turn", "polar_turn_big_bet"],
+  "defaults": { "population_toggle": "B" }
+}

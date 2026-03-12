@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.local/
+.tmp/
+.pnpm-home/
+*.db
+*.db-journal
+out/proofs/*.txt
+out/proofs/*.md
+out/reports/*.md
+.DS_Store
+
+# Next.js
+apps/table-sim/.next/
+apps/table-sim/out/
+apps/table-sim/.env.local

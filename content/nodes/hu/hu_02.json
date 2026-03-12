@@ -1,0 +1,13 @@
+{
+  "node_id": "hu_02",
+  "name": "Facing Turn Overbet",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "OOP",
+    "street": "turn",
+    "pot_type": "SRP"
+  },
+  "triggers": ["turn_overbet_faced"],
+  "defaults": { "population_toggle": "B" }
+}
