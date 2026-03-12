@@ -6,6 +6,7 @@ import {
   type InterventionHistoryEntry,
   type InterventionPlan,
   type InterventionRecommendation,
+  type InterventionStrategyBlueprint,
   type PatternAttemptSignal,
   type PlayerDiagnosisHistoryEntry,
   type RealPlayConceptSignal,
@@ -18,6 +19,7 @@ import { formatSessionLabel } from "./study-session-ui";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
 import { buildPrimaryInterventionRecommendation, buildTableSimInterventionRecommendations } from "./intervention-decision";
 import { buildConceptCaseMap } from "./concept-case";
+import { buildInterventionStrategyBlueprint } from "./intervention-strategy";
 import { buildPatternBriefs, type PatternBrief } from "./pattern-summaries";
 import { buildConceptRetentionSummary } from "./retention-scheduling";
 import type { InterventionDecisionSnapshotRow } from "../../../../packages/db/src/repository";
@@ -75,6 +77,7 @@ export interface CommandCenterSnapshot {
   };
   coachingPatterns: PatternBrief[];
   nextInterventionDecision?: InterventionRecommendation;
+  nextInterventionBlueprint?: InterventionStrategyBlueprint;
   leadConceptCase?: {
     conceptKey: string;
     label: string;
@@ -173,6 +176,12 @@ export function buildCommandCenterSnapshot({
     conceptKey: interventionPlan.rootConceptKey,
   });
   const leadCase = conceptCases.get(nextInterventionDecision?.conceptKey ?? interventionPlan.rootConceptKey);
+  const nextInterventionBlueprint = buildInterventionStrategyBlueprint({
+    playerIntelligence,
+    recommendation: nextInterventionDecision,
+    retentionSchedules,
+    now,
+  });
 
   return {
     generatedAt: now.toISOString(),
@@ -207,6 +216,7 @@ export function buildCommandCenterSnapshot({
     retention: buildRetentionSection(playerIntelligence, retentionSchedules, now),
     coachingPatterns: buildPatternBriefs(playerIntelligence.patterns.topPatterns, 2),
     nextInterventionDecision,
+    nextInterventionBlueprint,
     leadConceptCase: leadCase ? {
       conceptKey: leadCase.history.conceptKey,
       label: leadCase.history.label,

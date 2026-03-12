@@ -187,5 +187,7 @@ describe("concept case map", () => {
     expect(bundle?.nextStep.nextAction).toBe("continue_intervention");
     expect(bundle?.decisionAudit?.latestDecision?.actedUpon).toBe(true);
     expect(bundle?.retention.validationState).toBe("provisional");
+    expect(bundle?.strategyBlueprint?.strategyType).toBe("threshold_repair");
+    expect(bundle?.strategyBlueprint?.title.length).toBeGreaterThan(0);
   });
 });

@@ -2,6 +2,7 @@ import {
   buildConceptCaseHistory,
   deriveConceptCoachingExplanation,
   deriveConceptNextStep,
+  type InterventionStrategyBlueprint,
   selectPatternsForConcept,
   type ConceptCaseExplanation,
   type ConceptCaseHistory,
@@ -13,6 +14,7 @@ import {
 } from "@poker-coach/core/browser";
 import type { InterventionDecisionSnapshotRow, RetentionScheduleRow } from "../../../../packages/db/src/repository";
 import { buildConceptDecisionAuditSummary, type InterventionDecisionAuditSummary } from "./intervention-decision-audit";
+import { buildInterventionStrategyBlueprint } from "./intervention-strategy";
 import { buildConceptRetentionSummary, type RetentionSummary } from "./retention-scheduling";
 
 export interface ConceptCaseBundle {
@@ -22,6 +24,7 @@ export interface ConceptCaseBundle {
   decisionAudit?: InterventionDecisionAuditSummary;
   retention: RetentionSummary;
   recommendation?: InterventionRecommendation;
+  strategyBlueprint?: InterventionStrategyBlueprint;
 }
 
 export interface ConceptCaseResponse {
@@ -32,6 +35,7 @@ export interface ConceptCaseResponse {
   decisionAudit?: InterventionDecisionAuditSummary;
   retention: RetentionSummary;
   recommendation?: InterventionRecommendation;
+  strategyBlueprint?: InterventionStrategyBlueprint;
 }
 
 export function buildConceptCaseMap(args: {
@@ -102,6 +106,12 @@ export function buildConceptCaseMap(args: {
     });
     const explanation = deriveConceptCoachingExplanation(history);
     const nextStep = deriveConceptNextStep(history);
+    const strategyBlueprint = buildInterventionStrategyBlueprint({
+      playerIntelligence: args.playerIntelligence,
+      recommendation,
+      retentionSchedules,
+      now: args.now,
+    });
 
     bundles.set(concept.conceptKey, {
       history,
@@ -110,6 +120,7 @@ export function buildConceptCaseMap(args: {
       decisionAudit,
       retention,
       recommendation,
+      strategyBlueprint,
     });
   }
 

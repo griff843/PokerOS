@@ -63,6 +63,7 @@ export async function GET(
       decisionAudit: conceptCase.decisionAudit,
       retention: conceptCase.retention,
       recommendation: conceptCase.recommendation,
+      strategyBlueprint: conceptCase.strategyBlueprint,
     });
   } catch (error) {
     console.error("Failed to build concept case:", error);

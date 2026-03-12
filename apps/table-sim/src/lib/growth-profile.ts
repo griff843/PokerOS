@@ -7,6 +7,7 @@ import {
   type InterventionHistoryEntry,
   type InterventionPlan,
   type InterventionRecommendation,
+  type InterventionStrategyBlueprint,
   type PatternAttemptSignal,
   type PlayerDiagnosisHistoryEntry,
   type RealPlayConceptSignal,
@@ -17,6 +18,7 @@ import { buildWeaknessExplorerSnapshot, type WeaknessExplorerSnapshot } from "./
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
 import { buildPrimaryInterventionRecommendation } from "./intervention-decision";
 import { buildConceptCaseMap } from "./concept-case";
+import { buildInterventionStrategyBlueprint } from "./intervention-strategy";
 import { buildPatternBriefs, type PatternBrief } from "./pattern-summaries";
 import { buildConceptRetentionSummary } from "./retention-scheduling";
 
@@ -88,6 +90,7 @@ export interface GrowthProfileSnapshot {
   }>;
   coachingPatterns: PatternBrief[];
   nextInterventionDecision?: InterventionRecommendation;
+  nextInterventionBlueprint?: InterventionStrategyBlueprint;
   featuredConceptCase?: {
     conceptKey: string;
     label: string;
@@ -203,6 +206,12 @@ export function buildGrowthProfileSnapshot(args: {
     now,
   });
   const featuredConceptCase = conceptCases.get(nextInterventionDecision?.conceptKey ?? interventionPlan.rootConceptKey);
+  const nextInterventionBlueprint = buildInterventionStrategyBlueprint({
+    playerIntelligence,
+    recommendation: nextInterventionDecision,
+    retentionSchedules: args.retentionSchedules,
+    now,
+  });
   const primaryTendency = adaptive.tendencies[0];
   const dueReviewCount = args.srs.filter((row) => new Date(row.due_at) <= now).length;
   const practiceIdentity: GrowthProfileSnapshot["practiceIdentity"] = [
@@ -294,6 +303,7 @@ export function buildGrowthProfileSnapshot(args: {
     retentionValidation: buildRetentionValidation(playerIntelligence.concepts, args.retentionSchedules ?? [], now),
     coachingPatterns: buildPatternBriefs(playerIntelligence.patterns.topPatterns, 3),
     nextInterventionDecision,
+    nextInterventionBlueprint,
     featuredConceptCase: featuredConceptCase ? {
       conceptKey: featuredConceptCase.history.conceptKey,
       label: featuredConceptCase.history.label,

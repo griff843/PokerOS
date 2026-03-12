@@ -96,7 +96,13 @@ export async function GET(request: NextRequest) {
         }).get(decision.conceptKey)
       : undefined;
 
-    return NextResponse.json({ ...plan, nextInterventionDecision: decision, retentionSummary, conceptCase });
+    return NextResponse.json({
+      ...plan,
+      nextInterventionDecision: decision,
+      retentionSummary,
+      conceptCase,
+      strategyBlueprint: conceptCase?.strategyBlueprint,
+    });
   } catch (error) {
     console.error("Failed to build intervention plan:", error);
     return NextResponse.json({ error: "Failed to build intervention plan" }, { status: 500 });
