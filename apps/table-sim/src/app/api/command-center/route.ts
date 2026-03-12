@@ -85,6 +85,7 @@ export async function GET() {
       interventionHistory,
       realPlaySignals,
       patternAttempts,
+      decisionSnapshots: refreshedDecisionSnapshots,
       retentionSchedules,
       now,
     });

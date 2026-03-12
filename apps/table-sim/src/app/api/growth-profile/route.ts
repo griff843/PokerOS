@@ -39,6 +39,7 @@ export async function GET() {
       activePool,
       realPlaySignals: buildRealPlayConceptSignals(importedHands),
       patternAttempts,
+      decisionSnapshots,
       retentionSchedules,
       now: new Date(),
     });

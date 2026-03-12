@@ -209,6 +209,8 @@ describe("command center snapshot", () => {
     expect(snapshot.coachingPatterns[0]?.title).toBe("Recurring threshold leak");
     expect(snapshot.nextInterventionDecision?.action).toBe("assign_intervention");
     expect(snapshot.nextInterventionDecision?.recommendedStrategy).toBe("street_transition_repair");
+    expect(snapshot.leadConceptCase?.statusLabel).toBeTruthy();
+    expect(snapshot.leadConceptCase?.nextAction.length).toBeGreaterThan(0);
     expect(snapshot.interventions.active[0]?.status).toContain("Assigned");
     expect(snapshot.interventions.completed[0]?.status).toBe("Recovered");
     expect(snapshot.recentWork).toHaveLength(3);

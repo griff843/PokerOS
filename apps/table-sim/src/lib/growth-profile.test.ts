@@ -144,6 +144,8 @@ describe("growth profile snapshot", () => {
     expect(snapshot.recurringLeaks.length).toBeGreaterThan(0);
     expect(snapshot.coachingPatterns[0]?.title).toBe("Recurring threshold leak");
     expect(snapshot.nextInterventionDecision?.action).toBeTruthy();
+    expect(snapshot.featuredConceptCase?.statusLabel).toBeTruthy();
+    expect(snapshot.featuredConceptCase?.nextAction.length).toBeGreaterThan(0);
     expect(snapshot.interventionRecommendation?.plan.recommendedSessionTitle.length).toBeGreaterThan(0);
     expect(snapshot.nextActions[0]?.href).toBe("/app/weaknesses");
   });

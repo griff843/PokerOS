@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { buildAttemptInsights, buildRealPlayConceptSignals, type WeaknessPool } from "@poker-coach/core/browser";
+import { toDiagnosisHistoryEntries, toInterventionHistoryEntries } from "../../../lib/coaching-memory";
 import { loadLocalStudyData } from "../../../lib/local-study-data";
 import { buildWeaknessExplorerSnapshot } from "../../../lib/weakness-explorer";
 import { buildPatternAttemptSignals, hydratePersistedStudyAttempts } from "../../../lib/intervention-support";
@@ -9,7 +10,7 @@ import { buildConceptDecisionAuditSummary } from "../../../lib/intervention-deci
 
 export async function GET() {
   try {
-    const { drills, attempts, srs, importedHands, decisionSnapshots, retentionSchedules } = loadLocalStudyData();
+    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots, retentionSchedules } = loadLocalStudyData();
     const activePool = (attempts[0]?.active_pool ?? "baseline") as WeaknessPool;
     const drillMap = new Map(drills.map((drill) => [drill.drill_id, drill]));
     const hydratedAttempts = hydratePersistedStudyAttempts(attempts, drills);
@@ -18,6 +19,9 @@ export async function GET() {
       attemptInsights: buildAttemptInsights(attempts, drillMap),
       srs,
       activePool,
+      diagnosisHistory: toDiagnosisHistoryEntries(diagnoses),
+      interventionHistory: toInterventionHistoryEntries(interventions),
+      decisionSnapshots,
       realPlaySignals: buildRealPlayConceptSignals(importedHands),
       patternAttempts: buildPatternAttemptSignals(hydratedAttempts),
       retentionSchedules,

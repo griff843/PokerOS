@@ -12,10 +12,11 @@ import {
   type RealPlayConceptSignal,
   type WeaknessPool,
 } from "@poker-coach/core/browser";
-import type { RetentionScheduleRow } from "../../../../packages/db/src/repository";
+import type { InterventionDecisionSnapshotRow, RetentionScheduleRow } from "../../../../packages/db/src/repository";
 import { buildWeaknessExplorerSnapshot, type WeaknessExplorerSnapshot } from "./weakness-explorer";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
 import { buildPrimaryInterventionRecommendation } from "./intervention-decision";
+import { buildConceptCaseMap } from "./concept-case";
 import { buildPatternBriefs, type PatternBrief } from "./pattern-summaries";
 import { buildConceptRetentionSummary } from "./retention-scheduling";
 
@@ -87,6 +88,14 @@ export interface GrowthProfileSnapshot {
   }>;
   coachingPatterns: PatternBrief[];
   nextInterventionDecision?: InterventionRecommendation;
+  featuredConceptCase?: {
+    conceptKey: string;
+    label: string;
+    statusLabel: string;
+    statusReason: string;
+    nextAction: string;
+    coachNote: string;
+  };
   coachPerspective: {
     encouragingTruth: string;
     limitingFactor: string;
@@ -114,6 +123,7 @@ export function buildGrowthProfileSnapshot(args: {
   interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
   patternAttempts?: PatternAttemptSignal[];
+  decisionSnapshots?: InterventionDecisionSnapshotRow[];
   retentionSchedules?: RetentionScheduleRow[];
   now?: Date;
 }): GrowthProfileSnapshot {
@@ -136,8 +146,12 @@ export function buildGrowthProfileSnapshot(args: {
     attemptInsights: args.attemptInsights,
     srs: args.srs,
     activePool: args.activePool,
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory,
+    decisionSnapshots: args.decisionSnapshots,
     realPlaySignals: args.realPlaySignals,
     patternAttempts: args.patternAttempts,
+    retentionSchedules: args.retentionSchedules,
     now,
   });
   const windowSize = Math.max(3, Math.min(12, Math.floor(args.attempts.length / 2)));
@@ -179,6 +193,16 @@ export function buildGrowthProfileSnapshot(args: {
     realPlaySignals: args.realPlaySignals,
     conceptKey: interventionPlan.rootConceptKey,
   });
+  const conceptCases = buildConceptCaseMap({
+    playerIntelligence,
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory,
+    decisionSnapshots: args.decisionSnapshots,
+    retentionSchedules: args.retentionSchedules,
+    recommendations: nextInterventionDecision ? [nextInterventionDecision] : [],
+    now,
+  });
+  const featuredConceptCase = conceptCases.get(nextInterventionDecision?.conceptKey ?? interventionPlan.rootConceptKey);
   const primaryTendency = adaptive.tendencies[0];
   const dueReviewCount = args.srs.filter((row) => new Date(row.due_at) <= now).length;
   const practiceIdentity: GrowthProfileSnapshot["practiceIdentity"] = [
@@ -270,6 +294,14 @@ export function buildGrowthProfileSnapshot(args: {
     retentionValidation: buildRetentionValidation(playerIntelligence.concepts, args.retentionSchedules ?? [], now),
     coachingPatterns: buildPatternBriefs(playerIntelligence.patterns.topPatterns, 3),
     nextInterventionDecision,
+    featuredConceptCase: featuredConceptCase ? {
+      conceptKey: featuredConceptCase.history.conceptKey,
+      label: featuredConceptCase.history.label,
+      statusLabel: featuredConceptCase.explanation.statusLabel,
+      statusReason: featuredConceptCase.explanation.statusReason,
+      nextAction: featuredConceptCase.nextStep.nextAction.replace(/_/g, " "),
+      coachNote: featuredConceptCase.nextStep.coachNote,
+    } : undefined,
     coachPerspective: {
       encouragingTruth: strengthLeaders[0]
         ? `${strengthLeaders[0].label} is becoming a real anchor in your game, which means improvement is not just theoretical.`

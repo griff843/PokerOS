@@ -16,9 +16,11 @@ import type { RetentionScheduleRow } from "../../../../packages/db/src/repositor
 import type { TableSimSessionPlan } from "./session-plan";
 import { formatSessionLabel } from "./study-session-ui";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
-import { buildPrimaryInterventionRecommendation } from "./intervention-decision";
+import { buildPrimaryInterventionRecommendation, buildTableSimInterventionRecommendations } from "./intervention-decision";
+import { buildConceptCaseMap } from "./concept-case";
 import { buildPatternBriefs, type PatternBrief } from "./pattern-summaries";
 import { buildConceptRetentionSummary } from "./retention-scheduling";
+import type { InterventionDecisionSnapshotRow } from "../../../../packages/db/src/repository";
 
 export interface CommandCenterRecentAttempt {
   drillId: string;
@@ -73,6 +75,15 @@ export interface CommandCenterSnapshot {
   };
   coachingPatterns: PatternBrief[];
   nextInterventionDecision?: InterventionRecommendation;
+  leadConceptCase?: {
+    conceptKey: string;
+    label: string;
+    statusLabel: string;
+    statusReason: string;
+    priorityExplanation: string;
+    nextAction: string;
+    coachNote: string;
+  };
   recommendedTrainingBlock: {
     plan: InterventionPlan;
     href: string;
@@ -96,6 +107,7 @@ interface BuildCommandCenterSnapshotArgs {
   interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
   patternAttempts?: PatternAttemptSignal[];
+  decisionSnapshots?: InterventionDecisionSnapshotRow[];
   retentionSchedules?: RetentionScheduleRow[];
   now?: Date;
 }
@@ -111,6 +123,7 @@ export function buildCommandCenterSnapshot({
   interventionHistory = [],
   realPlaySignals,
   patternAttempts,
+  decisionSnapshots = [],
   retentionSchedules = [],
   now = new Date(),
 }: BuildCommandCenterSnapshotArgs): CommandCenterSnapshot {
@@ -122,6 +135,21 @@ export function buildCommandCenterSnapshot({
     interventionHistory,
     realPlaySignals,
     patternAttempts,
+    now,
+  });
+  const interventionRecommendations = buildTableSimInterventionRecommendations({
+    playerIntelligence,
+    diagnosisHistory,
+    interventionHistory,
+    realPlaySignals,
+  });
+  const conceptCases = buildConceptCaseMap({
+    playerIntelligence,
+    diagnosisHistory,
+    interventionHistory,
+    decisionSnapshots,
+    retentionSchedules,
+    recommendations: interventionRecommendations,
     now,
   });
   const nextFocusSummary = buildNextFocusSummary({
@@ -144,6 +172,7 @@ export function buildCommandCenterSnapshot({
     realPlaySignals,
     conceptKey: interventionPlan.rootConceptKey,
   });
+  const leadCase = conceptCases.get(nextInterventionDecision?.conceptKey ?? interventionPlan.rootConceptKey);
 
   return {
     generatedAt: now.toISOString(),
@@ -178,6 +207,15 @@ export function buildCommandCenterSnapshot({
     retention: buildRetentionSection(playerIntelligence, retentionSchedules, now),
     coachingPatterns: buildPatternBriefs(playerIntelligence.patterns.topPatterns, 2),
     nextInterventionDecision,
+    leadConceptCase: leadCase ? {
+      conceptKey: leadCase.history.conceptKey,
+      label: leadCase.history.label,
+      statusLabel: leadCase.explanation.statusLabel,
+      statusReason: leadCase.explanation.statusReason,
+      priorityExplanation: leadCase.explanation.priorityExplanation,
+      nextAction: leadCase.nextStep.nextAction.replace(/_/g, " "),
+      coachNote: leadCase.nextStep.coachNote,
+    } : undefined,
     recommendedTrainingBlock: {
       plan: interventionPlan,
       href: `/app/training/session/${interventionPlan.id}`,
