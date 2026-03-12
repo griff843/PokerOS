@@ -1,9 +1,11 @@
 ﻿import {
   buildPlayerIntelligenceSnapshot,
-  type ConfidenceInsight,
-  type PlayerIntelligenceSnapshot,
   type AttemptInsight,
   type CanonicalDrill,
+  type ConfidenceInsight,
+  type InterventionHistoryEntry,
+  type PlayerDiagnosisHistoryEntry,
+  type PlayerIntelligenceSnapshot,
   type RealPlayConceptSignal,
   type WeaknessPool,
 } from "@poker-coach/core/browser";
@@ -15,6 +17,8 @@ export function buildTableSimPlayerIntelligence(args: {
   activePool: WeaknessPool;
   confidenceInsights?: ConfidenceInsight[];
   diagnosticInsights?: import("@poker-coach/core/browser").DiagnosticInsight[];
+  diagnosisHistory?: PlayerDiagnosisHistoryEntry[];
+  interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
   now?: Date;
 }): PlayerIntelligenceSnapshot {
@@ -25,8 +29,9 @@ export function buildTableSimPlayerIntelligence(args: {
     activePool: args.activePool,
     confidenceInsights: args.confidenceInsights,
     diagnosticInsights: args.diagnosticInsights,
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory: args.interventionHistory,
     realPlaySignals: args.realPlaySignals,
     now: args.now,
   });
 }
-

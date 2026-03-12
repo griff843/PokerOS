@@ -1,5 +1,6 @@
 import type { CanonicalDrill } from "./schemas";
 import type { InterventionSessionPlanMetadata } from "./intervention-planner";
+import type { SessionPlanningReason } from "./coaching-memory";
 import {
   analyzeWeaknessAnalytics,
   buildAttemptInsights,
@@ -68,6 +69,7 @@ export interface SelectedDrill {
     interventionConceptKey?: string;
     interventionConceptLabel?: string;
     interventionRole?: "repair" | "retest" | "calibration";
+    prioritizationReasons?: SessionPlanningReason[];
   };
 }
 
@@ -351,3 +353,5 @@ function compareOptionalDates(a?: string, b?: string): number {
   if (!b) return -1;
   return new Date(a).getTime() - new Date(b).getTime();
 }
+
+

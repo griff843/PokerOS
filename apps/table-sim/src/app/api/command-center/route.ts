@@ -1,26 +1,55 @@
-﻿export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { buildAttemptInsights, buildRealPlayConceptSignals, type WeaknessPool } from "@poker-coach/core/browser";
 import { buildCommandCenterSnapshot } from "../../../lib/command-center";
-import { loadLocalStudyData } from "../../../lib/local-study-data";
+import { ensureInterventionForPlan, toDiagnosisHistoryEntries, toInterventionHistoryEntries } from "../../../lib/coaching-memory";
+import { loadLocalStudyData, resolveDbPath } from "../../../lib/local-study-data";
 import { createRecommendedInterventionPlan, createTableSimSessionPlan } from "../../../lib/session-plan-server";
+import { openDatabase } from "../../../../../../packages/db/src";
 
 const DEFAULT_COUNT = 10;
 
 export async function GET() {
   try {
-    const { drills, attempts, srs, importedHands } = loadLocalStudyData();
+    const { drills, attempts, srs, importedHands, diagnoses, interventions } = loadLocalStudyData();
     const drillMap = new Map(drills.map((drill) => [drill.drill_id, drill]));
     const activePool = (attempts[0]?.active_pool ?? "baseline") as WeaknessPool;
     const now = new Date();
     const realPlaySignals = buildRealPlayConceptSignals(importedHands);
+    const diagnosisHistory = toDiagnosisHistoryEntries(diagnoses);
+    const interventionHistory = toInterventionHistoryEntries(interventions);
 
     const plan = createTableSimSessionPlan({
       request: { count: DEFAULT_COUNT, activePool },
       inputs: { drills, attempts, srs, now },
+      diagnosisHistory,
+      interventionHistory,
     });
-    const interventionPlan = createRecommendedInterventionPlan({ drills, attempts, srs, activePool, now });
+    const interventionPlan = createRecommendedInterventionPlan({
+      drills,
+      attempts,
+      srs,
+      activePool,
+      diagnosisHistory,
+      interventionHistory,
+      now,
+    });
+
+    const dbPath = resolveDbPath();
+    if (dbPath) {
+      const db = openDatabase(dbPath);
+      try {
+        ensureInterventionForPlan({
+          db,
+          conceptKey: interventionPlan.rootConceptKey,
+          source: "command_center",
+          createdAt: interventionPlan.generatedAt,
+        });
+      } finally {
+        db.close();
+      }
+    }
 
     const snapshot = buildCommandCenterSnapshot({
       plan,
@@ -44,6 +73,8 @@ export async function GET() {
       activePool,
       count: DEFAULT_COUNT,
       interventionPlan,
+      diagnosisHistory,
+      interventionHistory,
       realPlaySignals,
       now,
     });
@@ -57,4 +88,3 @@ export async function GET() {
     );
   }
 }
-

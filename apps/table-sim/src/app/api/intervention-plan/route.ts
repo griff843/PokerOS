@@ -1,13 +1,15 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import type { WeaknessPool } from "@poker-coach/core/browser";
-import { loadLocalStudyData } from "../../../lib/local-study-data";
+import { ensureInterventionForPlan, toDiagnosisHistoryEntries, toInterventionHistoryEntries } from "../../../lib/coaching-memory";
+import { loadLocalStudyData, resolveDbPath } from "../../../lib/local-study-data";
 import { createRecommendedInterventionPlan } from "../../../lib/session-plan-server";
+import { openDatabase } from "../../../../../../packages/db/src";
 
 export async function GET(request: NextRequest) {
   try {
-    const { drills, attempts, srs } = loadLocalStudyData();
+    const { drills, attempts, srs, diagnoses, interventions } = loadLocalStudyData();
     const activePool = (request.nextUrl.searchParams.get("pool") ?? attempts[0]?.active_pool ?? "baseline") as WeaknessPool;
     const now = new Date();
     const plan = createRecommendedInterventionPlan({
@@ -15,6 +17,8 @@ export async function GET(request: NextRequest) {
       attempts,
       srs,
       activePool,
+      diagnosisHistory: toDiagnosisHistoryEntries(diagnoses),
+      interventionHistory: toInterventionHistoryEntries(interventions),
       now,
     });
     const requestedId = request.nextUrl.searchParams.get("id");
@@ -23,9 +27,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Intervention plan is no longer current", currentId: plan.id }, { status: 404 });
     }
 
+    const dbPath = resolveDbPath();
+    if (dbPath) {
+      const db = openDatabase(dbPath);
+      try {
+        ensureInterventionForPlan({
+          db,
+          conceptKey: plan.rootConceptKey,
+          source: "command_center",
+          createdAt: plan.generatedAt,
+        });
+      } finally {
+        db.close();
+      }
+    }
+
     return NextResponse.json(plan);
   } catch (error) {
     console.error("Failed to build intervention plan:", error);
     return NextResponse.json({ error: "Failed to build intervention plan" }, { status: 500 });
   }
 }
+

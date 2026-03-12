@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+﻿import { describe, expect, it } from "vitest";
 import { buildPlayerIntelligenceSnapshot } from "../player-intelligence";
 import type { AttemptInsight, CanonicalDrill } from "../index";
 
@@ -110,6 +110,29 @@ describe("player intelligence", () => {
     expect(snapshot.concepts.find((concept) => concept.conceptKey === "river_bluff_catching")?.evidence.some((entry) => entry.includes("threshold error"))).toBe(true);
   });
 
+  it("incorporates intervention history into the coaching memory summary", () => {
+    const drills = [makeDrill({ drillId: "d1", nodeId: "hu_river_01", title: "River Defense", conceptTag: "concept:blocker_effect", requiredTag: "paired_top_river" })];
+    const snapshot = buildPlayerIntelligenceSnapshot({
+      drills,
+      attemptInsights: [
+        { drillId: "d1", nodeId: "hu_river_01", score: 0.41, correct: false, missedTags: ["paired_top_river"], classificationTags: ["concept:blocker_effect"], activePool: "B" },
+      ],
+      activePool: "B",
+      diagnosisHistory: [
+        { conceptKey: "river_bluff_catching", diagnosticType: "threshold_error", confidence: 0.9, createdAt: "2026-03-10T10:00:00.000Z" },
+        { conceptKey: "river_bluff_catching", diagnosticType: "threshold_error", confidence: 0.8, createdAt: "2026-03-11T10:00:00.000Z" },
+      ],
+      interventionHistory: [
+        { id: "i1", conceptKey: "river_bluff_catching", source: "command_center", status: "completed", improved: true, preScore: 0.35, postScore: 0.72, createdAt: "2026-03-09T10:00:00.000Z" },
+      ],
+    });
+
+    expect(snapshot.memory.diagnosisCount).toBe(2);
+    expect(snapshot.memory.completedInterventions).toBe(1);
+    expect(snapshot.memory.interventionSuccessRate).toBe(1);
+    expect(snapshot.memory.recoveredConcepts).toContain("river_bluff_catching");
+  });
+
   it("surfaces confidence mismatch only when the evidence is real", () => {
     const drills = [makeDrill({ drillId: "d1", nodeId: "hu_river_01", title: "River Defense", conceptTag: "concept:blocker_effect", requiredTag: "paired_top_river" })];
     const insights: AttemptInsight[] = [
@@ -130,4 +153,3 @@ describe("player intelligence", () => {
     expect(snapshot.priorities[0]?.confidenceMismatch?.direction).toBe("overconfident");
   });
 });
-

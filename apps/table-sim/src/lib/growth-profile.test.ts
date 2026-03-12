@@ -1,5 +1,5 @@
 ﻿import { describe, expect, it } from "vitest";
-import type { AttemptInsight, CanonicalDrill } from "@poker-coach/core/browser";
+import type { AttemptInsight, CanonicalDrill, InterventionHistoryEntry } from "@poker-coach/core/browser";
 import { buildGrowthProfileSnapshot, type GrowthProfileAttempt } from "./growth-profile";
 
 function makeDrill(options: {
@@ -51,7 +51,7 @@ function makeDrill(options: {
 }
 
 describe("growth profile snapshot", () => {
-  it("summarizes long-term direction, strengths, weak spots, and next actions honestly", () => {
+  it("summarizes long-term direction, strengths, weak spots, intervention outcomes, and next actions honestly", () => {
     const drills: CanonicalDrill[] = [
       makeDrill({ drillId: "d1", nodeId: "hu_river_01", title: "River Bluff Catch", conceptTag: "concept:blocker_effect", requiredTag: "paired_top_river" }),
       makeDrill({ drillId: "d2", nodeId: "hu_turn_01", title: "Turn Probe", conceptTag: "concept:turn_probe", requiredTag: "turn_probe" }),
@@ -87,10 +87,16 @@ describe("growth profile snapshot", () => {
       { drillId: "d2", nodeId: "hu_turn_01", score: 0.28, correct: false, missedTags: ["turn_probe"], classificationTags: ["concept:turn_probe"], activePool: "B" },
     ];
 
+    const interventionHistory: InterventionHistoryEntry[] = [
+      { id: "i1", conceptKey: "turn_probe", source: "command_center", status: "completed", improved: true, preScore: 0.33, postScore: 0.69, createdAt: "2026-03-05T10:00:00.000Z" },
+      { id: "i2", conceptKey: "river_bluff_catching", source: "session_review", status: "assigned", createdAt: "2026-03-10T10:00:00.000Z" },
+    ];
+
     const snapshot = buildGrowthProfileSnapshot({
       drills,
       attempts,
       attemptInsights,
+      interventionHistory,
       srs: [{ drill_id: "d2", due_at: "2026-03-09T10:00:00.000Z" }],
       activePool: "B",
       now: new Date("2026-03-10T12:00:00.000Z"),
@@ -101,9 +107,10 @@ describe("growth profile snapshot", () => {
     expect(snapshot.weakSpots[0]?.label).toBe("Bluff Catching");
     expect(snapshot.practiceIdentity[0]?.value).toBe("Steady rhythm");
     expect(snapshot.practiceIdentity.some((item) => item.label === "Coaching emphasis")).toBe(true);
+    expect(snapshot.interventionSuccess[0]?.label).toBe("Intervention success");
+    expect(snapshot.conceptRecovery[0]?.label).toBe("Turn Probe");
+    expect(snapshot.recurringLeaks.length).toBeGreaterThan(0);
     expect(snapshot.interventionRecommendation?.plan.recommendedSessionTitle.length).toBeGreaterThan(0);
     expect(snapshot.nextActions[0]?.href).toBe("/app/weaknesses");
   });
 });
-
-

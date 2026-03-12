@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -67,6 +67,11 @@ export function GrowthProfile() {
 
         <MovementSection loading={loading} items={snapshot?.movement ?? []} />
         <PracticeIdentitySection loading={loading} items={snapshot?.practiceIdentity ?? []} />
+        <div className="grid gap-5 xl:grid-cols-3">
+          <InterventionSuccessSection loading={loading} items={snapshot?.interventionSuccess ?? []} />
+          <ConceptRecoverySection loading={loading} items={snapshot?.conceptRecovery ?? []} />
+          <RecurringLeaksSection loading={loading} items={snapshot?.recurringLeaks ?? []} />
+        </div>
         <NextActionsSection loading={loading} actions={snapshot?.nextActions ?? []} onNavigate={(href) => router.push(href)} />
       </div>
     </div>
@@ -205,6 +210,39 @@ function PracticeIdentitySection({ loading, items }: { loading: boolean; items: 
   );
 }
 
+function InterventionSuccessSection({ loading, items }: { loading: boolean; items: GrowthProfileSnapshot["interventionSuccess"] }) {
+  return (
+    <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Intervention Success</p>
+      <div className="mt-4 space-y-3">
+        {loading ? <p className="text-sm text-slate-500">Loading intervention outcomes.</p> : items.map((item) => <SignalBlock key={item.label + item.detail} {...item} />)}
+      </div>
+    </section>
+  );
+}
+
+function ConceptRecoverySection({ loading, items }: { loading: boolean; items: GrowthProfileSnapshot["conceptRecovery"] }) {
+  return (
+    <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Concept Recovery</p>
+      <div className="mt-4 space-y-3">
+        {loading ? <p className="text-sm text-slate-500">Loading recovery signals.</p> : items.length === 0 ? <p className="text-sm leading-6 text-slate-400">Recovered concepts will show up here once an intervention closes with improvement.</p> : items.map((item) => <SignalBlock key={item.label + item.detail} {...item} />)}
+      </div>
+    </section>
+  );
+}
+
+function RecurringLeaksSection({ loading, items }: { loading: boolean; items: GrowthProfileSnapshot["recurringLeaks"] }) {
+  return (
+    <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Recurring Leaks</p>
+      <div className="mt-4 space-y-3">
+        {loading ? <p className="text-sm text-slate-500">Loading recurring leak signals.</p> : items.map((item) => <SignalBlock key={item.label + item.detail} {...item} />)}
+      </div>
+    </section>
+  );
+}
+
 function NextActionsSection({ loading, actions, onNavigate }: { loading: boolean; actions: GrowthProfileSnapshot["nextActions"]; onNavigate: (href: string) => void }) {
   return (
     <section className="rounded-[30px] border border-emerald-500/14 bg-[linear-gradient(180deg,rgba(7,18,24,0.94),rgba(8,16,28,0.9))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.32)] backdrop-blur-sm">
@@ -284,3 +322,4 @@ function HeaderChip({ label, subtle = false }: { label: string; subtle?: boolean
     </span>
   );
 }
+

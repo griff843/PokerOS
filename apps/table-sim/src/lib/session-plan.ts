@@ -9,6 +9,21 @@ export const TableSimSelectionReasonSchema = z.enum([
   "weakness_new",
   "new_material_fill",
 ]);
+export const TableSimPlanningReasonSchema = z.enum([
+  "active_intervention",
+  "recurring_leak",
+  "regression_recovery",
+  "weakness_balance",
+  "retention_check",
+  "freshness_mix",
+]);
+export const TableSimRecoveryStageSchema = z.enum([
+  "unaddressed",
+  "active_repair",
+  "stabilizing",
+  "recovered",
+  "regressed",
+]);
 
 export const TableSimWeaknessTargetSchema = z.object({
   type: z.enum(["classification_tag", "rule_tag", "node"]),
@@ -28,6 +43,7 @@ export const TableSimInterventionTrainingBlockSchema = z.object({
   plannedReps: z.number().int().nonnegative(),
   role: z.enum(["repair", "retest", "calibration"]),
   reason: z.string(),
+  planningReasons: z.array(TableSimPlanningReasonSchema),
 });
 
 export const TableSimSelectedDrillSchema = z.object({
@@ -43,6 +59,7 @@ export const TableSimSelectedDrillSchema = z.object({
     interventionConceptKey: z.string().optional(),
     interventionConceptLabel: z.string().optional(),
     interventionRole: z.enum(["repair", "retest", "calibration"]).optional(),
+    prioritizationReasons: z.array(TableSimPlanningReasonSchema).optional(),
   }),
 });
 
@@ -71,6 +88,8 @@ export const TableSimSessionPlanMetadataSchema = z.object({
     nextSessionFocus: z.string(),
     totalTargetReps: z.number().int().positive(),
     totalPlannedReps: z.number().int().nonnegative(),
+    planningReasons: z.array(TableSimPlanningReasonSchema),
+    recoveryStage: TableSimRecoveryStageSchema,
     trainingBlocks: z.array(TableSimInterventionTrainingBlockSchema),
   }).optional(),
 });

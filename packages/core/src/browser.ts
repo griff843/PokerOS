@@ -16,3 +16,6 @@ export * from "./drill-coaching-snapshot";
 export * from "./diagnostics";
 export * from "./intervention-planner";
 export * from "./real-hands";
+export * from "./coaching-memory";
+
+

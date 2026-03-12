@@ -1,4 +1,4 @@
-﻿import Database from "better-sqlite3";
+import Database from "better-sqlite3";
 
 // Node operations
 
@@ -172,6 +172,186 @@ export function getAllAttempts(db: Database.Database): AttemptRow[] {
 
 export function getAttemptsSince(db: Database.Database, since: string): AttemptRow[] {
   return db.prepare("SELECT * FROM attempts WHERE ts >= ? ORDER BY ts DESC").all(since) as AttemptRow[];
+}
+
+// Coaching memory operations
+
+export type CoachingDiagnosticType =
+  | "threshold_error"
+  | "range_construction_error"
+  | "blocker_blindness"
+  | "line_misunderstanding"
+  | "pool_assumption_error"
+  | "confidence_miscalibration"
+  | "calibration_error";
+
+export type CoachingInterventionSource = "session_review" | "real_hand" | "weakness_explorer" | "command_center";
+export type CoachingInterventionStatus = "assigned" | "in_progress" | "stabilizing" | "completed" | "regressed" | "abandoned";
+
+export interface CoachingDiagnosisRow {
+  id: string;
+  user_id: string;
+  attempt_id: string;
+  concept_key: string;
+  diagnostic_type: CoachingDiagnosticType;
+  confidence: number;
+  created_at: string;
+}
+
+export interface CoachingReflectionRow {
+  id: string;
+  user_id: string;
+  attempt_id: string;
+  reflection_text: string;
+  confidence_level?: string | null;
+  created_at: string;
+}
+
+export interface CoachingInterventionRow {
+  id: string;
+  user_id: string;
+  concept_key: string;
+  source: CoachingInterventionSource;
+  created_at: string;
+  status: CoachingInterventionStatus;
+}
+
+export interface InterventionOutcomeRow {
+  id: string;
+  intervention_id: string;
+  evaluation_window: string;
+  pre_score: number;
+  post_score: number;
+  improved: number;
+  created_at: string;
+}
+
+export interface CoachingInterventionWithOutcomeRow extends CoachingInterventionRow {
+  outcome_id?: string | null;
+  evaluation_window?: string | null;
+  pre_score?: number | null;
+  post_score?: number | null;
+  improved?: number | null;
+  outcome_created_at?: string | null;
+}
+
+export function createDiagnosis(db: Database.Database, row: CoachingDiagnosisRow): void {
+  db.prepare(`
+    INSERT INTO coaching_diagnoses (id, user_id, attempt_id, concept_key, diagnostic_type, confidence, created_at)
+    VALUES (@id, @user_id, @attempt_id, @concept_key, @diagnostic_type, @confidence, @created_at)
+    ON CONFLICT(attempt_id) DO UPDATE SET
+      user_id = excluded.user_id,
+      concept_key = excluded.concept_key,
+      diagnostic_type = excluded.diagnostic_type,
+      confidence = excluded.confidence,
+      created_at = excluded.created_at
+  `).run(row);
+}
+
+export function deleteDiagnosisByAttempt(db: Database.Database, attemptId: string): void {
+  db.prepare("DELETE FROM coaching_diagnoses WHERE attempt_id = ?").run(attemptId);
+}
+
+export function createReflection(db: Database.Database, row: CoachingReflectionRow): void {
+  db.prepare(`
+    INSERT INTO coaching_reflections (id, user_id, attempt_id, reflection_text, confidence_level, created_at)
+    VALUES (@id, @user_id, @attempt_id, @reflection_text, @confidence_level, @created_at)
+    ON CONFLICT(attempt_id) DO UPDATE SET
+      user_id = excluded.user_id,
+      reflection_text = excluded.reflection_text,
+      confidence_level = excluded.confidence_level,
+      created_at = excluded.created_at
+  `).run({
+    ...row,
+    confidence_level: row.confidence_level ?? null,
+  });
+}
+
+export function deleteReflectionByAttempt(db: Database.Database, attemptId: string): void {
+  db.prepare("DELETE FROM coaching_reflections WHERE attempt_id = ?").run(attemptId);
+}
+
+export function createIntervention(db: Database.Database, row: CoachingInterventionRow): CoachingInterventionRow {
+  const existing = db.prepare(`
+    SELECT * FROM coaching_interventions
+    WHERE user_id = ? AND concept_key = ? AND source = ? AND status IN ('assigned', 'in_progress', 'stabilizing')
+    ORDER BY created_at DESC
+    LIMIT 1
+  `).get(row.user_id, row.concept_key, row.source) as CoachingInterventionRow | undefined;
+
+  if (existing) {
+    return existing;
+  }
+
+  db.prepare(`
+    INSERT INTO coaching_interventions (id, user_id, concept_key, source, created_at, status)
+    VALUES (@id, @user_id, @concept_key, @source, @created_at, @status)
+  `).run(row);
+  return row;
+}
+
+export function startIntervention(db: Database.Database, interventionId: string): void {
+  db.prepare("UPDATE coaching_interventions SET status = 'in_progress' WHERE id = ? AND status IN ('assigned', 'regressed')").run(interventionId);
+}
+
+export function completeIntervention(db: Database.Database, interventionId: string): void {
+  db.prepare("UPDATE coaching_interventions SET status = 'completed' WHERE id = ? AND status IN ('stabilizing', 'in_progress')").run(interventionId);
+}
+
+export function updateInterventionStatus(db: Database.Database, interventionId: string, status: CoachingInterventionStatus): void {
+  db.prepare("UPDATE coaching_interventions SET status = ? WHERE id = ?").run(status, interventionId);
+}
+
+export function recordInterventionOutcome(db: Database.Database, row: InterventionOutcomeRow): void {
+  db.prepare(`
+    INSERT INTO intervention_outcomes (id, intervention_id, evaluation_window, pre_score, post_score, improved, created_at)
+    VALUES (@id, @intervention_id, @evaluation_window, @pre_score, @post_score, @improved, @created_at)
+    ON CONFLICT(intervention_id) DO UPDATE SET
+      evaluation_window = excluded.evaluation_window,
+      pre_score = excluded.pre_score,
+      post_score = excluded.post_score,
+      improved = excluded.improved,
+      created_at = excluded.created_at
+  `).run(row);
+}
+
+export function getUserInterventions(db: Database.Database, userId: string): CoachingInterventionWithOutcomeRow[] {
+  return db.prepare(`
+    SELECT
+      interventions.*,
+      outcomes.id AS outcome_id,
+      outcomes.evaluation_window,
+      outcomes.pre_score,
+      outcomes.post_score,
+      outcomes.improved,
+      outcomes.created_at AS outcome_created_at
+    FROM coaching_interventions AS interventions
+    LEFT JOIN intervention_outcomes AS outcomes ON outcomes.intervention_id = interventions.id
+    WHERE interventions.user_id = ?
+    ORDER BY interventions.created_at DESC
+  `).all(userId) as CoachingInterventionWithOutcomeRow[];
+}
+
+export function getUserDiagnosisHistory(db: Database.Database, userId: string, limit = 100): CoachingDiagnosisRow[] {
+  return db.prepare(`
+    SELECT * FROM coaching_diagnoses
+    WHERE user_id = ?
+    ORDER BY created_at DESC
+    LIMIT ?
+  `).all(userId, limit) as CoachingDiagnosisRow[];
+}
+
+export function getUserReflections(db: Database.Database, userId: string, limit = 100): CoachingReflectionRow[] {
+  return db.prepare(`
+    SELECT * FROM coaching_reflections
+    WHERE user_id = ?
+    ORDER BY created_at DESC
+    LIMIT ?
+  `).all(userId, limit) as CoachingReflectionRow[];
+}
+
+export function getInterventionOutcome(db: Database.Database, interventionId: string): InterventionOutcomeRow | undefined {
+  return db.prepare("SELECT * FROM intervention_outcomes WHERE intervention_id = ?").get(interventionId) as InterventionOutcomeRow | undefined;
 }
 
 // SRS operations
@@ -395,4 +575,5 @@ export function getSetting(db: Database.Database, key: string): string | undefin
   const row = db.prepare("SELECT value FROM settings WHERE key = ?").get(key) as { value: string } | undefined;
   return row?.value;
 }
+
 

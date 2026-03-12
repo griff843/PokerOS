@@ -1,6 +1,5 @@
-﻿import { describe, expect, it } from "vitest";
-import type { InterventionPlan } from "@poker-coach/core/browser";
-import type { AttemptInsight } from "@poker-coach/core/browser";
+import { describe, expect, it } from "vitest";
+import type { AttemptInsight, InterventionHistoryEntry, InterventionPlan } from "@poker-coach/core/browser";
 import type { TableSimSessionPlan } from "./session-plan";
 import {
   buildCadenceSignal,
@@ -98,6 +97,8 @@ function makeInterventionPlan(): InterventionPlan {
     recommendedSessionTitle: "Turn Defense Lab -> River Bluff Catching Retest",
     nextSessionFocus: "Turn Defense first, then River Bluff Catching retest.",
     targetConcepts: ["turn_defense", "river_bluff_catching"],
+    planningReasons: ["active_intervention", "recurring_leak"],
+    recoveryStage: "active_repair",
     trainingBlocks: [
       {
         conceptKey: "turn_defense",
@@ -105,6 +106,7 @@ function makeInterventionPlan(): InterventionPlan {
         reps: 12,
         role: "repair",
         reason: "Repair the upstream concept feeding the current river bluff catching misses.",
+        planningReasons: ["active_intervention", "weakness_balance"],
       },
       {
         conceptKey: "river_bluff_catching",
@@ -112,6 +114,7 @@ function makeInterventionPlan(): InterventionPlan {
         reps: 8,
         role: "retest",
         reason: "Retest the live leak after upstream repair.",
+        planningReasons: ["active_intervention", "recurring_leak"],
       },
     ],
     totalTargetReps: 20,
@@ -139,6 +142,13 @@ function makeAttemptInsights(): AttemptInsight[] {
   ];
 }
 
+function makeInterventionHistory(): InterventionHistoryEntry[] {
+  return [
+    { id: "i1", conceptKey: "river_bluff_catching", source: "command_center", status: "assigned", createdAt: "2026-03-10T12:00:00.000Z" },
+    { id: "i2", conceptKey: "turn_defense", source: "session_review", status: "completed", improved: true, preScore: 0.33, postScore: 0.71, createdAt: "2026-03-09T12:00:00.000Z" },
+  ];
+}
+
 describe("command center snapshot", () => {
   it("builds a premium daily focus and selective sections from real plan data", () => {
     const snapshot = buildCommandCenterSnapshot({
@@ -148,6 +158,7 @@ describe("command center snapshot", () => {
       activePool: "B",
       count: 10,
       interventionPlan: makeInterventionPlan(),
+      interventionHistory: makeInterventionHistory(),
       now: new Date("2026-03-10T12:00:00.000Z"),
     });
 
@@ -158,6 +169,8 @@ describe("command center snapshot", () => {
     expect(snapshot.coachBriefing.recommendation).toContain("Turn Defense");
     expect(snapshot.coachBriefing.reminder.length).toBeGreaterThan(0);
     expect(snapshot.recommendedTrainingBlock.plan.id).toBe("plan-B-turn_defense-river_bluff_catching");
+    expect(snapshot.interventions.active[0]?.status).toContain("Assigned");
+    expect(snapshot.interventions.completed[0]?.status).toBe("Recovered");
     expect(snapshot.recentWork).toHaveLength(3);
   });
 
@@ -170,5 +183,6 @@ describe("command center snapshot", () => {
     expect(buildReadinessSignal(makeRecentAttempts().slice(0, 2))).toBeUndefined();
   });
 });
+
 
 

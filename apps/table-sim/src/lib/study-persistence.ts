@@ -1,6 +1,7 @@
 ﻿import { getAttempt, getAllAttempts, openDatabase, updateAttemptRecord } from "../../../../packages/db/src/index";
 import { insertAttempt, type AttemptRow } from "../../../../packages/db/src/repository";
 import { resolveDbPath } from "./local-study-data";
+import { syncCoachingMemoryForAttemptRow, syncCoachingMemoryForPersistedAttempt } from "./coaching-memory";
 import { toAttemptInsertRow, type PersistedAttemptRecord, type StoredAttemptPayload } from "./study-attempts";
 
 function resolveWritableDbPath(): string {
@@ -11,6 +12,7 @@ export function persistAttempt(record: PersistedAttemptRecord): void {
   const db = openDatabase(resolveWritableDbPath());
   try {
     insertAttempt(db, toAttemptInsertRow(record));
+    syncCoachingMemoryForPersistedAttempt(db, record);
   } finally {
     db.close();
   }
@@ -23,7 +25,11 @@ export function persistAttemptPatch(args: { attemptId: string; reflection?: stri
       reflection: args.reflection,
       user_answer_json: args.payload ? JSON.stringify(args.payload) : undefined,
     });
-    return getAttempt(db, args.attemptId);
+    const updated = getAttempt(db, args.attemptId);
+    if (updated) {
+      syncCoachingMemoryForAttemptRow(db, updated);
+    }
+    return updated;
   } finally {
     db.close();
   }
@@ -37,4 +43,3 @@ export function loadPersistedAttempts(): AttemptRow[] {
     db.close();
   }
 }
-

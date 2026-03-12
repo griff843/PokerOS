@@ -1,9 +1,13 @@
-﻿import {
+import {
   buildFallbackCoachResponse,
   buildNextFocusSummary,
+  formatPlanningReason,
   type AttemptInsight,
+  type InterventionHistoryEntry,
   type InterventionPlan,
+  type PlayerDiagnosisHistoryEntry,
   type RealPlayConceptSignal,
+  type SessionPlanningReason,
   type WeaknessPool,
 } from "@poker-coach/core/browser";
 import type { TableSimSessionPlan } from "./session-plan";
@@ -53,6 +57,10 @@ export interface CommandCenterSnapshot {
     reminder: string;
     recommendation: string;
   };
+  interventions: {
+    active: Array<{ concept: string; status: string; detail: string }>;
+    completed: Array<{ concept: string; status: string; detail: string }>;
+  };
   recommendedTrainingBlock: {
     plan: InterventionPlan;
     href: string;
@@ -72,6 +80,8 @@ interface BuildCommandCenterSnapshotArgs {
   activePool: WeaknessPool;
   count: number;
   interventionPlan: InterventionPlan;
+  diagnosisHistory?: PlayerDiagnosisHistoryEntry[];
+  interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
   now?: Date;
 }
@@ -83,6 +93,8 @@ export function buildCommandCenterSnapshot({
   activePool,
   count,
   interventionPlan,
+  diagnosisHistory = [],
+  interventionHistory = [],
   realPlaySignals,
   now = new Date(),
 }: BuildCommandCenterSnapshotArgs): CommandCenterSnapshot {
@@ -90,6 +102,8 @@ export function buildCommandCenterSnapshot({
     drills: plan.drills.map((entry) => entry.drill),
     attemptInsights,
     activePool,
+    diagnosisHistory,
+    interventionHistory,
     realPlaySignals,
     now,
   });
@@ -136,6 +150,7 @@ export function buildCommandCenterSnapshot({
       reminder: adaptive.surfaceSignals.commandCenter,
       recommendation: `${interventionPlan.nextSessionFocus}`,
     },
+    interventions: buildInterventionSection(interventionHistory, playerIntelligence),
     recommendedTrainingBlock: {
       plan: interventionPlan,
       href: `/app/training/session/${interventionPlan.id}`,
@@ -153,7 +168,7 @@ export function buildCadenceSignal(recentAttempts: CommandCenterRecentAttempt[])
   if (recentAttempts.length === 0) {
     return {
       label: "Fresh slate",
-      detail: "No stored reps yet, so today’s plan starts from a balanced baseline.",
+      detail: "No stored reps yet, so today's plan starts from a balanced baseline.",
     };
   }
 
@@ -273,23 +288,18 @@ function buildDailyFocusReasons(
   adaptiveSignal: string
 ): string[] {
   const reasons: string[] = [];
+  const planningReasons = plan.metadata.intervention?.planningReasons ?? [];
 
   if (plan.metadata.dueReviewCount > 0) {
     reasons.push(`${plan.metadata.dueReviewCount} due reviews are already waiting.`);
   }
 
+  for (const reason of planningReasons.slice(0, 3)) {
+    reasons.push(describePlanningReason(reason, leadConcept?.label ?? leadTarget?.key ?? "this concept"));
+  }
+
   if (leadConcept) {
-    reasons.push(
-      leadConcept.weaknessRole === "downstream" && leadConcept.supportingConceptKeys[0]
-        ? `${leadConcept.label} still shows up, but ${formatSessionLabel(leadConcept.supportingConceptKeys[0])} may be the upstream issue.`
-        : `${leadConcept.label} is still the strongest live concept signal.`
-    );
-  } else if (leadTarget) {
-    reasons.push(
-      leadTarget.scope === "pool" && leadTarget.pool
-        ? `${formatSessionLabel(leadTarget.key)} is still unstable in Pool ${leadTarget.pool}.`
-        : `${formatSessionLabel(leadTarget.key)} is still the strongest live leak signal.`
-    );
+    reasons.push(`Recovery stage: ${leadConcept.recoveryStage.replace(/_/g, " ")}.`);
   }
 
   if (recentAttempts.length > 0) {
@@ -297,7 +307,7 @@ function buildDailyFocusReasons(
   }
 
   reasons.push(adaptiveSignal);
-  return reasons.slice(0, 3);
+  return [...new Set(reasons)].slice(0, 4);
 }
 
 function buildPriorityLeaks(
@@ -318,16 +328,8 @@ function buildPriorityLeaks(
   for (const concept of playerIntelligence.priorities.slice(0, 2)) {
     leaks.push({
       label: concept.label,
-      detail: concept.weaknessRole === "downstream" && concept.inferredFrom[0]
-        ? `${concept.evidence[0]} ${concept.inferredFrom[0]}`
-        : concept.evidence[0] ?? concept.summary,
-      emphasis: concept.weaknessRole === "upstream"
-        ? "Structural leak"
-        : concept.weaknessRole === "downstream"
-          ? "Downstream symptom"
-          : concept.scope === "pool"
-            ? `Pool ${concept.recommendedPool}`
-            : "Weak concept",
+      detail: `${concept.evidence[0] ?? concept.summary} Recovery stage: ${concept.recoveryStage.replace(/_/g, " ")}.`,
+      emphasis: concept.planningReasons[0] ? formatPlanningReason(concept.planningReasons[0]) : concept.scope === "pool" ? `Pool ${concept.recommendedPool}` : "Weak concept",
     });
   }
 
@@ -360,6 +362,64 @@ function buildPriorityLeaks(
   }
 
   return dedupePriorityLeaks(leaks).slice(0, 3);
+}
+
+function buildInterventionSection(
+  interventionHistory: InterventionHistoryEntry[],
+  playerIntelligence: ReturnType<typeof buildTableSimPlayerIntelligence>
+): CommandCenterSnapshot["interventions"] {
+  const conceptsByKey = new Map(playerIntelligence.concepts.map((concept) => [concept.conceptKey, concept]));
+  const active = interventionHistory
+    .filter((entry) => entry.status === "assigned" || entry.status === "in_progress" || entry.status === "stabilizing")
+    .slice(0, 3)
+    .map((entry) => {
+      const concept = conceptsByKey.get(entry.conceptKey);
+      return {
+        concept: formatSessionLabel(entry.conceptKey),
+        status: formatSessionLabel(entry.status),
+        detail: `${concept ? `Recovery stage: ${concept.recoveryStage.replace(/_/g, " ")}. ` : ""}Source: ${entry.source.replace(/_/g, " ")}. ${concept?.planningReasons[0] ? `Lead reason: ${formatPlanningReason(concept.planningReasons[0]).toLowerCase()}.` : "This concept still has an active coaching block attached."}`.trim(),
+      };
+    });
+  const completed = interventionHistory
+    .filter((entry) => entry.status === "completed" || entry.status === "regressed")
+    .slice(0, 3)
+    .map((entry) => {
+      const concept = conceptsByKey.get(entry.conceptKey);
+      return {
+        concept: formatSessionLabel(entry.conceptKey),
+        status: entry.status === "regressed"
+          ? "Regressed"
+          : entry.improved === true
+            ? "Recovered"
+            : entry.improved === false
+              ? "Needs more work"
+              : "Completed",
+        detail: entry.preScore !== null && entry.preScore !== undefined && entry.postScore !== null && entry.postScore !== undefined
+          ? `Score moved from ${Math.round(entry.preScore * 100)}% to ${Math.round(entry.postScore * 100)}%. ${concept ? `Recovery stage: ${concept.recoveryStage.replace(/_/g, " ")}.` : ""}`.trim()
+          : concept
+            ? `Latest derived recovery stage: ${concept.recoveryStage.replace(/_/g, " ")}.`
+            : "This intervention has a closed status in coaching memory.",
+      };
+    });
+
+  return { active, completed };
+}
+
+function describePlanningReason(reason: SessionPlanningReason, conceptLabel: string): string {
+  switch (reason) {
+    case "active_intervention":
+      return `${formatSessionLabel(conceptLabel)} already has an active intervention, so the plan keeps that thread alive.`;
+    case "recurring_leak":
+      return `${formatSessionLabel(conceptLabel)} is recurring across persisted diagnoses, so it stays prioritized.`;
+    case "regression_recovery":
+      return `${formatSessionLabel(conceptLabel)} regressed after earlier work, so it moves back up the queue.`;
+    case "weakness_balance":
+      return "Weakness balancing still supports this as the clearest next concept.";
+    case "retention_check":
+      return `${formatSessionLabel(conceptLabel)} is in retention-check territory, so the plan verifies the gain instead of overtraining it.`;
+    case "freshness_mix":
+      return "The planner kept some freshness in the drill mix so the block does not collapse into one stale pattern.";
+  }
 }
 
 function describeLeak(target: TableSimSessionPlan["metadata"]["weaknessTargets"][number]): string {

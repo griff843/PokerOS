@@ -2,8 +2,16 @@
 import path from "node:path";
 import { readCanonicalDrillsFromDirectory } from "../../../../packages/core/src/drills";
 import { openDatabase } from "../../../../packages/db/src/index";
-import { getAllAttempts, getAllImportedHands, getAllSrs, getRecentHandImports } from "../../../../packages/db/src/repository";
+import {
+  getAllAttempts,
+  getAllImportedHands,
+  getAllSrs,
+  getRecentHandImports,
+  getUserDiagnosisHistory,
+  getUserInterventions,
+} from "../../../../packages/db/src/repository";
 import { ImportedHandSchema, type ImportedHand } from "@poker-coach/core/browser";
+import { getLocalCoachingUserId } from "./coaching-memory";
 
 export function resolveDrillsDir(): string {
   const candidates = [
@@ -39,11 +47,14 @@ export function loadLocalStudyData() {
       srs: [],
       importedHands: [],
       handImports: [],
+      diagnoses: [],
+      interventions: [],
     };
   }
 
   const db = openDatabase(dbPath);
   try {
+    const userId = getLocalCoachingUserId();
     return {
       drills,
       attempts: getAllAttempts(db),
@@ -60,9 +71,10 @@ export function loadLocalStudyData() {
         createdAt: row.created_at,
         updatedAt: row.updated_at,
       })),
+      diagnoses: getUserDiagnosisHistory(db, userId),
+      interventions: getUserInterventions(db, userId),
     };
   } finally {
     db.close();
   }
 }
-

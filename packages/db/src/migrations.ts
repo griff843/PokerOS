@@ -1,4 +1,4 @@
-﻿import Database from "better-sqlite3";
+import Database from "better-sqlite3";
 
 const MIGRATIONS: string[] = [
   `CREATE TABLE IF NOT EXISTS nodes (
@@ -38,6 +38,44 @@ const MIGRATIONS: string[] = [
     elapsed_ms INTEGER NOT NULL DEFAULT 0,
     missed_tags_json TEXT NOT NULL DEFAULT '[]',
     active_pool TEXT
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS coaching_diagnoses (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    attempt_id TEXT NOT NULL UNIQUE REFERENCES attempts(attempt_id),
+    concept_key TEXT NOT NULL,
+    diagnostic_type TEXT NOT NULL,
+    confidence REAL NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS coaching_reflections (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    attempt_id TEXT NOT NULL UNIQUE REFERENCES attempts(attempt_id),
+    reflection_text TEXT NOT NULL DEFAULT '',
+    confidence_level TEXT,
+    created_at TEXT NOT NULL
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS coaching_interventions (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    concept_key TEXT NOT NULL,
+    source TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    status TEXT NOT NULL
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS intervention_outcomes (
+    id TEXT PRIMARY KEY,
+    intervention_id TEXT NOT NULL UNIQUE REFERENCES coaching_interventions(id),
+    evaluation_window TEXT NOT NULL,
+    pre_score REAL NOT NULL DEFAULT 0,
+    post_score REAL NOT NULL DEFAULT 0,
+    improved INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL
   )`,
 
   `CREATE TABLE IF NOT EXISTS srs (
@@ -89,6 +127,12 @@ const MIGRATIONS: string[] = [
 
   `CREATE INDEX IF NOT EXISTS idx_drills_node ON drills(node_id)`,
   `CREATE INDEX IF NOT EXISTS idx_attempts_drill ON attempts(drill_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_attempts_ts ON attempts(ts DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_coaching_diagnoses_user_created ON coaching_diagnoses(user_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_coaching_diagnoses_concept ON coaching_diagnoses(user_id, concept_key, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_coaching_reflections_user_created ON coaching_reflections(user_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_coaching_interventions_user_status ON coaching_interventions(user_id, status, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_coaching_interventions_concept ON coaching_interventions(user_id, concept_key, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_srs_due ON srs(due_at)`,
   `CREATE INDEX IF NOT EXISTS idx_hand_imports_created ON hand_imports(created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_imported_hands_played ON imported_hands(played_at DESC)`,
@@ -98,6 +142,11 @@ const MIGRATIONS: string[] = [
 function columnExists(db: Database.Database, tableName: string, columnName: string): boolean {
   const columns = db.prepare(`PRAGMA table_info(${tableName})`).all() as Array<{ name: string }>;
   return columns.some((column) => column.name === columnName);
+}
+
+function tableExists(db: Database.Database, tableName: string): boolean {
+  const row = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?").get(tableName) as { name: string } | undefined;
+  return Boolean(row?.name);
 }
 
 export function runMigrations(db: Database.Database): void {
@@ -132,11 +181,17 @@ export function runMigrations(db: Database.Database): void {
       db.exec("ALTER TABLE attempts ADD COLUMN reflection TEXT NOT NULL DEFAULT ''");
     }
 
-    if (!columnExists(db, "imported_hands", "concept_matches_json")) {
-      db.exec("ALTER TABLE imported_hands ADD COLUMN concept_matches_json TEXT NOT NULL DEFAULT '[]'");
+    if (tableExists(db, "coaching_interventions")) {
+      db.exec("UPDATE coaching_interventions SET status = 'in_progress' WHERE status = 'started'");
     }
-    if (!columnExists(db, "imported_hands", "review_spots_json")) {
-      db.exec("ALTER TABLE imported_hands ADD COLUMN review_spots_json TEXT NOT NULL DEFAULT '[]'");
+
+    if (tableExists(db, "imported_hands")) {
+      if (!columnExists(db, "imported_hands", "concept_matches_json")) {
+        db.exec("ALTER TABLE imported_hands ADD COLUMN concept_matches_json TEXT NOT NULL DEFAULT '[]'");
+      }
+      if (!columnExists(db, "imported_hands", "review_spots_json")) {
+        db.exec("ALTER TABLE imported_hands ADD COLUMN review_spots_json TEXT NOT NULL DEFAULT '[]'");
+      }
     }
   });
 

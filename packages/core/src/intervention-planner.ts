@@ -1,5 +1,11 @@
-﻿import type { ConceptGraph } from "./concept-graph";
+import type { ConceptGraph } from "./concept-graph";
 import { collectDrillConceptSources, mapSignalToConceptKeys } from "./concept-graph";
+import {
+  formatPlanningReason,
+  planningReasonWeight,
+  type ConceptRecoveryStage,
+  type SessionPlanningReason,
+} from "./coaching-memory";
 import type { DiagnosticErrorType } from "./schemas";
 import type { PlayerConceptSnapshot, PlayerIntelligenceSnapshot } from "./player-intelligence";
 import { createNeutralAdaptiveCoachingProfile } from "./adaptive-coaching";
@@ -26,6 +32,7 @@ export interface InterventionTrainingBlock {
   reps: number;
   role: "repair" | "retest" | "calibration";
   reason: string;
+  planningReasons: SessionPlanningReason[];
 }
 
 export interface InterventionPlan {
@@ -41,6 +48,8 @@ export interface InterventionPlan {
   recommendedSessionTitle: string;
   nextSessionFocus: string;
   targetConcepts: string[];
+  planningReasons: SessionPlanningReason[];
+  recoveryStage: ConceptRecoveryStage;
   trainingBlocks: InterventionTrainingBlock[];
   totalTargetReps: number;
 }
@@ -57,6 +66,8 @@ export interface InterventionSessionPlanMetadata {
   nextSessionFocus: string;
   totalTargetReps: number;
   totalPlannedReps: number;
+  planningReasons: SessionPlanningReason[];
+  recoveryStage: ConceptRecoveryStage;
   trainingBlocks: Array<InterventionTrainingBlock & { plannedReps: number }>;
 }
 
@@ -65,6 +76,15 @@ interface CandidateDrill {
   priorAttempts: number;
   lastScore?: number;
   dueAt?: string;
+}
+
+interface RankedConceptCandidate {
+  conceptKey: string;
+  snapshot: PlayerConceptSnapshot;
+  score: number;
+  diagnosticWeight: number;
+  recentMissCount: number;
+  planningReasons: SessionPlanningReason[];
 }
 
 const ERROR_WEIGHTS: Record<DiagnosticErrorType, number> = {
@@ -85,47 +105,39 @@ export function buildInterventionPlan(args: {
   const now = args.now ?? new Date();
   const byConcept = aggregateDiagnostics(args.recentAttempts);
   const conceptsByKey = new Map(args.playerIntelligence.concepts.map((concept) => [concept.conceptKey, concept]));
-
-  const ranked = [...byConcept.entries()]
-    .map(([conceptKey, group]) => {
-      const snapshot = conceptsByKey.get(conceptKey);
-      const diagnosticWeight = [...group.errorCounts.entries()].reduce(
-        (sum, [errorType, count]) => sum + (ERROR_WEIGHTS[errorType] ?? 1) * count,
-        0
-      );
-      const score = diagnosticWeight + (snapshot?.trainingUrgency ?? 0) * 4 + group.count * 0.35;
-      return { conceptKey, group, snapshot, score };
-    })
-    .sort((a, b) => b.score - a.score || a.conceptKey.localeCompare(b.conceptKey));
+  const ranked = rankConceptCandidates(args.playerIntelligence.concepts, byConcept);
 
   const lead = ranked[0];
   const fallback = args.playerIntelligence.priorities[0] ?? args.playerIntelligence.concepts[0];
   const rootSnapshot = lead?.snapshot ?? fallback;
   const rootConceptKey = rootSnapshot?.conceptKey ?? lead?.conceptKey ?? "balanced_reinforcement";
-  const rootConceptLabel = rootSnapshot?.label ?? lead?.group.label ?? toTitleCase(rootConceptKey);
+  const rootConceptLabel = rootSnapshot?.label ?? toTitleCase(rootConceptKey);
+  const rootPlanningReasons = dedupeReasons(lead?.planningReasons ?? rootSnapshot?.planningReasons ?? ["weakness_balance"]);
+  const rootRecoveryStage = rootSnapshot?.recoveryStage ?? "unaddressed";
   const upstreamSnapshot = pickUpstreamConcept(rootSnapshot, args.playerIntelligence.graph, conceptsByKey);
   const confidenceMiscalibrationCount = args.recentAttempts.filter((attempt) => attempt.confidenceMiscalibration).length;
-  const topError = lead ? [...lead.group.errorCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0] : undefined;
+  const topError = getTopError(byConcept.get(rootConceptKey));
+  const diagnosticLead = lead?.diagnosticWeight ?? 0;
 
   const trainingBlocks: InterventionTrainingBlock[] = [];
   if (upstreamSnapshot && upstreamSnapshot.conceptKey !== rootConceptKey) {
     trainingBlocks.push({
       conceptKey: upstreamSnapshot.conceptKey,
       label: upstreamSnapshot.label,
-      reps: 12,
+      reps: rootPlanningReasons.includes("active_intervention") ? 10 : 8,
       role: "repair",
-      reason: `Repair the upstream concept feeding the current ${rootConceptLabel.toLowerCase()} misses.`,
+      reason: `Repair the upstream concept feeding the current ${rootConceptLabel.toLowerCase()} misses before the next retest.`,
+      planningReasons: dedupeReasons(["weakness_balance", ...getPlanningReasons(upstreamSnapshot)]),
     });
   }
 
   trainingBlocks.push({
     conceptKey: rootConceptKey,
     label: rootConceptLabel,
-    reps: upstreamSnapshot ? 8 : 12,
-    role: upstreamSnapshot ? "retest" : "repair",
-    reason: upstreamSnapshot
-      ? `Retest the visible leak after ${upstreamSnapshot.label.toLowerCase()} gets the first intervention block.`
-      : `Stay with the live leak until the action and reasoning both stabilize.`,
+    reps: rootPlanningReasons.includes("active_intervention") || rootPlanningReasons.includes("regression_recovery") ? 12 : upstreamSnapshot ? 8 : 10,
+    role: rootRecoveryStage === "recovered" ? "retest" : upstreamSnapshot ? "retest" : "repair",
+    reason: buildRootBlockReason(rootSnapshot, rootPlanningReasons, upstreamSnapshot),
+    planningReasons: rootPlanningReasons,
   });
 
   if (confidenceMiscalibrationCount >= 2) {
@@ -134,7 +146,8 @@ export function buildInterventionPlan(args: {
       label: `${rootConceptLabel} Calibration Retest`,
       reps: 4,
       role: "calibration",
-      reason: "Confidence has drifted away from the actual outcome often enough that calibration should be trained directly.",
+      reason: "Confidence has drifted away from actual outcomes often enough that calibration should be trained directly.",
+      planningReasons: dedupeReasons([...rootPlanningReasons, "weakness_balance"]),
     });
   }
 
@@ -147,31 +160,35 @@ export function buildInterventionPlan(args: {
     confidenceMiscalibrationCount,
   });
 
-  const rootLeakDiagnosisBase = lead && topError
-    ? `Repeated ${topError[0].replace(/_/g, " ")} signals are showing up inside ${rootConceptLabel.toLowerCase()}.`
-    : rootSnapshot?.weaknessRole === "downstream" && rootSnapshot.supportingConceptKeys[0]
-      ? `${rootConceptLabel} is still showing up, but it looks downstream of ${toTitleCase(rootSnapshot.supportingConceptKeys[0])}.`
-      : `${rootConceptLabel} is the clearest live leak to train next.`;
-
-  const rootLeakDiagnosis = adaptiveProfile.interventionAdjustments.prioritizeRealPlayReview
-    ? `${rootLeakDiagnosisBase} The same family is now showing up in imported hands too, so this is a transfer leak as well as a drill leak.`
-    : rootLeakDiagnosisBase;
-
-  const rationaleBase = upstreamSnapshot
-    ? `${rootLeakDiagnosis} The cleaner intervention is to repair ${upstreamSnapshot.label.toLowerCase()} first, then retest ${rootConceptLabel.toLowerCase()}.`
-    : `${rootLeakDiagnosis} The next block should stay narrow enough to repair the core concept instead of spreading volume across unrelated spots.`;
-  const rationale = `${rationaleBase} ${adaptiveProfile.coachingEmphasis.interventionBullets[0] ?? ""}`.trim();
-
-  const recommendedSessionTitle = adaptiveProfile.interventionAdjustments.prioritizeRealPlayReview
-    ? `${upstreamSnapshot ? `${upstreamSnapshot.label} Lab -> ` : ""}${rootConceptLabel} Transfer Block`
-    : upstreamSnapshot
-      ? `${upstreamSnapshot.label} Lab -> ${rootConceptLabel} Retest`
-      : `${rootConceptLabel} Intervention Block`;
-
-  const nextSessionFocusBase = upstreamSnapshot
-    ? `${upstreamSnapshot.label} first, then ${rootConceptLabel} retest.`
-    : `Stay with ${rootConceptLabel} until the signal stabilizes.`;
-  const nextSessionFocus = `${nextSessionFocusBase} ${adaptiveProfile.surfaceSignals.commandCenter}`.trim();
+  const rootLeakDiagnosis = buildRootLeakDiagnosis({
+    rootSnapshot,
+    rootConceptLabel,
+    rootPlanningReasons,
+    topError,
+    adaptiveProfile,
+    diagnosticLead,
+  });
+  const rationale = buildPlanRationale({
+    rootSnapshot,
+    rootConceptLabel,
+    rootPlanningReasons,
+    upstreamSnapshot,
+    rootLeakDiagnosis,
+    adaptiveProfile,
+  });
+  const recommendedSessionTitle = buildRecommendedSessionTitle({
+    rootConceptLabel,
+    upstreamSnapshot,
+    rootPlanningReasons,
+    adaptiveProfile,
+  });
+  const nextSessionFocus = buildNextSessionFocus({
+    rootConceptLabel,
+    rootPlanningReasons,
+    rootRecoveryStage,
+    upstreamSnapshot,
+    adaptiveProfile,
+  });
 
   return {
     id: buildPlanId(args.activePool, rootConceptKey, upstreamSnapshot?.conceptKey),
@@ -186,6 +203,8 @@ export function buildInterventionPlan(args: {
     recommendedSessionTitle,
     nextSessionFocus,
     targetConcepts: [...new Set(adaptiveBlocks.map((block) => block.conceptKey))],
+    planningReasons: rootPlanningReasons,
+    recoveryStage: rootRecoveryStage,
     trainingBlocks: adaptiveBlocks,
     totalTargetReps: adaptiveBlocks.reduce((sum, block) => sum + block.reps, 0),
   };
@@ -207,7 +226,10 @@ export function buildInterventionSessionPlan(args: {
   const selectedIds = new Set<string>();
   const drills: SelectedDrill[] = [];
   const plannedBlocks: Array<InterventionTrainingBlock & { plannedReps: number }> = [];
-  const notes = [...(args.baseNotes ?? []), "Session was built from a diagnostic intervention plan instead of the default weakness mix."];
+  const notes = [
+    ...(args.baseNotes ?? []),
+    `Session was prioritized from coaching memory: ${args.interventionPlan.planningReasons.join(", ")}.`,
+  ];
 
   for (const block of args.interventionPlan.trainingBlocks) {
     const candidates = args.drills
@@ -231,6 +253,10 @@ export function buildInterventionSessionPlan(args: {
 
       selectedIds.add(candidate.drill.drill_id);
       plannedReps += 1;
+      const prioritizationReasons = dedupeReasons([
+        ...block.planningReasons,
+        ...(candidate.priorAttempts === 0 ? ["freshness_mix" as const] : []),
+      ]);
       drills.push({
         drill: candidate.drill,
         kind: candidate.priorAttempts > 0 || candidate.dueAt ? "review" : "new",
@@ -248,6 +274,7 @@ export function buildInterventionSessionPlan(args: {
           interventionConceptKey: block.conceptKey,
           interventionConceptLabel: block.label,
           interventionRole: block.role,
+          prioritizationReasons,
         },
       });
     }
@@ -285,11 +312,62 @@ export function buildInterventionSessionPlan(args: {
       nextSessionFocus: args.interventionPlan.nextSessionFocus,
       totalTargetReps: args.interventionPlan.totalTargetReps,
       totalPlannedReps,
+      planningReasons: args.interventionPlan.planningReasons,
+      recoveryStage: args.interventionPlan.recoveryStage,
       trainingBlocks: plannedBlocks,
     },
   };
 
   return { drills, metadata };
+}
+
+function rankConceptCandidates(
+  concepts: PlayerConceptSnapshot[],
+  byConcept: Map<string, { label: string; count: number; errorCounts: Map<DiagnosticErrorType, number> }>
+): RankedConceptCandidate[] {
+  return concepts
+    .filter((concept) => concept.status !== "strength" || getPlanningReasons(concept).includes("retention_check"))
+    .map((concept) => {
+      const group = byConcept.get(concept.conceptKey);
+      const diagnosticWeight = [...(group?.errorCounts.entries() ?? [])].reduce(
+        (sum, [errorType, count]) => sum + (ERROR_WEIGHTS[errorType] ?? 1) * count,
+        0
+      );
+      const recentMissCount = group?.count ?? 0;
+      const score = scoreConceptCandidate(concept, diagnosticWeight, recentMissCount);
+      return {
+        conceptKey: concept.conceptKey,
+        snapshot: concept,
+        score,
+        diagnosticWeight,
+        recentMissCount,
+        planningReasons: getPlanningReasons(concept),
+      };
+    })
+    .sort((a, b) => b.score - a.score || a.snapshot.label.localeCompare(b.snapshot.label));
+}
+
+function scoreConceptCandidate(snapshot: PlayerConceptSnapshot, diagnosticWeight: number, recentMissCount: number): number {
+  const planningReasons = getPlanningReasons(snapshot);
+  let score = snapshot.trainingUrgency * 20 + diagnosticWeight * 5 + recentMissCount * 3 + snapshot.reviewPressure * 2;
+
+  for (const reason of planningReasons) {
+    score += planningReasonWeight(reason) * 10;
+  }
+
+  if (snapshot.recoveryStage === "recovered" && !planningReasons.includes("retention_check")) {
+    score -= 22;
+  }
+
+  if (snapshot.recoveryStage === "regressed") {
+    score += 16;
+  }
+
+  if (snapshot.recoveryStage === "stabilizing") {
+    score += 10;
+  }
+
+  return score;
 }
 
 function aggregateDiagnostics(attempts: InterventionPlannerRecentAttempt[]) {
@@ -312,6 +390,10 @@ function aggregateDiagnostics(attempts: InterventionPlannerRecentAttempt[]) {
     groups.set(attempt.diagnosticConceptKey, current);
   }
   return groups;
+}
+
+function getTopError(group: { errorCounts: Map<DiagnosticErrorType, number> } | undefined) {
+  return group ? [...group.errorCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0] : undefined;
 }
 
 function pickUpstreamConcept(
@@ -373,8 +455,8 @@ function compareInterventionCandidates(a: CandidateDrill, b: CandidateDrill): nu
   if (aScore !== bScore) {
     return aScore - bScore;
   }
-  if (b.priorAttempts !== a.priorAttempts) {
-    return b.priorAttempts - a.priorAttempts;
+  if (a.priorAttempts !== b.priorAttempts) {
+    return a.priorAttempts - b.priorAttempts;
   }
   return a.drill.drill_id.localeCompare(b.drill.drill_id);
 }
@@ -412,7 +494,7 @@ function applyAdaptiveInterventionWeighting(args: {
   rootSnapshot?: PlayerConceptSnapshot;
   confidenceMiscalibrationCount: number;
 }): InterventionTrainingBlock[] {
-  const blocks = args.blocks.map((block) => ({ ...block }));
+  const blocks = args.blocks.map((block) => ({ ...block, planningReasons: [...block.planningReasons] }));
   const adjustments = args.adaptiveProfile.interventionAdjustments;
   const rootIndex = blocks.findIndex((block) => block.label === args.rootConceptLabel || block.conceptKey === args.rootSnapshot?.conceptKey);
   const rootBlock = rootIndex >= 0 ? blocks[rootIndex] : blocks[blocks.length - 1];
@@ -449,10 +531,120 @@ function applyAdaptiveInterventionWeighting(args: {
       reps: 4,
       role: "calibration",
       reason: "Confidence is part of the current learner pattern, so the plan should calibrate certainty directly instead of leaving it implicit.",
+      planningReasons: dedupeReasons([...rootBlock.planningReasons, "weakness_balance"]),
     });
   }
 
   return blocks;
+}
+
+function buildRootLeakDiagnosis(args: {
+  rootSnapshot?: PlayerConceptSnapshot;
+  rootConceptLabel: string;
+  rootPlanningReasons: SessionPlanningReason[];
+  topError?: [DiagnosticErrorType, number];
+  adaptiveProfile: PlayerIntelligenceSnapshot["adaptiveProfile"];
+  diagnosticLead: number;
+}): string {
+  const rootLeakDiagnosisBase = args.rootPlanningReasons.includes("active_intervention")
+    ? `${args.rootConceptLabel} already has an active intervention, so the next session should continue the same repair thread.`
+    : args.rootPlanningReasons.includes("regression_recovery")
+      ? `${args.rootConceptLabel} improved once but has regressed, so it returns to the front of the queue.`
+      : args.rootPlanningReasons.includes("recurring_leak")
+        ? `${args.rootConceptLabel} keeps recurring across persisted diagnoses, so it is a real leak instead of a one-off miss.`
+        : args.topError
+          ? `Repeated ${args.topError[0].replace(/_/g, " ")} signals are showing up inside ${args.rootConceptLabel.toLowerCase()}.`
+          : args.rootSnapshot?.weaknessRole === "downstream" && args.rootSnapshot.supportingConceptKeys[0]
+            ? `${args.rootConceptLabel} is still showing up, but it looks downstream of ${toTitleCase(args.rootSnapshot.supportingConceptKeys[0])}.`
+            : `${args.rootConceptLabel} is the clearest live concept to train next.`;
+
+  return args.adaptiveProfile.interventionAdjustments.prioritizeRealPlayReview
+    ? `${rootLeakDiagnosisBase} The same family is now showing up in imported hands too, so this is a transfer leak as well as a drill leak.`
+    : rootLeakDiagnosisBase;
+}
+
+function buildPlanRationale(args: {
+  rootSnapshot?: PlayerConceptSnapshot;
+  rootConceptLabel: string;
+  rootPlanningReasons: SessionPlanningReason[];
+  upstreamSnapshot?: PlayerConceptSnapshot;
+  rootLeakDiagnosis: string;
+  adaptiveProfile: PlayerIntelligenceSnapshot["adaptiveProfile"];
+}): string {
+  const planningTrace = args.rootPlanningReasons.map(formatPlanningReason).join(", ").toLowerCase();
+  const rationaleBase = args.upstreamSnapshot
+    ? `${args.rootLeakDiagnosis} The cleaner intervention is to repair ${args.upstreamSnapshot.label.toLowerCase()} first, then retest ${args.rootConceptLabel.toLowerCase()}.`
+    : `${args.rootLeakDiagnosis} The next block should stay narrow enough to repair the core concept instead of spreading volume across unrelated spots.`;
+  return `${rationaleBase} Priority came from ${planningTrace}. ${args.adaptiveProfile.coachingEmphasis.interventionBullets[0] ?? ""}`.trim();
+}
+
+function buildRecommendedSessionTitle(args: {
+  rootConceptLabel: string;
+  upstreamSnapshot?: PlayerConceptSnapshot;
+  rootPlanningReasons: SessionPlanningReason[];
+  adaptiveProfile: PlayerIntelligenceSnapshot["adaptiveProfile"];
+}): string {
+  if (args.rootPlanningReasons.includes("regression_recovery")) {
+    return `${args.rootConceptLabel} Recovery Block`;
+  }
+  if (args.rootPlanningReasons.includes("active_intervention")) {
+    return `${args.rootConceptLabel} Continuation Block`;
+  }
+  return args.adaptiveProfile.interventionAdjustments.prioritizeRealPlayReview
+    ? `${args.upstreamSnapshot ? `${args.upstreamSnapshot.label} Lab -> ` : ""}${args.rootConceptLabel} Transfer Block`
+    : args.upstreamSnapshot
+      ? `${args.upstreamSnapshot.label} Lab -> ${args.rootConceptLabel} Retest`
+      : `${args.rootConceptLabel} Intervention Block`;
+}
+
+function buildNextSessionFocus(args: {
+  rootConceptLabel: string;
+  rootPlanningReasons: SessionPlanningReason[];
+  rootRecoveryStage: ConceptRecoveryStage;
+  upstreamSnapshot?: PlayerConceptSnapshot;
+  adaptiveProfile: PlayerIntelligenceSnapshot["adaptiveProfile"];
+}): string {
+  const nextSessionFocusBase = args.rootPlanningReasons.includes("retention_check")
+    ? `Retest ${args.rootConceptLabel} just enough to confirm the recovery is holding.`
+    : args.rootPlanningReasons.includes("regression_recovery")
+      ? `Re-enter ${args.rootConceptLabel} with repair-first reps until the concept stops slipping.`
+      : args.upstreamSnapshot
+        ? `${args.upstreamSnapshot.label} first, then ${args.rootConceptLabel} retest.`
+        : `Stay with ${args.rootConceptLabel} until the signal stabilizes.`;
+  return `${nextSessionFocusBase} ${args.adaptiveProfile.surfaceSignals.commandCenter}`.trim();
+}
+
+function buildRootBlockReason(
+  rootSnapshot: PlayerConceptSnapshot | undefined,
+  rootPlanningReasons: SessionPlanningReason[],
+  upstreamSnapshot?: PlayerConceptSnapshot
+): string {
+  if (rootPlanningReasons.includes("active_intervention")) {
+    return `Continue the existing intervention thread so the learner gets repetition on the same concept instead of fragmenting the repair.`;
+  }
+  if (rootPlanningReasons.includes("regression_recovery")) {
+    return `This concept regressed after earlier work, so the next block should reopen repair before the leak hardens again.`;
+  }
+  if (rootPlanningReasons.includes("retention_check")) {
+    return `This concept looks recovered, so the next reps should verify that the gain is holding rather than assuming it is permanent.`;
+  }
+  if (rootPlanningReasons.includes("recurring_leak")) {
+    return `Persisted diagnoses keep mapping back here, so the next block should close a recurring leak instead of chasing novelty.`;
+  }
+  if (upstreamSnapshot) {
+    return `Retest the visible leak after ${upstreamSnapshot.label.toLowerCase()} gets the first intervention block.`;
+  }
+  return rootSnapshot?.recoveryStage === "recovered"
+    ? `Run a small retention check to keep the recovered concept from quietly slipping.`
+    : `Stay with the live leak until the action and reasoning both stabilize.`;
+}
+
+function getPlanningReasons(snapshot: Pick<PlayerConceptSnapshot, "planningReasons">): SessionPlanningReason[] {
+  return snapshot.planningReasons && snapshot.planningReasons.length > 0 ? snapshot.planningReasons : ["weakness_balance"];
+}
+
+function dedupeReasons(reasons: SessionPlanningReason[]): SessionPlanningReason[] {
+  return [...new Set(reasons)];
 }
 
 

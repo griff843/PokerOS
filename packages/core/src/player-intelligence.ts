@@ -1,9 +1,17 @@
-﻿import type { CanonicalDrill } from "./schemas";
+import type { CanonicalDrill } from "./schemas";
 import type { AttemptInsight, WeaknessPool, WeaknessScope } from "./weakness-analytics";
 import type { DiagnosticInsight } from "./diagnostics";
 import type { RealPlayConceptSignal } from "./real-hands";
 import type { AdaptiveCoachingProfile } from "./adaptive-coaching";
 import { buildAdaptiveCoachingProfile } from "./adaptive-coaching";
+import {
+  buildPlanningReasons,
+  deriveConceptRecoveryStage,
+  scorePlanningReasons,
+  type ConceptRecoveryStage,
+  type InterventionLifecycleStatus,
+  type SessionPlanningReason,
+} from "./coaching-memory";
 import {
   buildConceptGraph,
   collectDrillConceptSources,
@@ -45,6 +53,9 @@ export interface PlayerConceptSnapshot {
   trainingUrgency: number;
   status: "strength" | "watch" | "weakness";
   weaknessRole: "none" | "primary" | "upstream" | "downstream";
+  recoveryStage: ConceptRecoveryStage;
+  planningReasons: SessionPlanningReason[];
+  interventionStatus?: InterventionLifecycleStatus;
   directSignalKeys: string[];
   relatedConceptKeys: string[];
   supportingConceptKeys: string[];
@@ -69,6 +80,37 @@ export interface PlayerRecommendation {
   explainability: string[];
 }
 
+export interface PlayerDiagnosisHistoryEntry {
+  conceptKey: string;
+  diagnosticType: string;
+  confidence: number;
+  createdAt: string;
+}
+
+export interface InterventionHistoryEntry {
+  id: string;
+  conceptKey: string;
+  source: string;
+  status: InterventionLifecycleStatus;
+  createdAt: string;
+  improved?: boolean | null;
+  preScore?: number | null;
+  postScore?: number | null;
+  evaluationWindow?: string | null;
+  outcomeCreatedAt?: string | null;
+}
+
+export interface PlayerMemorySummary {
+  diagnosisCount: number;
+  activeInterventions: number;
+  completedInterventions: number;
+  interventionSuccessRate: number | null;
+  recurringLeakConcepts: string[];
+  recoveredConcepts: string[];
+  regressedConcepts: string[];
+  stabilizingConcepts: string[];
+}
+
 export interface PlayerIntelligenceSnapshot {
   generatedAt: string;
   activePool: WeaknessPool;
@@ -78,6 +120,7 @@ export interface PlayerIntelligenceSnapshot {
   strengths: PlayerConceptSnapshot[];
   recommendations: PlayerRecommendation[];
   adaptiveProfile: AdaptiveCoachingProfile;
+  memory: PlayerMemorySummary;
 }
 
 interface ConceptAccumulator {
@@ -97,6 +140,8 @@ export function buildPlayerIntelligenceSnapshot(args: {
   activePool?: WeaknessPool;
   confidenceInsights?: ConfidenceInsight[];
   diagnosticInsights?: DiagnosticInsight[];
+  diagnosisHistory?: PlayerDiagnosisHistoryEntry[];
+  interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
   now?: Date;
 }): PlayerIntelligenceSnapshot {
@@ -110,6 +155,9 @@ export function buildPlayerIntelligenceSnapshot(args: {
   );
   const drillConcepts = buildDrillConceptIndex(args.drills);
   const realPlaySignalMap = new Map((args.realPlaySignals ?? []).map((signal) => [signal.conceptKey, signal]));
+  const diagnosisHistory = args.diagnosisHistory ?? [];
+  const interventionHistory = args.interventionHistory ?? [];
+
   const snapshots = graph.nodes
     .map((node) =>
       buildConceptSnapshot({
@@ -124,6 +172,8 @@ export function buildPlayerIntelligenceSnapshot(args: {
         activePool,
         confidenceInsights: args.confidenceInsights ?? [],
         diagnosticInsights: args.diagnosticInsights ?? [],
+        diagnosisHistory: diagnosisHistory.filter((entry) => entry.conceptKey === node.key),
+        interventionHistory: interventionHistory.filter((entry) => entry.conceptKey === node.key),
         realPlaySignal: realPlaySignalMap.get(node.key),
       })
     )
@@ -148,6 +198,7 @@ export function buildPlayerIntelligenceSnapshot(args: {
     activePool,
     now,
   });
+  const memory = buildPlayerMemorySummary({ diagnosisHistory, interventionHistory });
 
   return {
     generatedAt: now.toISOString(),
@@ -158,6 +209,7 @@ export function buildPlayerIntelligenceSnapshot(args: {
     strengths,
     recommendations: buildPlayerRecommendations({ activePool, priorities, strengths, adaptiveProfile }),
     adaptiveProfile,
+    memory,
   };
 }
 
@@ -175,9 +227,11 @@ export function buildPlayerRecommendations(args: {
   if (lead) {
     recommendations.push({
       conceptKey: lead.conceptKey,
-      label: lead.weaknessRole === "downstream" && lead.supportingConceptKeys[0]
-        ? `Repair ${toTitleCase(lead.supportingConceptKeys[0])}`
-        : `Train ${lead.label}`,
+      label: lead.evidence.some((entry) => entry.includes("active intervention"))
+        ? `Continue ${lead.label}`
+        : lead.weaknessRole === "downstream" && lead.supportingConceptKeys[0]
+          ? `Repair ${toTitleCase(lead.supportingConceptKeys[0])}`
+          : `Train ${lead.label}`,
       rationale: buildRecommendationRationale(lead),
       recommendedPool: lead.recommendedPool,
       emphasis: lead.scope === "pool" ? "pool_focus" : lead.weaknessRole === "upstream" || lead.reviewPressure > 0 ? "review" : "stabilize",
@@ -249,6 +303,8 @@ function buildConceptSnapshot(args: {
   activePool: WeaknessPool;
   confidenceInsights: ConfidenceInsight[];
   diagnosticInsights: DiagnosticInsight[];
+  diagnosisHistory: PlayerDiagnosisHistoryEntry[];
+  interventionHistory: InterventionHistoryEntry[];
   realPlaySignal?: RealPlayConceptSignal;
 }): PlayerConceptSnapshot | null {
   const poolSignals = buildAccumulator(
@@ -264,8 +320,18 @@ function buildConceptSnapshot(args: {
   const usePoolScope = args.activePool !== "baseline" && poolSignals.allScores.length >= MIN_POOL_SAMPLE;
   const chosen = usePoolScope ? poolSignals : overallSignals;
   const realPlaySignal = args.realPlaySignal;
+  const activeInterventionCount = args.interventionHistory.filter((entry) => isActiveInterventionStatus(entry.status)).length;
+  const completedInterventions = args.interventionHistory.filter((entry) => entry.status === "completed");
+  const successfulInterventions = completedInterventions.filter((entry) => entry.improved === true).length;
+  const unsuccessfulInterventions = completedInterventions.filter((entry) => entry.improved === false).length;
 
-  if (chosen.allScores.length === 0 && chosen.recurrenceCount === 0 && !realPlaySignal) {
+  if (
+    chosen.allScores.length === 0
+    && chosen.recurrenceCount === 0
+    && args.diagnosisHistory.length === 0
+    && args.interventionHistory.length === 0
+    && !realPlaySignal
+  ) {
     return null;
   }
 
@@ -282,26 +348,55 @@ function buildConceptSnapshot(args: {
     }));
   const reviewPressure = relatedDrills.filter((drill) => args.dueDrillIds.has(drill.drillId)).length;
   const confidenceMismatch = buildConfidenceMismatch(args.confidenceInsights, args.conceptKey);
+  const latestIntervention = [...args.interventionHistory].sort((a, b) => compareByDate(b.outcomeCreatedAt ?? b.createdAt, a.outcomeCreatedAt ?? a.createdAt))[0];
+  const recoveryStage = deriveConceptRecoveryStage({
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory: args.interventionHistory,
+    worseningTrend: trend?.direction === "worsening",
+  });
   const hasDirectConceptSignal = [...chosen.directSignalKeys].some((key) => key.startsWith("concept:") || key.startsWith("decision:")) || Boolean(realPlaySignal);
-  const trainingUrgency = round(clamp(
+  const effectiveRecurrence = chosen.recurrenceCount + args.diagnosisHistory.length + (realPlaySignal?.occurrences ?? 0);
+  const baseUrgency = round(clamp(
     ((1 - (averageScore ?? 0.55)) * 0.55)
       + (Math.min(chosen.recurrenceCount, 4) * 0.1)
       + (reviewPressure * 0.07)
       + (trend?.direction === "worsening" ? 0.14 : trend?.direction === "improving" ? -0.08 : 0)
       + (confidenceMismatch?.direction === "overconfident" ? 0.08 : 0)
       + (Math.min([...chosen.diagnosticCounts.values()].reduce((sum, value) => sum + value, 0), 3) * 0.05)
+      + (Math.min(args.diagnosisHistory.length, 3) * 0.04)
+      + (activeInterventionCount * 0.05)
+      + (unsuccessfulInterventions * 0.08)
+      - (successfulInterventions * 0.07)
       + (realPlaySignal?.weight ?? 0)
       - (relatedDrills.length === 0 ? 0.12 : 0)
       - (!hasDirectConceptSignal ? 0.08 : 0),
     0,
     1
   ));
-  const effectiveRecurrence = chosen.recurrenceCount + (realPlaySignal?.occurrences ?? 0);
-  const status = trainingUrgency >= 0.52 || effectiveRecurrence >= 2 || (averageScore ?? 1) < 0.58
+  const planningReasons = buildPlanningReasons({
+    recoveryStage,
+    recurrenceCount: effectiveRecurrence,
+    reviewPressure,
+    trainingUrgency: baseUrgency,
+    diagnosisCount: args.diagnosisHistory.length,
+    activeInterventionCount,
+  });
+  const trainingUrgency = round(clamp(
+    baseUrgency
+      + scorePlanningReasons(planningReasons) * 0.04
+      - (recoveryStage === "recovered" && !planningReasons.includes("retention_check") ? 0.16 : 0),
+    0,
+    1
+  ));
+  const status = recoveryStage === "regressed"
     ? "weakness"
-    : (averageScore ?? 0) >= 0.6 && trend?.direction !== "worsening" && !realPlaySignal
-      ? "strength"
-      : "watch";
+    : trainingUrgency >= 0.52 || effectiveRecurrence >= 2 || (averageScore ?? 1) < 0.58 || activeInterventionCount > 0
+      ? "weakness"
+      : recoveryStage === "recovered" && reviewPressure === 0
+        ? "strength"
+        : (averageScore ?? 0) >= 0.6 && trend?.direction !== "worsening" && !realPlaySignal
+          ? "strength"
+          : "watch";
   const supportingConceptKeys = getSupportingConcepts(args.graph, args.conceptKey).map((node) => node.key);
   const supportedConceptKeys = getSupportedConcepts(args.graph, args.conceptKey).map((node) => node.key);
   const relatedConceptKeys = args.graph.edges
@@ -314,15 +409,19 @@ function buildConceptSnapshot(args: {
       ? `${chosen.allScores.length} tracked reps are averaging ${Math.round((averageScore ?? 0) * 100)}%.`
       : realPlaySignal
         ? "Real-play evidence is available even though scored drill history is still thin."
-        : "Only miss-driven evidence is available so far.",
+        : args.diagnosisHistory.length > 0
+          ? "Persisted coaching memory is available even though scored drill history is still thin."
+          : "Only miss-driven evidence is available so far.",
     effectiveRecurrence > 0
-      ? `${effectiveRecurrence} repeated signal${effectiveRecurrence === 1 ? "" : "s"} are mapped into this concept across drills and imported hands.`
+      ? `${effectiveRecurrence} repeated signal${effectiveRecurrence === 1 ? "" : "s"} are mapped into this concept across drills, diagnoses, and imported hands.`
       : "No repeated miss cluster is mapped here.",
     reviewPressure > 0
       ? `${reviewPressure} related drills are already due for review.`
       : realPlaySignal?.reviewSpotCount
         ? `${realPlaySignal.reviewSpotCount} review-worthy real-play spots are attached here.`
         : "Review pressure is currently light for this concept.",
+    `Recovery stage: ${recoveryStage.replace(/_/g, " ")}.`,
+    `Planning reasons: ${planningReasons.join(", ")}.`,
   ];
   if (trend) {
     evidence.push(trend.detail);
@@ -332,6 +431,24 @@ function buildConceptSnapshot(args: {
   }
   if (diagnosticLead) {
     evidence.push(`${diagnosticLead[1]} ${diagnosticLead[0].replace(/_/g, " ")} signals were tagged inside this concept.`);
+  }
+  if (args.diagnosisHistory.length > 0) {
+    evidence.push(`${args.diagnosisHistory.length} persisted diagnosis ${args.diagnosisHistory.length === 1 ? "entry" : "entries"} are attached to this concept.`);
+  }
+  if (activeInterventionCount > 0) {
+    evidence.push(`${activeInterventionCount} active intervention ${activeInterventionCount === 1 ? "is" : "are"} still open for this concept.`);
+  }
+  if (successfulInterventions > 0) {
+    evidence.push(`${successfulInterventions} prior intervention ${successfulInterventions === 1 ? "has" : "have"} already improved this concept, so recovery is possible here.`);
+  }
+  if (unsuccessfulInterventions > 0) {
+    evidence.push(`${unsuccessfulInterventions} completed intervention ${unsuccessfulInterventions === 1 ? "did not fully stick" : "have not fully stuck"} yet, so the leak still needs tighter follow-through.`);
+  }
+  if (latestIntervention?.status === "stabilizing") {
+    evidence.push("The latest intervention improved enough to enter a stabilizing window, so the planner should verify retention before moving on.");
+  }
+  if (latestIntervention?.status === "regressed") {
+    evidence.push("The latest intervention regressed, so the concept returns to the front of the queue.");
   }
   if (realPlaySignal) {
     evidence.push(...realPlaySignal.evidence.slice(0, 2));
@@ -343,7 +460,7 @@ function buildConceptSnapshot(args: {
     summary: args.summary,
     scope: usePoolScope ? "pool" : "overall",
     recommendedPool: usePoolScope ? args.activePool : (realPlaySignal?.recommendedPool ?? "baseline"),
-    sampleSize: chosen.allScores.length + (realPlaySignal?.occurrences ?? 0),
+    sampleSize: chosen.allScores.length + args.diagnosisHistory.length + (realPlaySignal?.occurrences ?? 0),
     recentAverage,
     averageScore,
     recurrenceCount: effectiveRecurrence,
@@ -354,6 +471,9 @@ function buildConceptSnapshot(args: {
     trainingUrgency,
     status,
     weaknessRole: "none",
+    recoveryStage,
+    planningReasons,
+    interventionStatus: latestIntervention?.status,
     directSignalKeys: [...chosen.directSignalKeys, ...(realPlaySignal ? [`real_play:${realPlaySignal.conceptKey}`] : [])].sort(),
     relatedConceptKeys,
     supportingConceptKeys,
@@ -570,6 +690,10 @@ function buildDrillConceptIndex(drills: CanonicalDrill[]): Map<string, Set<strin
 }
 
 function buildRecommendationRationale(snapshot: PlayerConceptSnapshot): string {
+  if (snapshot.evidence.some((entry) => entry.includes("active intervention"))) {
+    return `${snapshot.label} already has an active intervention, so the next recommendation should continue that thread instead of fragmenting the work.`;
+  }
+
   if (snapshot.weaknessRole === "downstream" && snapshot.supportingConceptKeys[0]) {
     return `${snapshot.label} keeps showing up, but the graph suggests ${toTitleCase(snapshot.supportingConceptKeys[0])} may be the upstream issue to repair first.`;
   }
@@ -671,14 +795,71 @@ function buildAdaptiveRecommendation(
   }
 }
 
+function buildPlayerMemorySummary(args: {
+  diagnosisHistory: PlayerDiagnosisHistoryEntry[];
+  interventionHistory: InterventionHistoryEntry[];
+}): PlayerMemorySummary {
+  const completed = args.interventionHistory.filter((entry) => entry.status === "completed");
+  const improved = completed.filter((entry) => entry.improved === true).length;
+
+  return {
+    diagnosisCount: args.diagnosisHistory.length,
+    activeInterventions: args.interventionHistory.filter((entry) => isActiveInterventionStatus(entry.status)).length,
+    completedInterventions: completed.length,
+    interventionSuccessRate: completed.length > 0 ? round(improved / completed.length) : null,
+    recurringLeakConcepts: rankConcepts(args.diagnosisHistory.map((entry) => entry.conceptKey)),
+    recoveredConcepts: rankConcepts(completed.filter((entry) => entry.improved === true).map((entry) => entry.conceptKey)),
+    regressedConcepts: rankConcepts(args.interventionHistory.filter((entry) => entry.status === "regressed" || entry.improved === false).map((entry) => entry.conceptKey)),
+    stabilizingConcepts: rankConcepts(args.interventionHistory.filter((entry) => entry.status === "stabilizing").map((entry) => entry.conceptKey)),
+  };
+}
+
+function rankConcepts(values: string[]): string[] {
+  const counts = new Map<string, number>();
+  for (const value of values) {
+    counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 3)
+    .map(([value]) => value);
+}
+
 function compareConceptSnapshots(a: PlayerConceptSnapshot, b: PlayerConceptSnapshot): number {
   if (b.trainingUrgency !== a.trainingUrgency) {
     return b.trainingUrgency - a.trainingUrgency;
+  }
+  if (planningStageRank(b.recoveryStage) !== planningStageRank(a.recoveryStage)) {
+    return planningStageRank(b.recoveryStage) - planningStageRank(a.recoveryStage);
   }
   if (b.recurrenceCount !== a.recurrenceCount) {
     return b.recurrenceCount - a.recurrenceCount;
   }
   return a.label.localeCompare(b.label);
+}
+
+function planningStageRank(stage: ConceptRecoveryStage): number {
+  switch (stage) {
+    case "active_repair":
+      return 5;
+    case "regressed":
+      return 4;
+    case "stabilizing":
+      return 3;
+    case "unaddressed":
+      return 2;
+    case "recovered":
+      return 1;
+  }
+}
+
+function isActiveInterventionStatus(status: InterventionLifecycleStatus): boolean {
+  return status === "assigned" || status === "in_progress" || status === "stabilizing";
+}
+
+function compareByDate(a: string, b: string): number {
+  return new Date(a).getTime() - new Date(b).getTime();
 }
 
 function average(values: number[]): number {
@@ -703,3 +884,12 @@ function toTitleCase(value: string): string {
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 }
+
+
+
+
+
+
+
+
+

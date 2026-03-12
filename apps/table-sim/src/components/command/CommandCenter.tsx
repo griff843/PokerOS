@@ -250,6 +250,8 @@ export function CommandCenter() {
           <CoachBriefingCard loading={snapshotLoading} snapshot={snapshot} />
         </div>
 
+        <InterventionsCard snapshot={snapshot} />
+
         {snapshot?.recommendedTrainingBlock ? (
           <RecommendedTrainingBlockCard
             plan={snapshot.recommendedTrainingBlock.plan}
@@ -654,3 +656,44 @@ function TrendItem({
 
 
 
+
+
+function InterventionsCard({ snapshot }: { snapshot: CommandCenterSnapshot | null }) {
+  const active = snapshot?.interventions.active ?? [];
+  const completed = snapshot?.interventions.completed ?? [];
+
+  return (
+    <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Coaching Memory</p>
+        <p className="mt-2 text-sm leading-6 text-slate-400">Active interventions, completed blocks, and whether the last coaching prescription actually moved the score.</p>
+      </div>
+      <div className="mt-4 grid gap-3 lg:grid-cols-2">
+        <div className="space-y-3 rounded-[24px] border border-white/8 bg-black/20 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Active interventions</p>
+          {active.length === 0 ? (
+            <p className="text-sm leading-6 text-slate-400">No active interventions are open yet. The next prescribed block will appear here once assigned.</p>
+          ) : active.map((item) => (
+            <div key={`${item.concept}:${item.status}`} className="rounded-[20px] border border-white/8 bg-white/5 p-3">
+              <p className="text-sm font-semibold text-white">Concept: {item.concept}</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-200">Status: {item.status}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{item.detail}</p>
+            </div>
+          ))}
+        </div>
+        <div className="space-y-3 rounded-[24px] border border-white/8 bg-black/20 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Completed interventions</p>
+          {completed.length === 0 ? (
+            <p className="text-sm leading-6 text-slate-400">Completed intervention outcomes will show up here once a concept finishes an evaluation window.</p>
+          ) : completed.map((item) => (
+            <div key={`${item.concept}:${item.status}`} className="rounded-[20px] border border-white/8 bg-white/5 p-3">
+              <p className="text-sm font-semibold text-white">Concept: {item.concept}</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">Outcome: {item.status}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-300">{item.detail}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

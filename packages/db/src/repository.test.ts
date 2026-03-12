@@ -4,12 +4,21 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { openDatabase } from "./index";
 import {
+  completeIntervention,
+  createDiagnosis,
+  createIntervention,
+  createReflection,
   getAllAttempts,
   getAllImportedHands,
+  getInterventionOutcome,
   getRecentHandImports,
+  getUserDiagnosisHistory,
+  getUserInterventions,
   insertAttempt,
   insertHandImport,
   insertImportedHand,
+  recordInterventionOutcome,
+  startIntervention,
   type ImportedHandRow,
   updateAttemptReflection,
   upsertDrill,
@@ -102,6 +111,99 @@ describe("attempt persistence", () => {
     expect(attempts[1].reflection).toBe("Updated reflection");
   });
 
+  it("stores diagnoses, reflections, interventions, and outcomes separately from attempts", () => {
+    const db = openDatabase(createTempDbPath());
+
+    upsertNode(db, {
+      node_id: "hu_01",
+      name: "Heads-Up River",
+      version: "1.0.0",
+      context_json: "{}",
+      triggers_json: "[]",
+      checklist_md: "",
+      defaults_json: "{}",
+    });
+
+    upsertDrill(db, {
+      drill_id: "d1",
+      node_id: "hu_01",
+      prompt: "Test drill",
+      options_json: "[]",
+      answer_json: "{}",
+      tags_json: "[]",
+      difficulty: 1,
+      content_json: "{}",
+      created_at: new Date().toISOString(),
+    });
+
+    insertAttempt(db, {
+      attempt_id: "a1",
+      drill_id: "d1",
+      session_id: "s1",
+      ts: "2026-03-10T12:00:00.000Z",
+      selected_action: "CALL",
+      confidence: "certain",
+      tags_json: JSON.stringify(["paired_top_river"]),
+      reflection: "River felt under-bluffed.",
+      user_answer_json: JSON.stringify({ answer: "CALL" }),
+      correct_bool: 0,
+      score: 0.32,
+      elapsed_ms: 1200,
+      missed_tags_json: JSON.stringify(["paired_top_river"]),
+      active_pool: "B",
+    });
+
+    createDiagnosis(db, {
+      id: "diag-1",
+      user_id: "local_user",
+      attempt_id: "a1",
+      concept_key: "river_bluff_catching",
+      diagnostic_type: "threshold_error",
+      confidence: 0.9,
+      created_at: "2026-03-10T12:00:00.000Z",
+    });
+
+    createReflection(db, {
+      id: "reflection-1",
+      user_id: "local_user",
+      attempt_id: "a1",
+      reflection_text: "I over-called because I counted too many bluffs.",
+      confidence_level: "certain",
+      created_at: "2026-03-10T12:00:00.000Z",
+    });
+
+    const assigned = createIntervention(db, {
+      id: "intervention-1",
+      user_id: "local_user",
+      concept_key: "river_bluff_catching",
+      source: "command_center",
+      created_at: "2026-03-10T12:05:00.000Z",
+      status: "assigned",
+    });
+
+    startIntervention(db, assigned.id);
+    recordInterventionOutcome(db, {
+      id: "outcome-1",
+      intervention_id: assigned.id,
+      evaluation_window: "3_attempts",
+      pre_score: 0.34,
+      post_score: 0.71,
+      improved: 1,
+      created_at: "2026-03-10T13:00:00.000Z",
+    });
+    completeIntervention(db, assigned.id);
+
+    const diagnoses = getUserDiagnosisHistory(db, "local_user");
+    const interventions = getUserInterventions(db, "local_user");
+    const outcome = getInterventionOutcome(db, assigned.id);
+    db.close();
+
+    expect(diagnoses[0]?.diagnostic_type).toBe("threshold_error");
+    expect(interventions[0]?.status).toBe("completed");
+    expect(interventions[0]?.improved).toBe(1);
+    expect(outcome?.post_score).toBe(0.71);
+  });
+
   it("stores imported hand batches and structured hands", () => {
     const db = openDatabase(createTempDbPath());
 
@@ -149,4 +251,3 @@ describe("attempt persistence", () => {
     expect(hands[0]?.concept_matches_json).toContain("river_defense");
   });
 });
-

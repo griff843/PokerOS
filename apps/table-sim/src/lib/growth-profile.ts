@@ -1,12 +1,16 @@
-﻿import {
+import {
   buildInterventionPlan,
+  formatPlanningReason,
   type AttemptInsight,
+  type CanonicalDrill,
+  type DiagnosticInsight,
+  type InterventionHistoryEntry,
   type InterventionPlan,
+  type PlayerDiagnosisHistoryEntry,
   type RealPlayConceptSignal,
   type WeaknessPool,
 } from "@poker-coach/core/browser";
 import { buildWeaknessExplorerSnapshot, type WeaknessExplorerSnapshot } from "./weakness-explorer";
-import type { CanonicalDrill } from "@poker-coach/core/browser";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
 
 export interface GrowthProfileAttempt {
@@ -55,6 +59,21 @@ export interface GrowthProfileSnapshot {
     detail: string;
     tone: "good" | "warning" | "neutral";
   }>;
+  interventionSuccess: Array<{
+    label: string;
+    detail: string;
+    tone: "good" | "warning" | "neutral";
+  }>;
+  conceptRecovery: Array<{
+    label: string;
+    detail: string;
+    tone: "good" | "warning" | "neutral";
+  }>;
+  recurringLeaks: Array<{
+    label: string;
+    detail: string;
+    tone: "warning" | "neutral";
+  }>;
   coachPerspective: {
     encouragingTruth: string;
     limitingFactor: string;
@@ -77,17 +96,22 @@ export function buildGrowthProfileSnapshot(args: {
   attemptInsights: AttemptInsight[];
   srs: Array<{ drill_id: string; due_at: string }>;
   activePool: WeaknessPool;
-  diagnosticInsights?: import("@poker-coach/core/browser").DiagnosticInsight[];
+  diagnosticInsights?: DiagnosticInsight[];
+  diagnosisHistory?: PlayerDiagnosisHistoryEntry[];
+  interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
   now?: Date;
 }): GrowthProfileSnapshot {
   const now = args.now ?? new Date();
+  const interventionHistory = args.interventionHistory ?? [];
   const playerIntelligence = buildTableSimPlayerIntelligence({
     drills: args.drills,
     attemptInsights: args.attemptInsights,
     srs: args.srs,
     activePool: args.activePool,
     diagnosticInsights: args.diagnosticInsights,
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory,
     realPlaySignals: args.realPlaySignals,
     now,
   });
@@ -197,7 +221,9 @@ export function buildGrowthProfileSnapshot(args: {
       {
         label: "Weakest active area",
         value: activeWeakness,
-        detail: weakSpots[0]?.evidence[0] ?? "No weakness cluster has enough evidence yet to lead long-term planning.",
+        detail: weakSpots[0]
+          ? `${weakSpots[0].evidence[0] ?? weakSpots[0].summary} Recovery stage: ${weakSpots[0].recoveryStage.replace(/_/g, " ")}.`
+          : "No weakness cluster has enough evidence yet to lead long-term planning.",
         tone: weakSpots[0] ? "warning" : "neutral",
       },
     ],
@@ -208,20 +234,25 @@ export function buildGrowthProfileSnapshot(args: {
     })),
     weakSpots: weakSpots.map((spot) => ({
       label: spot.label,
-      detail: `${spot.evidence[0] ?? spot.summary} ${spot.inferredFrom[0] ?? ""}`.trim(),
+      detail: `${spot.evidence[0] ?? spot.summary} Recovery stage: ${spot.recoveryStage.replace(/_/g, " ")}. Lead reason: ${spot.planningReasons[0] ? formatPlanningReason(spot.planningReasons[0]).toLowerCase() : "weakness balance"}.`,
       tone: "warning",
       recommendedPool: spot.recommendedPool,
     })),
     movement,
     practiceIdentity: practiceIdentity.slice(0, 5),
+    interventionSuccess: buildInterventionSuccess(interventionHistory, playerIntelligence.memory.interventionSuccessRate),
+    conceptRecovery: buildConceptRecovery(playerIntelligence.concepts, interventionHistory),
+    recurringLeaks: buildRecurringLeaks(playerIntelligence.memory.recurringLeakConcepts, weakSpots),
     coachPerspective: {
       encouragingTruth: strengthLeaders[0]
         ? `${strengthLeaders[0].label} is becoming a real anchor in your game, which means improvement is not just theoretical.`
         : "You have enough work logged that real signals are starting to emerge, even if the profile is still early.",
       limitingFactor: weakSpots[0]
-        ? weakSpots[0].weaknessRole === "downstream" && weakSpots[0].supportingConceptKeys[0]
-          ? `${weakSpots[0].label} keeps showing up, but ${weakSpots[0].supportingConceptKeys[0].replace(/_/g, " ")} may be the upstream limiter.`
-          : `${weakSpots[0].label} is still the main constraint on the next stage of growth because it keeps recurring instead of fading.`
+        ? weakSpots[0].recoveryStage === "regressed"
+          ? `${weakSpots[0].label} improved once but slipped back, so the system should reopen repair instead of pretending the concept is done.`
+          : weakSpots[0].weaknessRole === "downstream" && weakSpots[0].supportingConceptKeys[0]
+            ? `${weakSpots[0].label} keeps showing up, but ${weakSpots[0].supportingConceptKeys[0].replace(/_/g, " ")} may be the upstream limiter.`
+            : `${weakSpots[0].label} is still the main constraint on the next stage of growth because it keeps recurring instead of fading.`
         : "The biggest current limitation is still sample depth rather than one sharply defined leak.",
       recommendation: `${interventionPlan.nextSessionFocus} ${adaptive.surfaceSignals.growthProfile}`,
     },
@@ -237,15 +268,12 @@ function buildHeadline(delta: number, overallAverage: number, cadence: ReturnTyp
   if (delta > 0.05 && cadence.tone === "good") {
     return "Your profile shows steady forward movement with a real practice rhythm behind it.";
   }
-
   if (delta < -0.05) {
     return "Your profile is still productive, but the recent direction is softer than the earlier window.";
   }
-
   if (overallAverage >= 0.65) {
     return "Your profile looks stable, with clear strengths holding while a smaller set of leaks still limits the ceiling.";
   }
-
   return "Your profile is still forming, but the core strengths and limiting leaks are now visible enough to guide the next stage.";
 }
 
@@ -266,14 +294,8 @@ function buildHeaderSummary(
 }
 
 function buildDirectionLabel(delta: number): string {
-  if (delta > 0.05) {
-    return "Trending up";
-  }
-
-  if (delta < -0.05) {
-    return "Needs reinforcement";
-  }
-
+  if (delta > 0.05) return "Trending up";
+  if (delta < -0.05) return "Needs reinforcement";
   return "Stable build";
 }
 
@@ -283,7 +305,6 @@ function buildMovementCards(
   weaknessExplorer: WeaknessExplorerSnapshot
 ): GrowthProfileSnapshot["movement"] {
   const cards: GrowthProfileSnapshot["movement"] = [];
-
   cards.push({
     label: buildDirectionLabel(delta),
     detail: delta > 0.05
@@ -297,16 +318,9 @@ function buildMovementCards(
   const improving = weaknessExplorer.movementSignals.find((signal) => signal.label.startsWith("Improving:"));
   const worsening = weaknessExplorer.movementSignals.find((signal) => signal.label.startsWith("Worsening:"));
   const stable = weaknessExplorer.movementSignals.find((signal) => signal.label.startsWith("Stable:"));
-
-  if (improving) {
-    cards.push(improving);
-  }
-  if (worsening) {
-    cards.push(worsening);
-  }
-  if (!improving && !worsening && stable) {
-    cards.push(stable);
-  }
+  if (improving) cards.push(improving);
+  if (worsening) cards.push(worsening);
+  if (!improving && !worsening && stable) cards.push(stable);
 
   if (strengthLeaders[0]) {
     cards.push({
@@ -332,7 +346,6 @@ function buildCadenceProfile(attempts: GrowthProfileAttempt[], now: Date) {
       tone: "good" as const,
     };
   }
-
   if (activeDays >= 2) {
     return {
       label: "Intermittent but alive",
@@ -341,7 +354,6 @@ function buildCadenceProfile(attempts: GrowthProfileAttempt[], now: Date) {
       tone: "neutral" as const,
     };
   }
-
   return {
     label: "Sparse cadence",
     detail: last14.length > 0
@@ -354,48 +366,23 @@ function buildCadenceProfile(attempts: GrowthProfileAttempt[], now: Date) {
 
 function buildPaceProfile(attempts: GrowthProfileAttempt[]) {
   if (attempts.length === 0) {
-    return {
-      value: "No pace data",
-      detail: "Decision pace will appear once enough attempt history exists.",
-      tone: "neutral" as const,
-    };
+    return { value: "No pace data", detail: "Decision pace will appear once enough attempt history exists.", tone: "neutral" as const };
   }
-
   const recent = attempts.slice(0, 12);
   const averageSeconds = average(recent.map((attempt) => attempt.elapsedMs / 1000));
-
   if (averageSeconds <= 18) {
-    return {
-      value: `${averageSeconds.toFixed(1)}s`,
-      detail: "Recent decisions are moving with decent tempo without collapsing into a rush.",
-      tone: "good" as const,
-    };
+    return { value: `${averageSeconds.toFixed(1)}s`, detail: "Recent decisions are moving with decent tempo without collapsing into a rush.", tone: "good" as const };
   }
-
   if (averageSeconds <= 35) {
-    return {
-      value: `${averageSeconds.toFixed(1)}s`,
-      detail: "Recent pace is measured and deliberate, which fits a study block more than a speed test.",
-      tone: "neutral" as const,
-    };
+    return { value: `${averageSeconds.toFixed(1)}s`, detail: "Recent pace is measured and deliberate, which fits a study block more than a speed test.", tone: "neutral" as const };
   }
-
-  return {
-    value: `${averageSeconds.toFixed(1)}s`,
-    detail: "Recent pace is slow enough that the next stage may be about making the right reads feel more automatic.",
-    tone: "warning" as const,
-  };
+  return { value: `${averageSeconds.toFixed(1)}s`, detail: "Recent pace is slow enough that the next stage may be about making the right reads feel more automatic.", tone: "warning" as const };
 }
 
 function buildPoolProfile(attempts: GrowthProfileAttempt[]) {
   if (attempts.length === 0) {
-    return {
-      value: "No context yet",
-      detail: "Pool/context spread will appear once more history is logged.",
-      tone: "neutral" as const,
-    };
+    return { value: "No context yet", detail: "Pool/context spread will appear once more history is logged.", tone: "neutral" as const };
   }
-
   const counts = new Map<string, number>();
   for (const attempt of attempts.slice(0, 24)) {
     const key = attempt.activePool ?? "baseline";
@@ -403,15 +390,9 @@ function buildPoolProfile(attempts: GrowthProfileAttempt[]) {
   }
   const ranked = [...counts.entries()].sort((a, b) => b[1] - a[1]);
   const lead = ranked[0];
-
   if (!lead) {
-    return {
-      value: "No context yet",
-      detail: "Pool/context spread will appear once more history is logged.",
-      tone: "neutral" as const,
-    };
+    return { value: "No context yet", detail: "Pool/context spread will appear once more history is logged.", tone: "neutral" as const };
   }
-
   return {
     value: lead[0] === "baseline" ? "Baseline-led" : `Pool ${lead[0]}-led`,
     detail: ranked.length > 1
@@ -423,15 +404,83 @@ function buildPoolProfile(attempts: GrowthProfileAttempt[]) {
 
 function buildReviewLoadDetail(srs: Array<{ drill_id: string; due_at: string }>, now: Date): string {
   const due = srs.filter((row) => new Date(row.due_at) <= now).length;
-  if (due === 0) {
-    return "Review pressure is currently light, so the next block can be guided more by weakness shape than by backlog.";
-  }
-
-  if (due <= 4) {
-    return `${due} review reps are due, which is enough to matter without overwhelming the next plan.`;
-  }
-
+  if (due === 0) return "Review pressure is currently light, so the next block can be guided more by weakness shape than by backlog.";
+  if (due <= 4) return `${due} review reps are due, which is enough to matter without overwhelming the next plan.`;
   return `${due} review reps are due, so follow-through on reinforcement is now part of the growth picture, not just raw performance.`;
+}
+
+function buildInterventionSuccess(
+  interventionHistory: InterventionHistoryEntry[],
+  successRate: number | null
+): GrowthProfileSnapshot["interventionSuccess"] {
+  const completed = interventionHistory.filter((entry) => entry.status === "completed");
+  const improved = completed.filter((entry) => entry.improved === true).length;
+  const regressed = interventionHistory.filter((entry) => entry.status === "regressed").length;
+  const items: GrowthProfileSnapshot["interventionSuccess"] = [
+    {
+      label: "Intervention success",
+      detail: completed.length > 0
+        ? `${improved} of ${completed.length} completed interventions produced a measurable score lift.${successRate !== null ? ` Success rate: ${Math.round(successRate * 100)}%.` : ""}${regressed > 0 ? ` ${regressed} concept${regressed === 1 ? " has" : "s have"} since regressed.` : ""}`
+        : "No completed interventions are stored yet, so success tracking will appear after the first coaching block closes.",
+      tone: successRate === null ? "neutral" as const : successRate >= 0.5 ? "good" as const : "warning" as const,
+    },
+    ...completed.slice(0, 2).map((entry) => ({
+      label: formatConcept(entry.conceptKey),
+      detail: entry.preScore !== null && entry.preScore !== undefined && entry.postScore !== null && entry.postScore !== undefined
+        ? `Intervention completed with scores moving from ${Math.round(entry.preScore * 100)}% to ${Math.round(entry.postScore * 100)}%.`
+        : "Completed intervention is logged for this concept.",
+      tone: entry.improved === true ? "good" as const : entry.improved === false ? "warning" as const : "neutral" as const,
+    })),
+  ];
+  return items.slice(0, 3);
+}
+
+function buildConceptRecovery(
+  concepts: ReturnType<typeof buildTableSimPlayerIntelligence>["concepts"],
+  interventionHistory: InterventionHistoryEntry[]
+): GrowthProfileSnapshot["conceptRecovery"] {
+  const conceptDriven = concepts
+    .filter((concept) => concept.recoveryStage !== "unaddressed")
+    .sort((a, b) => b.trainingUrgency - a.trainingUrgency)
+    .slice(0, 3)
+    .map((concept) => ({
+      label: concept.label,
+      detail: `Recovery stage: ${concept.recoveryStage.replace(/_/g, " ")}. Planning reasons: ${concept.planningReasons.map((reason) => formatPlanningReason(reason).toLowerCase()).join(", ")}.`,
+      tone: concept.recoveryStage === "recovered" ? "good" as const : concept.recoveryStage === "regressed" ? "warning" as const : "neutral" as const,
+    }));
+
+  if (conceptDriven.length > 0) {
+    return conceptDriven;
+  }
+
+  return interventionHistory
+    .filter((entry) => entry.status === "completed" || entry.status === "stabilizing" || entry.status === "regressed")
+    .slice(0, 3)
+    .map((entry) => ({
+      label: formatConcept(entry.conceptKey),
+      detail: entry.status === "regressed"
+        ? "This concept improved once but has since regressed, so it is back under active recovery pressure."
+        : entry.status === "stabilizing"
+          ? "This concept is in a stabilizing window, so the next step is to verify that the gain holds."
+          : "This concept has a completed intervention on record and remains part of the recovery picture.",
+      tone: entry.status === "regressed" ? "warning" as const : entry.improved === true ? "good" as const : "neutral" as const,
+    }));
+}
+
+function buildRecurringLeaks(recurringLeakConcepts: string[], weakSpots: ReturnType<typeof buildTableSimPlayerIntelligence>["priorities"]): GrowthProfileSnapshot["recurringLeaks"] {
+  const recurring = recurringLeakConcepts.map((conceptKey) => ({
+    label: formatConcept(conceptKey),
+    detail: "This concept keeps showing up across persisted diagnoses, so it is part of the recurring leak picture rather than a one-off miss.",
+    tone: "warning" as const,
+  }));
+  if (recurring.length > 0) {
+    return recurring.slice(0, 3);
+  }
+  return weakSpots.slice(0, 3).map((spot) => ({
+    label: spot.label,
+    detail: `${spot.evidence[0] ?? spot.summary} Lead reason: ${spot.planningReasons[0] ? formatPlanningReason(spot.planningReasons[0]).toLowerCase() : "weakness balance"}.`,
+    tone: "warning" as const,
+  }));
 }
 
 function buildNextActions(weaknessExplorer: WeaknessExplorerSnapshot, interventionPlan: InterventionPlan): GrowthProfileSnapshot["nextActions"] {
@@ -461,7 +510,6 @@ function buildNextActions(weaknessExplorer: WeaknessExplorerSnapshot, interventi
     detail: "Use the review surface if you want the latest misses before starting another block.",
     href: "/app/review",
   });
-
   actions.push({
     label: "Review imported hands",
     detail: "Inspect the real-play hands feeding concept and intervention pressure.",
@@ -471,14 +519,16 @@ function buildNextActions(weaknessExplorer: WeaknessExplorerSnapshot, interventi
   return actions.slice(0, 4);
 }
 
+function formatConcept(value: string): string {
+  return value.split(/[_:\-\s]+/).filter(Boolean).map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(" ");
+}
+
 function daysBetween(a: Date, b: Date): number {
   return Math.floor((a.getTime() - b.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function average(values: number[]): number {
-  if (values.length === 0) {
-    return 0;
-  }
-
+  if (values.length === 0) return 0;
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
+

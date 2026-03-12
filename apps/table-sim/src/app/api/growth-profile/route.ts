@@ -2,16 +2,17 @@
 
 import { NextResponse } from "next/server";
 import { buildAttemptInsights, buildRealPlayConceptSignals, type WeaknessPool } from "@poker-coach/core/browser";
-import { loadLocalStudyData } from "../../../lib/local-study-data";
+import { toDiagnosisHistoryEntries, toInterventionHistoryEntries } from "../../../lib/coaching-memory";
 import { buildGrowthProfileSnapshot } from "../../../lib/growth-profile";
 import {
   buildDiagnosticInsightsFromAttempts,
   hydratePersistedStudyAttempts,
 } from "../../../lib/intervention-support";
+import { loadLocalStudyData } from "../../../lib/local-study-data";
 
 export async function GET() {
   try {
-    const { drills, attempts, srs, importedHands } = loadLocalStudyData();
+    const { drills, attempts, srs, importedHands, diagnoses, interventions } = loadLocalStudyData();
     const drillMap = new Map(drills.map((drill) => [drill.drill_id, drill]));
     const activePool = (attempts[0]?.active_pool ?? "baseline") as WeaknessPool;
     const hydratedAttempts = hydratePersistedStudyAttempts(attempts, drills);
@@ -29,6 +30,8 @@ export async function GET() {
       })),
       attemptInsights: buildAttemptInsights(attempts, drillMap),
       diagnosticInsights: buildDiagnosticInsightsFromAttempts(hydratedAttempts),
+      diagnosisHistory: toDiagnosisHistoryEntries(diagnoses),
+      interventionHistory: toInterventionHistoryEntries(interventions),
       srs,
       activePool,
       realPlaySignals: buildRealPlayConceptSignals(importedHands),
@@ -44,4 +47,3 @@ export async function GET() {
     );
   }
 }
-
