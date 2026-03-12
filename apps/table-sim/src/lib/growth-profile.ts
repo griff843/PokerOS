@@ -6,12 +6,16 @@ import {
   type DiagnosticInsight,
   type InterventionHistoryEntry,
   type InterventionPlan,
+  type InterventionRecommendation,
+  type PatternAttemptSignal,
   type PlayerDiagnosisHistoryEntry,
   type RealPlayConceptSignal,
   type WeaknessPool,
 } from "@poker-coach/core/browser";
 import { buildWeaknessExplorerSnapshot, type WeaknessExplorerSnapshot } from "./weakness-explorer";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
+import { buildPrimaryInterventionRecommendation } from "./intervention-decision";
+import { buildPatternBriefs, type PatternBrief } from "./pattern-summaries";
 
 export interface GrowthProfileAttempt {
   drillId: string;
@@ -74,6 +78,8 @@ export interface GrowthProfileSnapshot {
     detail: string;
     tone: "warning" | "neutral";
   }>;
+  coachingPatterns: PatternBrief[];
+  nextInterventionDecision?: InterventionRecommendation;
   coachPerspective: {
     encouragingTruth: string;
     limitingFactor: string;
@@ -100,6 +106,7 @@ export function buildGrowthProfileSnapshot(args: {
   diagnosisHistory?: PlayerDiagnosisHistoryEntry[];
   interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
+  patternAttempts?: PatternAttemptSignal[];
   now?: Date;
 }): GrowthProfileSnapshot {
   const now = args.now ?? new Date();
@@ -113,6 +120,7 @@ export function buildGrowthProfileSnapshot(args: {
     diagnosisHistory: args.diagnosisHistory,
     interventionHistory,
     realPlaySignals: args.realPlaySignals,
+    patternAttempts: args.patternAttempts,
     now,
   });
   const weaknessExplorer = buildWeaknessExplorerSnapshot({
@@ -121,6 +129,7 @@ export function buildGrowthProfileSnapshot(args: {
     srs: args.srs,
     activePool: args.activePool,
     realPlaySignals: args.realPlaySignals,
+    patternAttempts: args.patternAttempts,
     now,
   });
   const windowSize = Math.max(3, Math.min(12, Math.floor(args.attempts.length / 2)));
@@ -155,6 +164,13 @@ export function buildGrowthProfileSnapshot(args: {
     now,
   });
   const adaptive = playerIntelligence.adaptiveProfile;
+  const nextInterventionDecision = buildPrimaryInterventionRecommendation({
+    playerIntelligence,
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory,
+    realPlaySignals: args.realPlaySignals,
+    conceptKey: interventionPlan.rootConceptKey,
+  });
   const primaryTendency = adaptive.tendencies[0];
   const dueReviewCount = args.srs.filter((row) => new Date(row.due_at) <= now).length;
   const practiceIdentity: GrowthProfileSnapshot["practiceIdentity"] = [
@@ -243,6 +259,8 @@ export function buildGrowthProfileSnapshot(args: {
     interventionSuccess: buildInterventionSuccess(interventionHistory, playerIntelligence.memory.interventionSuccessRate),
     conceptRecovery: buildConceptRecovery(playerIntelligence.concepts, interventionHistory),
     recurringLeaks: buildRecurringLeaks(playerIntelligence.memory.recurringLeakConcepts, weakSpots),
+    coachingPatterns: buildPatternBriefs(playerIntelligence.patterns.topPatterns, 3),
+    nextInterventionDecision,
     coachPerspective: {
       encouragingTruth: strengthLeaders[0]
         ? `${strengthLeaders[0].label} is becoming a real anchor in your game, which means improvement is not just theoretical.`

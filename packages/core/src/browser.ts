@@ -17,5 +17,5 @@ export * from "./diagnostics";
 export * from "./intervention-planner";
 export * from "./real-hands";
 export * from "./coaching-memory";
-
-
+export * from "./patterns";
+export * from "./intervention-recommendations";

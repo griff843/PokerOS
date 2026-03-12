@@ -12,9 +12,11 @@ import { openDatabase } from "../../../../packages/db/src";
 import { resolveDbPath } from "./local-study-data";
 import { ensureInterventionForPlan, markInterventionStarted, toDiagnosisHistoryEntries, toInterventionHistoryEntries } from "./coaching-memory";
 import { TableSimSessionPlanSchema, type TableSimSessionPlan } from "./session-plan";
+import { buildPrimaryInterventionRecommendation, shouldPersistInterventionRecommendation } from "./intervention-decision";
 import {
   buildDiagnosticInsightsFromAttempts,
   buildInterventionRecentAttempts,
+  buildPatternAttemptSignals,
   hydratePersistedStudyAttempts,
 } from "./intervention-support";
 
@@ -47,6 +49,7 @@ export function createTableSimSessionPlan({
   );
 
   const hydratedAttempts = hydratePersistedStudyAttempts(inputs.attempts, drills);
+  const patternAttempts = buildPatternAttemptSignals(hydratedAttempts);
   const attemptInsights = buildAttemptInsights(inputs.attempts, new Map(drills.map((drill) => [drill.drill_id, drill])));
   const playerIntelligence = buildPlayerIntelligenceSnapshot({
     drills,
@@ -56,7 +59,14 @@ export function createTableSimSessionPlan({
     diagnosticInsights: buildDiagnosticInsightsFromAttempts(hydratedAttempts),
     diagnosisHistory,
     interventionHistory,
+    patternAttempts,
     now: inputs.now,
+  });
+  const interventionRecommendation = buildPrimaryInterventionRecommendation({
+    playerIntelligence,
+    diagnosisHistory,
+    interventionHistory,
+    conceptKey: playerIntelligence.priorities[0]?.conceptKey,
   });
   const interventionPlan = buildInterventionPlan({
     playerIntelligence,
@@ -84,19 +94,54 @@ export function createTableSimSessionPlan({
   if (dbPath) {
     const db = openDatabase(dbPath);
     try {
-      const intervention = ensureInterventionForPlan({
-        db,
-        conceptKey: interventionPlan.rootConceptKey,
-        source: "command_center",
-        createdAt: interventionPlan.generatedAt,
-      });
-      markInterventionStarted(db, intervention.id);
+      if (interventionRecommendation && shouldPersistInterventionRecommendation(interventionRecommendation)) {
+        const intervention = ensureInterventionForPlan({
+          db,
+          conceptKey: interventionRecommendation.conceptKey,
+          source: "command_center",
+          createdAt: interventionPlan.generatedAt,
+        });
+        markInterventionStarted(db, intervention.id);
+      }
     } finally {
       db.close();
     }
   }
 
   return TableSimSessionPlanSchema.parse(plan);
+}
+
+
+export function createRecommendedInterventionDecision(args: {
+  drills: CanonicalDrill[];
+  attempts: GeneratorInputs["attempts"];
+  srs: GeneratorInputs["srs"];
+  activePool: SessionRequest["activePool"];
+  diagnosisHistory?: ReturnType<typeof toDiagnosisHistoryEntries>;
+  interventionHistory?: ReturnType<typeof toInterventionHistoryEntries>;
+  now?: Date;
+}) {
+  const hydratedAttempts = hydratePersistedStudyAttempts(args.attempts, args.drills);
+  const patternAttempts = buildPatternAttemptSignals(hydratedAttempts);
+  const attemptInsights = buildAttemptInsights(args.attempts, new Map(args.drills.map((drill) => [drill.drill_id, drill])));
+  const playerIntelligence = buildPlayerIntelligenceSnapshot({
+    drills: args.drills,
+    attemptInsights,
+    srs: args.srs,
+    activePool: args.activePool,
+    diagnosticInsights: buildDiagnosticInsightsFromAttempts(hydratedAttempts),
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory: args.interventionHistory,
+    patternAttempts,
+    now: args.now,
+  });
+
+  return buildPrimaryInterventionRecommendation({
+    playerIntelligence,
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory: args.interventionHistory,
+    conceptKey: playerIntelligence.priorities[0]?.conceptKey,
+  });
 }
 
 export function createRecommendedInterventionPlan(args: {
@@ -109,6 +154,7 @@ export function createRecommendedInterventionPlan(args: {
   now?: Date;
 }) {
   const hydratedAttempts = hydratePersistedStudyAttempts(args.attempts, args.drills);
+  const patternAttempts = buildPatternAttemptSignals(hydratedAttempts);
   const attemptInsights = buildAttemptInsights(args.attempts, new Map(args.drills.map((drill) => [drill.drill_id, drill])));
   const playerIntelligence = buildPlayerIntelligenceSnapshot({
     drills: args.drills,
@@ -118,6 +164,7 @@ export function createRecommendedInterventionPlan(args: {
     diagnosticInsights: buildDiagnosticInsightsFromAttempts(hydratedAttempts),
     diagnosisHistory: args.diagnosisHistory,
     interventionHistory: args.interventionHistory,
+    patternAttempts,
     now: args.now,
   });
 

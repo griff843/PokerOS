@@ -250,7 +250,11 @@ export function CommandCenter() {
           <CoachBriefingCard loading={snapshotLoading} snapshot={snapshot} />
         </div>
 
-        <InterventionsCard snapshot={snapshot} />
+        <div className="grid gap-5 xl:grid-cols-3">
+          <InterventionsCard snapshot={snapshot} />
+          <CoachingPatternsCard snapshot={snapshot} />
+          <NextInterventionDecisionCard snapshot={snapshot} />
+        </div>
 
         {snapshot?.recommendedTrainingBlock ? (
           <RecommendedTrainingBlockCard
@@ -657,6 +661,60 @@ function TrendItem({
 
 
 
+
+
+
+function NextInterventionDecisionCard({ snapshot }: { snapshot: CommandCenterSnapshot | null }) {
+  const decision = snapshot?.nextInterventionDecision;
+
+  return (
+    <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Next Intervention Call</p>
+        <p className="mt-2 text-sm leading-6 text-slate-400">What the system thinks should happen next in the intervention loop.</p>
+      </div>
+      <div className="mt-4 rounded-[20px] border border-white/8 bg-white/5 p-4">
+        {!decision ? (
+          <p className="text-sm leading-6 text-slate-400">No intervention decision outranks the current plan signal yet.</p>
+        ) : (
+          <>
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100">{decision.action.replace(/_/g, " ")}</span>
+              <span className="rounded-full border border-white/8 bg-slate-950/70 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-300">{decision.recommendedStrategy.replace(/_/g, " ")}</span>
+              <span className="rounded-full border border-white/8 bg-slate-950/70 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-300">{decision.suggestedIntensity}</span>
+            </div>
+            <p className="mt-3 text-base font-semibold text-white">{decision.summary}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">{decision.decisionReason}</p>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function CoachingPatternsCard({ snapshot }: { snapshot: CommandCenterSnapshot | null }) {
+  const patterns = snapshot?.coachingPatterns ?? [];
+
+  return (
+    <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Cross-Hand Patterns</p>
+        <p className="mt-2 text-sm leading-6 text-slate-400">Only the repeat patterns strong enough to change coaching priority.</p>
+      </div>
+      <div className="mt-4 space-y-3">
+        {patterns.length === 0 ? (
+          <p className="text-sm leading-6 text-slate-400">No cross-hand pattern is strong enough yet to outrank the current intervention and leak signals.</p>
+        ) : patterns.map((pattern) => (
+          <div key={pattern.type} className="rounded-[20px] border border-white/8 bg-white/5 p-3">
+            <p className="text-sm font-semibold text-white">{pattern.title}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">{pattern.detail}</p>
+            <p className="mt-2 text-xs uppercase tracking-[0.18em] text-emerald-200">{pattern.implication}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 function InterventionsCard({ snapshot }: { snapshot: CommandCenterSnapshot | null }) {
   const active = snapshot?.interventions.active ?? [];

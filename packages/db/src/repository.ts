@@ -216,6 +216,54 @@ export interface CoachingInterventionRow {
   status: CoachingInterventionStatus;
 }
 
+
+export type InterventionDecisionAction =
+  | "assign_intervention"
+  | "continue_intervention"
+  | "escalate_intervention"
+  | "change_intervention_strategy"
+  | "add_transfer_block"
+  | "run_retention_check"
+  | "reopen_intervention"
+  | "monitor_only"
+  | "close_intervention_loop";
+
+export type InterventionDecisionStrategy =
+  | "threshold_repair"
+  | "blocker_recognition"
+  | "street_transition_repair"
+  | "transfer_training"
+  | "stabilization_reinforcement"
+  | "review_habit_repair"
+  | "mixed_repair";
+
+export type InterventionDecisionConfidence = "low" | "medium" | "high";
+export type InterventionDecisionIntensity = "light" | "moderate" | "high" | "intensive";
+
+export interface InterventionDecisionSnapshotRow {
+  id: string;
+  user_id: string;
+  concept_key: string;
+  created_at: string;
+  recommended_action: InterventionDecisionAction;
+  recommended_strategy: InterventionDecisionStrategy;
+  confidence: InterventionDecisionConfidence;
+  priority: number;
+  suggested_intensity: InterventionDecisionIntensity;
+  recovery_stage: string;
+  current_intervention_status?: CoachingInterventionStatus | null;
+  reason_codes_json: string;
+  supporting_signals_json: string;
+  evidence_json: string;
+  pattern_types_json: string;
+  recurring_leak_bool: number;
+  transfer_gap_bool: number;
+  acted_upon_bool: number;
+  linked_intervention_id?: string | null;
+  source_context?: string | null;
+  supersedes_decision_id?: string | null;
+}
+
 export interface InterventionOutcomeRow {
   id: string;
   intervention_id: string;
@@ -348,6 +396,118 @@ export function getUserReflections(db: Database.Database, userId: string, limit 
     ORDER BY created_at DESC
     LIMIT ?
   `).all(userId, limit) as CoachingReflectionRow[];
+}
+
+
+export function createInterventionDecisionSnapshot(db: Database.Database, row: InterventionDecisionSnapshotRow): InterventionDecisionSnapshotRow {
+  db.prepare(`
+    INSERT INTO intervention_decision_snapshots (
+      id,
+      user_id,
+      concept_key,
+      created_at,
+      recommended_action,
+      recommended_strategy,
+      confidence,
+      priority,
+      suggested_intensity,
+      recovery_stage,
+      current_intervention_status,
+      reason_codes_json,
+      supporting_signals_json,
+      evidence_json,
+      pattern_types_json,
+      recurring_leak_bool,
+      transfer_gap_bool,
+      acted_upon_bool,
+      linked_intervention_id,
+      source_context,
+      supersedes_decision_id
+    )
+    VALUES (
+      @id,
+      @user_id,
+      @concept_key,
+      @created_at,
+      @recommended_action,
+      @recommended_strategy,
+      @confidence,
+      @priority,
+      @suggested_intensity,
+      @recovery_stage,
+      @current_intervention_status,
+      @reason_codes_json,
+      @supporting_signals_json,
+      @evidence_json,
+      @pattern_types_json,
+      @recurring_leak_bool,
+      @transfer_gap_bool,
+      @acted_upon_bool,
+      @linked_intervention_id,
+      @source_context,
+      @supersedes_decision_id
+    )
+  `).run({
+    ...row,
+    current_intervention_status: row.current_intervention_status ?? null,
+    linked_intervention_id: row.linked_intervention_id ?? null,
+    source_context: row.source_context ?? null,
+    supersedes_decision_id: row.supersedes_decision_id ?? null,
+  });
+  return row;
+}
+
+export function getRecentInterventionDecisionSnapshots(
+  db: Database.Database,
+  userId: string,
+  conceptKey: string,
+  limit = 20
+): InterventionDecisionSnapshotRow[] {
+  return db.prepare(`
+    SELECT * FROM intervention_decision_snapshots
+    WHERE user_id = ? AND concept_key = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT ?
+  `).all(userId, conceptKey, limit) as InterventionDecisionSnapshotRow[];
+}
+
+export function getUserInterventionDecisionSnapshots(
+  db: Database.Database,
+  userId: string,
+  limit = 100
+): InterventionDecisionSnapshotRow[] {
+  return db.prepare(`
+    SELECT * FROM intervention_decision_snapshots
+    WHERE user_id = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT ?
+  `).all(userId, limit) as InterventionDecisionSnapshotRow[];
+}
+
+export function getLatestInterventionDecisionSnapshot(
+  db: Database.Database,
+  userId: string,
+  conceptKey: string
+): InterventionDecisionSnapshotRow | undefined {
+  return db.prepare(`
+    SELECT * FROM intervention_decision_snapshots
+    WHERE user_id = ? AND concept_key = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT 1
+  `).get(userId, conceptKey) as InterventionDecisionSnapshotRow | undefined;
+}
+
+export function markInterventionDecisionActedUpon(
+  db: Database.Database,
+  decisionId: string,
+  linkedInterventionId?: string | null
+): void {
+  db.prepare(`
+    UPDATE intervention_decision_snapshots
+    SET acted_upon_bool = 1,
+        linked_intervention_id = COALESCE(?, linked_intervention_id)
+    WHERE id = ?
+  `).run(linkedInterventionId ?? null, decisionId);
 }
 
 export function getInterventionOutcome(db: Database.Database, interventionId: string): InterventionOutcomeRow | undefined {

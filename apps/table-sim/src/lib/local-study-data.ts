@@ -8,6 +8,7 @@ import {
   getAllSrs,
   getRecentHandImports,
   getUserDiagnosisHistory,
+  getUserInterventionDecisionSnapshots,
   getUserInterventions,
 } from "../../../../packages/db/src/repository";
 import { ImportedHandSchema, type ImportedHand } from "@poker-coach/core/browser";
@@ -49,6 +50,7 @@ export function loadLocalStudyData() {
       handImports: [],
       diagnoses: [],
       interventions: [],
+      decisionSnapshots: [],
     };
   }
 
@@ -73,6 +75,7 @@ export function loadLocalStudyData() {
       })),
       diagnoses: getUserDiagnosisHistory(db, userId),
       interventions: getUserInterventions(db, userId),
+      decisionSnapshots: getUserInterventionDecisionSnapshots(db, userId),
     };
   } finally {
     db.close();

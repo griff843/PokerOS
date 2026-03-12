@@ -9,6 +9,7 @@ import {
 import type { DiagnosticErrorType } from "./schemas";
 import type { PlayerConceptSnapshot, PlayerIntelligenceSnapshot } from "./player-intelligence";
 import { createNeutralAdaptiveCoachingProfile } from "./adaptive-coaching";
+import { collectPatternBiases, type PatternInterventionBias } from "./patterns";
 import type { SessionGeneratorSrsRow, SessionPlan, SessionPlanMetadata, SelectedDrill } from "./session-generator";
 import type { CanonicalDrill } from "./schemas";
 import type { WeaknessPool, WeaknessTarget } from "./weakness-analytics";
@@ -85,6 +86,7 @@ interface RankedConceptCandidate {
   diagnosticWeight: number;
   recentMissCount: number;
   planningReasons: SessionPlanningReason[];
+  patternBiases: PatternInterventionBias[];
 }
 
 const ERROR_WEIGHTS: Record<DiagnosticErrorType, number> = {
@@ -105,7 +107,7 @@ export function buildInterventionPlan(args: {
   const now = args.now ?? new Date();
   const byConcept = aggregateDiagnostics(args.recentAttempts);
   const conceptsByKey = new Map(args.playerIntelligence.concepts.map((concept) => [concept.conceptKey, concept]));
-  const ranked = rankConceptCandidates(args.playerIntelligence.concepts, byConcept);
+  const ranked = rankConceptCandidates(args.playerIntelligence.concepts, byConcept, args.playerIntelligence.patterns.patterns);
 
   const lead = ranked[0];
   const fallback = args.playerIntelligence.priorities[0] ?? args.playerIntelligence.concepts[0];
@@ -115,6 +117,7 @@ export function buildInterventionPlan(args: {
   const rootPlanningReasons = dedupeReasons(lead?.planningReasons ?? rootSnapshot?.planningReasons ?? ["weakness_balance"]);
   const rootRecoveryStage = rootSnapshot?.recoveryStage ?? "unaddressed";
   const upstreamSnapshot = pickUpstreamConcept(rootSnapshot, args.playerIntelligence.graph, conceptsByKey);
+  const rootPatternBiases = lead?.patternBiases ?? collectPatternBiases(args.playerIntelligence.patterns.patterns, [rootConceptKey, upstreamSnapshot?.conceptKey].filter(Boolean) as string[]);
   const confidenceMiscalibrationCount = args.recentAttempts.filter((attempt) => attempt.confidenceMiscalibration).length;
   const topError = getTopError(byConcept.get(rootConceptKey));
   const diagnosticLead = lead?.diagnosticWeight ?? 0;
@@ -134,9 +137,15 @@ export function buildInterventionPlan(args: {
   trainingBlocks.push({
     conceptKey: rootConceptKey,
     label: rootConceptLabel,
-    reps: rootPlanningReasons.includes("active_intervention") || rootPlanningReasons.includes("regression_recovery") ? 12 : upstreamSnapshot ? 8 : 10,
+    reps: rootPlanningReasons.includes("active_intervention") || rootPlanningReasons.includes("regression_recovery")
+      ? 12
+      : rootPatternBiases.includes("repair_intensity")
+        ? 12
+        : upstreamSnapshot
+          ? 8
+          : 10,
     role: rootRecoveryStage === "recovered" ? "retest" : upstreamSnapshot ? "retest" : "repair",
-    reason: buildRootBlockReason(rootSnapshot, rootPlanningReasons, upstreamSnapshot),
+    reason: buildRootBlockReason(rootSnapshot, rootPlanningReasons, rootPatternBiases, upstreamSnapshot),
     planningReasons: rootPlanningReasons,
   });
 
@@ -158,6 +167,7 @@ export function buildInterventionPlan(args: {
     rootConceptLabel,
     rootSnapshot,
     confidenceMiscalibrationCount,
+    patternBiases: rootPatternBiases,
   });
 
   const rootLeakDiagnosis = buildRootLeakDiagnosis({
@@ -167,6 +177,7 @@ export function buildInterventionPlan(args: {
     topError,
     adaptiveProfile,
     diagnosticLead,
+    patternBiases: rootPatternBiases,
   });
   const rationale = buildPlanRationale({
     rootSnapshot,
@@ -175,12 +186,14 @@ export function buildInterventionPlan(args: {
     upstreamSnapshot,
     rootLeakDiagnosis,
     adaptiveProfile,
+    patternBiases: rootPatternBiases,
   });
   const recommendedSessionTitle = buildRecommendedSessionTitle({
     rootConceptLabel,
     upstreamSnapshot,
     rootPlanningReasons,
     adaptiveProfile,
+    patternBiases: rootPatternBiases,
   });
   const nextSessionFocus = buildNextSessionFocus({
     rootConceptLabel,
@@ -188,6 +201,7 @@ export function buildInterventionPlan(args: {
     rootRecoveryStage,
     upstreamSnapshot,
     adaptiveProfile,
+    patternBiases: rootPatternBiases,
   });
 
   return {
@@ -323,7 +337,8 @@ export function buildInterventionSessionPlan(args: {
 
 function rankConceptCandidates(
   concepts: PlayerConceptSnapshot[],
-  byConcept: Map<string, { label: string; count: number; errorCounts: Map<DiagnosticErrorType, number> }>
+  byConcept: Map<string, { label: string; count: number; errorCounts: Map<DiagnosticErrorType, number> }>,
+  playerPatterns: PlayerIntelligenceSnapshot["patterns"]["patterns"]
 ): RankedConceptCandidate[] {
   return concepts
     .filter((concept) => concept.status !== "strength" || getPlanningReasons(concept).includes("retention_check"))
@@ -334,7 +349,8 @@ function rankConceptCandidates(
         0
       );
       const recentMissCount = group?.count ?? 0;
-      const score = scoreConceptCandidate(concept, diagnosticWeight, recentMissCount);
+      const patternBiases = collectPatternBiases(playerPatterns, [concept.conceptKey, ...concept.supportingConceptKeys]);
+      const score = scoreConceptCandidate(concept, diagnosticWeight, recentMissCount, patternBiases);
       return {
         conceptKey: concept.conceptKey,
         snapshot: concept,
@@ -342,12 +358,18 @@ function rankConceptCandidates(
         diagnosticWeight,
         recentMissCount,
         planningReasons: getPlanningReasons(concept),
+        patternBiases,
       };
     })
     .sort((a, b) => b.score - a.score || a.snapshot.label.localeCompare(b.snapshot.label));
 }
 
-function scoreConceptCandidate(snapshot: PlayerConceptSnapshot, diagnosticWeight: number, recentMissCount: number): number {
+function scoreConceptCandidate(
+  snapshot: PlayerConceptSnapshot,
+  diagnosticWeight: number,
+  recentMissCount: number,
+  patternBiases: PatternInterventionBias[]
+): number {
   const planningReasons = getPlanningReasons(snapshot);
   let score = snapshot.trainingUrgency * 20 + diagnosticWeight * 5 + recentMissCount * 3 + snapshot.reviewPressure * 2;
 
@@ -365,6 +387,10 @@ function scoreConceptCandidate(snapshot: PlayerConceptSnapshot, diagnosticWeight
 
   if (snapshot.recoveryStage === "stabilizing") {
     score += 10;
+  }
+
+  for (const bias of patternBiases) {
+    score += patternBiasWeight(bias);
   }
 
   return score;
@@ -493,6 +519,7 @@ function applyAdaptiveInterventionWeighting(args: {
   rootConceptLabel: string;
   rootSnapshot?: PlayerConceptSnapshot;
   confidenceMiscalibrationCount: number;
+  patternBiases: PatternInterventionBias[];
 }): InterventionTrainingBlock[] {
   const blocks = args.blocks.map((block) => ({ ...block, planningReasons: [...block.planningReasons] }));
   const adjustments = args.adaptiveProfile.interventionAdjustments;
@@ -505,22 +532,34 @@ function applyAdaptiveInterventionWeighting(args: {
     repairBlock.reason = `${repairBlock.reason} Lead with line reconstruction so the street story is stable before the final action gets retested.`;
   }
 
-  if (adjustments.prioritizeThresholdRetests && rootBlock) {
+  if ((adjustments.prioritizeThresholdRetests || args.patternBiases.includes("threshold_retest")) && rootBlock) {
     rootBlock.reps += 4;
     rootBlock.reason = `${rootBlock.reason} Keep the retest anchored on practical thresholds rather than category labels.`;
   }
 
-  if (adjustments.prioritizeBlockerNotes && rootBlock) {
+  if ((adjustments.prioritizeBlockerNotes || args.patternBiases.includes("blocker_explicitness")) && rootBlock) {
     rootBlock.reason = `${rootBlock.reason} Surface blocker effects explicitly during the review.`;
   }
 
-  if (adjustments.prioritizeRealPlayReview && rootBlock) {
+  if ((adjustments.prioritizeRealPlayReview || args.patternBiases.includes("real_play_transfer")) && rootBlock) {
     rootBlock.reason = `${rootBlock.reason} Tie the reps back to imported hands so transfer improves, not just lab accuracy.`;
   }
 
   if (adjustments.preferShorterReviewBlocks) {
     for (const block of blocks) {
       block.reps = Math.max(4, block.role === "calibration" ? block.reps : Math.round(block.reps * 0.75));
+    }
+  }
+
+  if (args.patternBiases.includes("repair_intensity") && rootBlock) {
+    rootBlock.reps += 2;
+  }
+
+  if (args.patternBiases.includes("review_follow_through")) {
+    for (const block of blocks) {
+      if (block.role !== "calibration") {
+        block.reps += 1;
+      }
     }
   }
 
@@ -538,6 +577,25 @@ function applyAdaptiveInterventionWeighting(args: {
   return blocks;
 }
 
+function patternBiasWeight(bias: PatternInterventionBias): number {
+  switch (bias) {
+    case "repair_intensity":
+      return 9;
+    case "upstream_repair":
+      return 8;
+    case "real_play_transfer":
+      return 7;
+    case "threshold_retest":
+      return 6;
+    case "stabilization_check":
+      return 5;
+    case "review_follow_through":
+      return 4;
+    case "blocker_explicitness":
+      return 4;
+  }
+}
+
 function buildRootLeakDiagnosis(args: {
   rootSnapshot?: PlayerConceptSnapshot;
   rootConceptLabel: string;
@@ -545,6 +603,7 @@ function buildRootLeakDiagnosis(args: {
   topError?: [DiagnosticErrorType, number];
   adaptiveProfile: PlayerIntelligenceSnapshot["adaptiveProfile"];
   diagnosticLead: number;
+  patternBiases: PatternInterventionBias[];
 }): string {
   const rootLeakDiagnosisBase = args.rootPlanningReasons.includes("active_intervention")
     ? `${args.rootConceptLabel} already has an active intervention, so the next session should continue the same repair thread.`
@@ -558,6 +617,10 @@ function buildRootLeakDiagnosis(args: {
             ? `${args.rootConceptLabel} is still showing up, but it looks downstream of ${toTitleCase(args.rootSnapshot.supportingConceptKeys[0])}.`
             : `${args.rootConceptLabel} is the clearest live concept to train next.`;
 
+  if (args.patternBiases.includes("real_play_transfer")) {
+    return `${rootLeakDiagnosisBase} Drill improvement is not yet transferring cleanly into real play, so the next block should bridge lab reps into imported-hand review.`;
+  }
+
   return args.adaptiveProfile.interventionAdjustments.prioritizeRealPlayReview
     ? `${rootLeakDiagnosisBase} The same family is now showing up in imported hands too, so this is a transfer leak as well as a drill leak.`
     : rootLeakDiagnosisBase;
@@ -570,12 +633,14 @@ function buildPlanRationale(args: {
   upstreamSnapshot?: PlayerConceptSnapshot;
   rootLeakDiagnosis: string;
   adaptiveProfile: PlayerIntelligenceSnapshot["adaptiveProfile"];
+  patternBiases: PatternInterventionBias[];
 }): string {
   const planningTrace = args.rootPlanningReasons.map(formatPlanningReason).join(", ").toLowerCase();
   const rationaleBase = args.upstreamSnapshot
     ? `${args.rootLeakDiagnosis} The cleaner intervention is to repair ${args.upstreamSnapshot.label.toLowerCase()} first, then retest ${args.rootConceptLabel.toLowerCase()}.`
     : `${args.rootLeakDiagnosis} The next block should stay narrow enough to repair the core concept instead of spreading volume across unrelated spots.`;
-  return `${rationaleBase} Priority came from ${planningTrace}. ${args.adaptiveProfile.coachingEmphasis.interventionBullets[0] ?? ""}`.trim();
+  const patternTrace = describePatternBiases(args.patternBiases);
+  return `${rationaleBase} Priority came from ${planningTrace}.${patternTrace ? ` Pattern weighting: ${patternTrace}.` : ""} ${args.adaptiveProfile.coachingEmphasis.interventionBullets[0] ?? ""}`.trim();
 }
 
 function buildRecommendedSessionTitle(args: {
@@ -583,6 +648,7 @@ function buildRecommendedSessionTitle(args: {
   upstreamSnapshot?: PlayerConceptSnapshot;
   rootPlanningReasons: SessionPlanningReason[];
   adaptiveProfile: PlayerIntelligenceSnapshot["adaptiveProfile"];
+  patternBiases: PatternInterventionBias[];
 }): string {
   if (args.rootPlanningReasons.includes("regression_recovery")) {
     return `${args.rootConceptLabel} Recovery Block`;
@@ -590,6 +656,10 @@ function buildRecommendedSessionTitle(args: {
   if (args.rootPlanningReasons.includes("active_intervention")) {
     return `${args.rootConceptLabel} Continuation Block`;
   }
+  if (args.patternBiases.includes("real_play_transfer")) {
+    return `${args.upstreamSnapshot ? `${args.upstreamSnapshot.label} Lab -> ` : ""}${args.rootConceptLabel} Transfer Block`;
+  }
+
   return args.adaptiveProfile.interventionAdjustments.prioritizeRealPlayReview
     ? `${args.upstreamSnapshot ? `${args.upstreamSnapshot.label} Lab -> ` : ""}${args.rootConceptLabel} Transfer Block`
     : args.upstreamSnapshot
@@ -603,6 +673,7 @@ function buildNextSessionFocus(args: {
   rootRecoveryStage: ConceptRecoveryStage;
   upstreamSnapshot?: PlayerConceptSnapshot;
   adaptiveProfile: PlayerIntelligenceSnapshot["adaptiveProfile"];
+  patternBiases: PatternInterventionBias[];
 }): string {
   const nextSessionFocusBase = args.rootPlanningReasons.includes("retention_check")
     ? `Retest ${args.rootConceptLabel} just enough to confirm the recovery is holding.`
@@ -611,12 +682,18 @@ function buildNextSessionFocus(args: {
       : args.upstreamSnapshot
         ? `${args.upstreamSnapshot.label} first, then ${args.rootConceptLabel} retest.`
         : `Stay with ${args.rootConceptLabel} until the signal stabilizes.`;
-  return `${nextSessionFocusBase} ${args.adaptiveProfile.surfaceSignals.commandCenter}`.trim();
+  const patternTail = args.patternBiases.includes("real_play_transfer")
+    ? "Bridge the concept back into imported hands before you treat the gain as real-play stable."
+    : args.patternBiases.includes("stabilization_check")
+      ? "Keep a stabilization check in the loop before you move on."
+      : "";
+  return `${nextSessionFocusBase} ${patternTail} ${args.adaptiveProfile.surfaceSignals.commandCenter}`.trim();
 }
 
 function buildRootBlockReason(
   rootSnapshot: PlayerConceptSnapshot | undefined,
   rootPlanningReasons: SessionPlanningReason[],
+  patternBiases: PatternInterventionBias[],
   upstreamSnapshot?: PlayerConceptSnapshot
 ): string {
   if (rootPlanningReasons.includes("active_intervention")) {
@@ -631,12 +708,40 @@ function buildRootBlockReason(
   if (rootPlanningReasons.includes("recurring_leak")) {
     return `Persisted diagnoses keep mapping back here, so the next block should close a recurring leak instead of chasing novelty.`;
   }
+  if (patternBiases.includes("real_play_transfer")) {
+    return `This concept is improving in drills but not yet transferring into real play, so the next reps should bridge authored work into imported-hand review.`;
+  }
+  if (patternBiases.includes("upstream_repair") && upstreamSnapshot) {
+    return `The visible leak still looks downstream of ${upstreamSnapshot.label.toLowerCase()}, so the next block should repair the upstream concept first and then retest transfer.`;
+  }
   if (upstreamSnapshot) {
     return `Retest the visible leak after ${upstreamSnapshot.label.toLowerCase()} gets the first intervention block.`;
   }
   return rootSnapshot?.recoveryStage === "recovered"
     ? `Run a small retention check to keep the recovered concept from quietly slipping.`
     : `Stay with the live leak until the action and reasoning both stabilize.`;
+}
+
+function describePatternBiases(patternBiases: PatternInterventionBias[]): string {
+  const labels = patternBiases.map((bias) => {
+    switch (bias) {
+      case "threshold_retest":
+        return "threshold retests";
+      case "blocker_explicitness":
+        return "explicit blocker notes";
+      case "upstream_repair":
+        return "upstream repair";
+      case "real_play_transfer":
+        return "real-play transfer review";
+      case "repair_intensity":
+        return "higher repair intensity";
+      case "stabilization_check":
+        return "stabilization checks";
+      case "review_follow_through":
+        return "follow-through review";
+    }
+  });
+  return [...new Set(labels)].join(", ");
 }
 
 function getPlanningReasons(snapshot: Pick<PlayerConceptSnapshot, "planningReasons">): SessionPlanningReason[] {

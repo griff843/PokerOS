@@ -7,16 +7,21 @@ import {
   completeIntervention,
   createDiagnosis,
   createIntervention,
+  createInterventionDecisionSnapshot,
   createReflection,
   getAllAttempts,
   getAllImportedHands,
   getInterventionOutcome,
+  getLatestInterventionDecisionSnapshot,
   getRecentHandImports,
+  getRecentInterventionDecisionSnapshots,
   getUserDiagnosisHistory,
+  getUserInterventionDecisionSnapshots,
   getUserInterventions,
   insertAttempt,
   insertHandImport,
   insertImportedHand,
+  markInterventionDecisionActedUpon,
   recordInterventionOutcome,
   startIntervention,
   type ImportedHandRow,
@@ -249,5 +254,83 @@ describe("attempt persistence", () => {
     expect(imports[0]?.import_id).toBe("import-1");
     expect(hands[0]?.imported_hand_id).toBe("imported-123");
     expect(hands[0]?.concept_matches_json).toContain("river_defense");
+  });
+});
+
+
+describe("intervention decision snapshots", () => {
+  it("stores, links, and reads decision history in newest-first order", () => {
+    const db = openDatabase(createTempDbPath());
+
+    const first = createInterventionDecisionSnapshot(db, {
+      id: "decision-1",
+      user_id: "local_user",
+      concept_key: "river_bluff_catching",
+      created_at: "2026-03-10T12:00:00.000Z",
+      recommended_action: "assign_intervention",
+      recommended_strategy: "threshold_repair",
+      confidence: "high",
+      priority: 92,
+      suggested_intensity: "high",
+      recovery_stage: "active_repair",
+      current_intervention_status: null,
+      reason_codes_json: JSON.stringify(["new_diagnosis_without_intervention", "threshold_pattern"]),
+      supporting_signals_json: JSON.stringify([{ kind: "diagnosis", code: "diagnosis_count", detail: "2 stored diagnosis entries are attached to this concept." }]),
+      evidence_json: JSON.stringify(["Recent misses remain under threshold."]),
+      pattern_types_json: JSON.stringify(["persistent_threshold_leak"]),
+      recurring_leak_bool: 1,
+      transfer_gap_bool: 0,
+      acted_upon_bool: 0,
+      linked_intervention_id: null,
+      source_context: "intervention_plan_api",
+      supersedes_decision_id: null,
+    });
+
+    const intervention = createIntervention(db, {
+      id: "intervention-1",
+      user_id: "local_user",
+      concept_key: "river_bluff_catching",
+      source: "command_center",
+      created_at: "2026-03-10T12:01:00.000Z",
+      status: "assigned",
+    });
+
+    markInterventionDecisionActedUpon(db, first.id, intervention.id);
+
+    createInterventionDecisionSnapshot(db, {
+      id: "decision-2",
+      user_id: "local_user",
+      concept_key: "river_bluff_catching",
+      created_at: "2026-03-10T12:30:00.000Z",
+      recommended_action: "continue_intervention",
+      recommended_strategy: "threshold_repair",
+      confidence: "medium",
+      priority: 74,
+      suggested_intensity: "moderate",
+      recovery_stage: "stabilizing",
+      current_intervention_status: "in_progress",
+      reason_codes_json: JSON.stringify(["active_intervention_improving", "threshold_pattern"]),
+      supporting_signals_json: JSON.stringify([{ kind: "intervention", code: "in_progress", detail: "Latest intervention status is in progress." }]),
+      evidence_json: JSON.stringify(["Recent scores are improving."]),
+      pattern_types_json: JSON.stringify(["persistent_threshold_leak"]),
+      recurring_leak_bool: 1,
+      transfer_gap_bool: 0,
+      acted_upon_bool: 0,
+      linked_intervention_id: null,
+      source_context: "session_plan",
+      supersedes_decision_id: first.id,
+    });
+
+    const latest = getLatestInterventionDecisionSnapshot(db, "local_user", "river_bluff_catching");
+    const conceptHistory = getRecentInterventionDecisionSnapshots(db, "local_user", "river_bluff_catching", 10);
+    const userHistory = getUserInterventionDecisionSnapshots(db, "local_user", 10);
+    db.close();
+
+    expect(latest?.id).toBe("decision-2");
+    expect(conceptHistory.map((entry) => entry.id)).toEqual(["decision-2", "decision-1"]);
+    expect(userHistory.map((entry) => entry.id)).toEqual(["decision-2", "decision-1"]);
+    expect(conceptHistory[1]?.acted_upon_bool).toBe(1);
+    expect(conceptHistory[1]?.linked_intervention_id).toBe(intervention.id);
+    expect(conceptHistory[0]?.supersedes_decision_id).toBe("decision-1");
   });
 });

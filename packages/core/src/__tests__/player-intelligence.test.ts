@@ -152,4 +152,66 @@ describe("player intelligence", () => {
 
     expect(snapshot.priorities[0]?.confidenceMismatch?.direction).toBe("overconfident");
   });
+
+  it("derives cross-hand coaching patterns from persisted memory and transfer signals", () => {
+    const drills = [makeDrill({ drillId: "d1", nodeId: "hu_river_01", title: "River Defense", conceptTag: "concept:blocker_effect", requiredTag: "paired_top_river" })];
+    const snapshot = buildPlayerIntelligenceSnapshot({
+      drills,
+      attemptInsights: [
+        { drillId: "d1", nodeId: "hu_river_01", score: 0.71, correct: true, missedTags: [], classificationTags: ["concept:blocker_effect"], activePool: "B" },
+        { drillId: "d1", nodeId: "hu_river_01", score: 0.74, correct: true, missedTags: [], classificationTags: ["concept:blocker_effect"], activePool: "B" },
+      ],
+      activePool: "B",
+      diagnosisHistory: [
+        { conceptKey: "river_bluff_catching", diagnosticType: "threshold_error", confidence: 0.9, createdAt: "2026-03-10T10:00:00.000Z" },
+        { conceptKey: "river_bluff_catching", diagnosticType: "threshold_error", confidence: 0.85, createdAt: "2026-03-11T10:00:00.000Z" },
+      ],
+      interventionHistory: [
+        { id: "i1", conceptKey: "bluff_catching", source: "command_center", status: "completed", improved: true, preScore: 0.35, postScore: 0.72, createdAt: "2026-03-09T10:00:00.000Z", outcomeCreatedAt: "2026-03-10T10:00:00.000Z" },
+      ],
+      realPlaySignals: [
+        {
+          conceptKey: "bluff_catching",
+          label: "Bluff Catching",
+          occurrences: 2,
+          reviewSpotCount: 2,
+          weight: 0.18,
+          recommendedPool: "B",
+          evidence: ["Imported hands are still surfacing bluff-catching pressure."],
+        },
+      ],
+      patternAttempts: [
+        {
+          drillId: "d1",
+          nodeId: "hu_river_01",
+          ts: "2026-03-10T10:00:00.000Z",
+          sessionId: "s1",
+          conceptKeys: ["river_bluff_catching"],
+          missedTags: ["paired_top_river"],
+          score: 0.32,
+          correct: false,
+          diagnosticType: "threshold_error",
+          diagnosticConceptKey: "river_bluff_catching",
+          activePool: "B",
+        },
+        {
+          drillId: "d2",
+          nodeId: "hu_river_02",
+          ts: "2026-03-11T10:00:00.000Z",
+          sessionId: "s2",
+          conceptKeys: ["river_bluff_catching"],
+          missedTags: ["paired_top_river"],
+          score: 0.36,
+          correct: false,
+          diagnosticType: "threshold_error",
+          diagnosticConceptKey: "river_bluff_catching",
+          activePool: "B",
+        },
+      ],
+    });
+
+    expect(snapshot.patterns.topPatterns.some((pattern) => pattern.type === "persistent_threshold_leak")).toBe(true);
+    expect(snapshot.patterns.topPatterns.some((pattern) => pattern.type === "real_play_transfer_gap")).toBe(true);
+  });
+
 });

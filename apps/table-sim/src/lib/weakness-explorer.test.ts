@@ -86,6 +86,8 @@ describe("weakness explorer snapshot", () => {
     expect(snapshot.movementSignals.some((signal) => signal.label.includes("Improving"))).toBe(true);
     expect(snapshot.trainingActions[0]?.recommendedPool).toBe("B");
     expect(snapshot.trainingActions[0]?.detail.length).toBeGreaterThan(0);
+    expect(snapshot.priorityWeaknesses[0]).toHaveProperty("coachingPattern");
+    expect(snapshot.priorityWeaknesses[0]).toHaveProperty("interventionDecision");
     expect(snapshot.deepReviewGroups[0]?.drills[0]?.title).toBe("River Bluff Catch");
   });
 });

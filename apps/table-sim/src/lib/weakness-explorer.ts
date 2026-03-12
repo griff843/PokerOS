@@ -1,4 +1,4 @@
-﻿import {
+import {
   buildFallbackCoachResponse,
   buildNextFocusSummary,
   buildWeaknessSummary,
@@ -6,6 +6,8 @@
   selectWeaknessTargetsForPool,
   type AttemptInsight,
   type CanonicalDrill,
+  type InterventionRecommendation,
+  type PatternAttemptSignal,
   type RealPlayConceptSignal,
   type WeaknessPool,
   type WeaknessTarget,
@@ -13,6 +15,8 @@
 import { analyzeWeaknessAnalyticsFromInsights } from "../../../../packages/core/src/weakness-analytics";
 import { formatSessionLabel } from "./study-session-ui";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
+import { buildTableSimInterventionRecommendations } from "./intervention-decision";
+import { buildPatternBriefs } from "./pattern-summaries";
 
 const DEFAULT_WEAKNESS_THRESHOLD = 0.5;
 const DEFAULT_MIN_ATTEMPTS = 2;
@@ -27,6 +31,7 @@ export interface WeaknessExplorerSnapshot {
   };
   priorityWeaknesses: Array<{
     key: string;
+    conceptKey: string;
     label: string;
     typeLabel: string;
     urgency: string;
@@ -41,6 +46,8 @@ export interface WeaknessExplorerSnapshot {
       direction: "improving" | "worsening" | "stable";
     };
     dimensions: string[];
+    coachingPattern?: string;
+    interventionDecision?: Pick<InterventionRecommendation, "action" | "recommendedStrategy" | "summary">;
     relatedDrills: Array<{
       drillId: string;
       title: string;
@@ -76,6 +83,7 @@ export function buildWeaknessExplorerSnapshot(args: {
   srs: Array<{ drill_id: string; due_at: string }>;
   activePool: WeaknessPool;
   realPlaySignals?: RealPlayConceptSignal[];
+  patternAttempts?: PatternAttemptSignal[];
   now?: Date;
 }): WeaknessExplorerSnapshot {
   const now = args.now ?? new Date();
@@ -91,8 +99,10 @@ export function buildWeaknessExplorerSnapshot(args: {
     srs: args.srs,
     activePool: args.activePool,
     realPlaySignals: args.realPlaySignals,
+    patternAttempts: args.patternAttempts,
     now,
   });
+  const interventionRecommendations = buildTableSimInterventionRecommendations({ playerIntelligence, realPlaySignals: args.realPlaySignals });
   const weaknessSummary = buildWeaknessSummary({ report, activePool: args.activePool });
   const weaknessCoach = buildFallbackCoachResponse(weaknessSummary);
   const topTargets = selectWeaknessTargetsForPool(report, args.activePool, 5);
@@ -101,7 +111,7 @@ export function buildWeaknessExplorerSnapshot(args: {
     weaknessReport: report,
     playerIntelligence,
   });
-  const weaknessCards = playerIntelligence.priorities.slice(0, 5).map((concept) => buildWeaknessCard(concept, topTargets, args.drills, args.srs, args.activePool, now, playerIntelligence.adaptiveProfile.surfaceSignals.weaknessExplorer));
+  const weaknessCards = playerIntelligence.priorities.slice(0, 5).map((concept) => buildWeaknessCard(concept, topTargets, args.drills, args.srs, args.activePool, now, playerIntelligence.adaptiveProfile.surfaceSignals.weaknessExplorer, playerIntelligence.patterns.topPatterns, interventionRecommendations.find((entry) => entry.conceptKey === concept.conceptKey)));
 
   return {
     generatedAt: report.generatedAt,
@@ -132,7 +142,9 @@ function buildWeaknessCard(
   srs: Array<{ drill_id: string; due_at: string }>,
   activePool: WeaknessPool,
   now: Date,
-  adaptiveSignal: string
+  adaptiveSignal: string,
+  topPatterns: ReturnType<typeof buildTableSimPlayerIntelligence>["patterns"]["topPatterns"],
+  interventionDecision?: InterventionRecommendation
 ): WeaknessExplorerSnapshot["priorityWeaknesses"][number] {
   const fallbackTarget = fallbackTargets.find((target) => formatSessionLabel(target.key) === concept.label);
   const relatedDrills = concept.relatedDrills.length > 0
@@ -146,15 +158,17 @@ function buildWeaknessCard(
           nodeId: drill.node_id,
         }));
   const dueReviewCount = srs.filter((row) => new Date(row.due_at) <= now && relatedDrills.some((drill) => drill.drillId === row.drill_id)).length;
+  const pattern = buildPatternBriefs(topPatterns.filter((entry) => entry.implicatedConcepts.includes(concept.conceptKey)), 1)[0];
 
   return {
     key: `${concept.conceptKey}:${concept.scope}:${concept.recommendedPool}`,
+    conceptKey: concept.conceptKey,
     label: concept.label,
     typeLabel: concept.weaknessRole === "upstream" ? "Structural leak" : concept.weaknessRole === "downstream" ? "Downstream symptom" : "Weak concept",
     urgency: buildUrgencyLabel(concept, dueReviewCount),
     recurrence: concept.recurrenceCount > 0
       ? `${concept.recurrenceCount} repeat misses in scope`
-      : `${concept.sampleSize} reps tracked${concept.averageScore !== undefined ? ` · ${Math.round(concept.averageScore * 100)}% average` : ""}`,
+      : `${concept.sampleSize} reps tracked${concept.averageScore !== undefined ? ` � ${Math.round(concept.averageScore * 100)}% average` : ""}`,
     whyItMatters: buildWhyItMatters(concept, dueReviewCount, adaptiveSignal),
     recommendedAction: buildRecommendedAction(concept, adaptiveSignal),
     recommendedPool: concept.recommendedPool,
@@ -165,6 +179,8 @@ function buildWeaknessCard(
       direction: concept.trend.direction,
     } : undefined,
     dimensions: [...concept.evidence.slice(0, 2), ...concept.inferredFrom.slice(0, 1)].slice(0, 3),
+    coachingPattern: pattern ? `${pattern.title}: ${pattern.detail}` : undefined,
+    interventionDecision: interventionDecision ? { action: interventionDecision.action, recommendedStrategy: interventionDecision.recommendedStrategy, summary: interventionDecision.summary } : undefined,
     relatedDrills,
   };
 }
@@ -302,3 +318,4 @@ function buildRecommendedAction(
 
   return `Start another ${poolLabel} weakness block so the generator can keep reinforcing ${concept.label.toLowerCase()} while the signal is still active. ${adaptiveSignal}`.trim();
 }
+

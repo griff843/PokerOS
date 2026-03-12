@@ -5,6 +5,8 @@ import {
   type AttemptInsight,
   type InterventionHistoryEntry,
   type InterventionPlan,
+  type InterventionRecommendation,
+  type PatternAttemptSignal,
   type PlayerDiagnosisHistoryEntry,
   type RealPlayConceptSignal,
   type SessionPlanningReason,
@@ -13,6 +15,8 @@ import {
 import type { TableSimSessionPlan } from "./session-plan";
 import { formatSessionLabel } from "./study-session-ui";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
+import { buildPrimaryInterventionRecommendation } from "./intervention-decision";
+import { buildPatternBriefs, type PatternBrief } from "./pattern-summaries";
 
 export interface CommandCenterRecentAttempt {
   drillId: string;
@@ -61,6 +65,8 @@ export interface CommandCenterSnapshot {
     active: Array<{ concept: string; status: string; detail: string }>;
     completed: Array<{ concept: string; status: string; detail: string }>;
   };
+  coachingPatterns: PatternBrief[];
+  nextInterventionDecision?: InterventionRecommendation;
   recommendedTrainingBlock: {
     plan: InterventionPlan;
     href: string;
@@ -83,6 +89,7 @@ interface BuildCommandCenterSnapshotArgs {
   diagnosisHistory?: PlayerDiagnosisHistoryEntry[];
   interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
+  patternAttempts?: PatternAttemptSignal[];
   now?: Date;
 }
 
@@ -96,6 +103,7 @@ export function buildCommandCenterSnapshot({
   diagnosisHistory = [],
   interventionHistory = [],
   realPlaySignals,
+  patternAttempts,
   now = new Date(),
 }: BuildCommandCenterSnapshotArgs): CommandCenterSnapshot {
   const playerIntelligence = buildTableSimPlayerIntelligence({
@@ -105,6 +113,7 @@ export function buildCommandCenterSnapshot({
     diagnosisHistory,
     interventionHistory,
     realPlaySignals,
+    patternAttempts,
     now,
   });
   const nextFocusSummary = buildNextFocusSummary({
@@ -120,6 +129,13 @@ export function buildCommandCenterSnapshot({
     ?? (firstDrill ? firstDrill.tags.find((tag) => tag.startsWith("concept:")) ?? `node:${firstDrill.node_id}` : leadTarget?.key ?? "Balanced reinforcement");
   const [improving, slipping] = buildTrendSignals(attemptInsights);
   const adaptive = playerIntelligence.adaptiveProfile;
+  const nextInterventionDecision = buildPrimaryInterventionRecommendation({
+    playerIntelligence,
+    diagnosisHistory,
+    interventionHistory,
+    realPlaySignals,
+    conceptKey: interventionPlan.rootConceptKey,
+  });
 
   return {
     generatedAt: now.toISOString(),
@@ -151,6 +167,8 @@ export function buildCommandCenterSnapshot({
       recommendation: `${interventionPlan.nextSessionFocus}`,
     },
     interventions: buildInterventionSection(interventionHistory, playerIntelligence),
+    coachingPatterns: buildPatternBriefs(playerIntelligence.patterns.topPatterns, 2),
+    nextInterventionDecision,
     recommendedTrainingBlock: {
       plan: interventionPlan,
       href: `/app/training/session/${interventionPlan.id}`,

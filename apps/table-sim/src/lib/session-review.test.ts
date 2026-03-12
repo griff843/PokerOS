@@ -140,6 +140,7 @@ describe("session review snapshot", () => {
     expect(snapshot.movedToday.items[1]?.title).toBe("Blocker Effects");
     expect(snapshot.importantDrills[0]?.reviewTag).toBe("paired_top_river");
     expect(snapshot.coachDebrief.leak.length).toBeGreaterThan(0);
+    expect(snapshot.coachDebrief.pattern.length).toBeGreaterThan(0);
     expect(snapshot.recommendedTrainingBlock?.plan.recommendedSessionTitle.length).toBeGreaterThan(0);
     expect(snapshot.nextAction.primary.action).toBe("review_incorrect");
   });

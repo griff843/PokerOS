@@ -8,6 +8,7 @@
 import type { SessionState, DrillAttempt, DecisionConfidence } from "./session-types";
 import { formatDecisionConfidence, formatSessionLabel } from "./study-session-ui";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
+import { buildPatternBriefs } from "./pattern-summaries";
 
 export interface SessionReviewSnapshot {
   header: {
@@ -37,6 +38,7 @@ export interface SessionReviewSnapshot {
   coachDebrief: {
     takeaway: string;
     leak: string;
+    pattern: string;
     nextFocus: string;
   };
   importantDrills: Array<{
@@ -87,6 +89,20 @@ export function buildSessionReviewSnapshot(
     })),
     activePool: config.activePool,
   });
+  const patternAttempts = attempts.map((attempt) => ({
+    drillId: attempt.drill.drill_id,
+    nodeId: attempt.drill.node_id,
+    ts: attempt.timestamp,
+    sessionId: planMetadata?.generatedAt ?? "current-session",
+    conceptKeys: attempt.drill.tags.filter((tag) => tag.startsWith("concept:")).map((tag) => tag.slice("concept:".length)),
+    missedTags: attempt.missedTags,
+    score: attempt.score,
+    correct: attempt.correct,
+    diagnosticType: attempt.diagnostic?.result.errorType ?? null,
+    diagnosticConceptKey: attempt.diagnostic?.result.conceptKey ?? null,
+    activePool: attempt.activePool,
+  }));
+
   const playerIntelligence = buildTableSimPlayerIntelligence({
     drills: drills.map((entry) => entry.drill),
     attemptInsights: attempts.map((attempt) => ({
@@ -111,6 +127,7 @@ export function buildSessionReviewSnapshot(
       errorType: attempt.diagnostic.result.errorType,
       confidenceMiscalibration: attempt.diagnostic.result.confidenceMiscalibration,
     }] : []),
+    patternAttempts,
   });
   const interventionPlan = buildInterventionPlan({
     playerIntelligence,
@@ -155,6 +172,7 @@ export function buildSessionReviewSnapshot(
     : topMissedTag?.key ?? null;
   const adaptive = playerIntelligence.adaptiveProfile;
   const primaryTendency = adaptive.tendencies[0];
+  const leadPattern = buildPatternBriefs(playerIntelligence.patterns.topPatterns, 1)[0];
 
   return {
     header: {
@@ -230,6 +248,7 @@ export function buildSessionReviewSnapshot(
     coachDebrief: {
       takeaway: completedSummary.headline,
       leak: `${interventionPlan.rootLeakDiagnosis} ${adaptive.surfaceSignals.sessionReview}`.trim(),
+      pattern: leadPattern ? `${leadPattern.title}: ${leadPattern.detail}` : "No recurring cross-hand pattern separated strongly enough to outrank the session leak yet.",
       nextFocus: nextFocusSummary.recommendations[0]
         ? `${interventionPlan.recommendedSessionTitle}: ${nextFocusSummary.recommendations[0].rationale} ${adaptive.surfaceSignals.sessionReview}`.trim()
         : `${interventionPlan.recommendedSessionTitle}: ${interventionPlan.nextSessionFocus}`,

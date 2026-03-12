@@ -116,6 +116,11 @@ function makeSnapshot(): PlayerIntelligenceSnapshot {
         recommendedPool: "B",
       },
     ],
+    patterns: {
+      generatedAt: "2026-03-10T12:00:00.000Z",
+      patterns: [],
+      topPatterns: [],
+    },
   } as unknown as PlayerIntelligenceSnapshot;
 }
 
@@ -197,6 +202,62 @@ describe("intervention planner", () => {
     expect(session.metadata.intervention?.trainingBlocks[0]?.plannedReps).toBeGreaterThanOrEqual(0);
     expect(session.drills.every((drill) => drill.metadata.interventionConceptKey)).toBe(true);
   });
+
+  it("weights real-play transfer patterns into the intervention title and rationale", () => {
+    const snapshot = makeSnapshot();
+    snapshot.patterns = {
+      generatedAt: "2026-03-10T12:00:00.000Z",
+      patterns: [
+        {
+          id: "pattern:river_bluff_catching:real_play_transfer_gap",
+          type: "real_play_transfer_gap",
+          confidence: "high",
+          severity: 0.82,
+          implicatedConcepts: ["river_bluff_catching"],
+          evidence: ["River Bluff Catching is recovering in drills, but imported hands still map here."],
+          coachingImplication: "Bridge drills into imported-hand review before treating the concept as transferred.",
+          suggestedBiases: ["real_play_transfer", "stabilization_check"],
+        },
+      ],
+      topPatterns: [
+        {
+          id: "pattern:river_bluff_catching:real_play_transfer_gap",
+          type: "real_play_transfer_gap",
+          confidence: "high",
+          severity: 0.82,
+          implicatedConcepts: ["river_bluff_catching"],
+          evidence: ["River Bluff Catching is recovering in drills, but imported hands still map here."],
+          coachingImplication: "Bridge drills into imported-hand review before treating the concept as transferred.",
+          suggestedBiases: ["real_play_transfer", "stabilization_check"],
+        },
+      ],
+    };
+
+    const plan = buildInterventionPlan({
+      playerIntelligence: snapshot,
+      recentAttempts: [
+        {
+          drillId: "d1",
+          nodeId: "hu_river_01",
+          title: "River Bluff Catch",
+          score: 0.61,
+          correct: true,
+          ts: "2026-03-10T10:00:00.000Z",
+          activePool: "B",
+          diagnosticErrorType: "threshold_error",
+          diagnosticConceptKey: "river_bluff_catching",
+          confidenceMiscalibration: false,
+        },
+      ],
+      activePool: "B",
+      now: new Date("2026-03-10T12:00:00.000Z"),
+    });
+
+    expect(plan.recommendedSessionTitle).toContain("Transfer Block");
+    expect(plan.rationale).toContain("real-play transfer review");
+    expect(plan.nextSessionFocus).toContain("imported hands");
+  });
+
 });
 
 

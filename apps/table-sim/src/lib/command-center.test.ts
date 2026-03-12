@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AttemptInsight, InterventionHistoryEntry, InterventionPlan } from "@poker-coach/core/browser";
+import type { AttemptInsight, InterventionHistoryEntry, InterventionPlan, PatternAttemptSignal } from "@poker-coach/core/browser";
 import type { TableSimSessionPlan } from "./session-plan";
 import {
   buildCadenceSignal,
@@ -142,6 +142,38 @@ function makeAttemptInsights(): AttemptInsight[] {
   ];
 }
 
+
+function makePatternAttempts(): PatternAttemptSignal[] {
+  return [
+    {
+      drillId: "d1",
+      nodeId: "hu_01",
+      ts: "2026-03-10T10:00:00.000Z",
+      sessionId: "s1",
+      conceptKeys: ["river_bluff_catching"],
+      missedTags: ["paired_top_river"],
+      score: 0.35,
+      correct: false,
+      diagnosticType: "threshold_error",
+      diagnosticConceptKey: "river_bluff_catching",
+      activePool: "B",
+    },
+    {
+      drillId: "d2",
+      nodeId: "hu_02",
+      ts: "2026-03-09T10:00:00.000Z",
+      sessionId: "s2",
+      conceptKeys: ["river_bluff_catching"],
+      missedTags: ["paired_top_river"],
+      score: 0.38,
+      correct: false,
+      diagnosticType: "threshold_error",
+      diagnosticConceptKey: "river_bluff_catching",
+      activePool: "B",
+    },
+  ];
+}
+
 function makeInterventionHistory(): InterventionHistoryEntry[] {
   return [
     { id: "i1", conceptKey: "river_bluff_catching", source: "command_center", status: "assigned", createdAt: "2026-03-10T12:00:00.000Z" },
@@ -158,7 +190,12 @@ describe("command center snapshot", () => {
       activePool: "B",
       count: 10,
       interventionPlan: makeInterventionPlan(),
+      diagnosisHistory: [
+        { conceptKey: "river_bluff_catching", diagnosticType: "threshold_error", confidence: 0.9, createdAt: "2026-03-10T11:00:00.000Z" },
+        { conceptKey: "river_bluff_catching", diagnosticType: "threshold_error", confidence: 0.85, createdAt: "2026-03-09T11:00:00.000Z" },
+      ],
       interventionHistory: makeInterventionHistory(),
+      patternAttempts: makePatternAttempts(),
       now: new Date("2026-03-10T12:00:00.000Z"),
     });
 
@@ -169,6 +206,9 @@ describe("command center snapshot", () => {
     expect(snapshot.coachBriefing.recommendation).toContain("Turn Defense");
     expect(snapshot.coachBriefing.reminder.length).toBeGreaterThan(0);
     expect(snapshot.recommendedTrainingBlock.plan.id).toBe("plan-B-turn_defense-river_bluff_catching");
+    expect(snapshot.coachingPatterns[0]?.title).toBe("Recurring threshold leak");
+    expect(snapshot.nextInterventionDecision?.action).toBe("assign_intervention");
+    expect(snapshot.nextInterventionDecision?.recommendedStrategy).toBe("street_transition_repair");
     expect(snapshot.interventions.active[0]?.status).toContain("Assigned");
     expect(snapshot.interventions.completed[0]?.status).toBe("Recovered");
     expect(snapshot.recentWork).toHaveLength(3);

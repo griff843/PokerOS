@@ -4,6 +4,7 @@
   type CanonicalDrill,
   type ConfidenceInsight,
   type InterventionHistoryEntry,
+  type PatternAttemptSignal,
   type PlayerDiagnosisHistoryEntry,
   type PlayerIntelligenceSnapshot,
   type RealPlayConceptSignal,
@@ -20,6 +21,7 @@ export function buildTableSimPlayerIntelligence(args: {
   diagnosisHistory?: PlayerDiagnosisHistoryEntry[];
   interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
+  patternAttempts?: PatternAttemptSignal[];
   now?: Date;
 }): PlayerIntelligenceSnapshot {
   return buildPlayerIntelligenceSnapshot({
@@ -32,6 +34,7 @@ export function buildTableSimPlayerIntelligence(args: {
     diagnosisHistory: args.diagnosisHistory,
     interventionHistory: args.interventionHistory,
     realPlaySignals: args.realPlaySignals,
+    patternAttempts: args.patternAttempts,
     now: args.now,
   });
 }

@@ -1,6 +1,7 @@
 import type {
   DiagnosticInsight,
   InterventionPlannerRecentAttempt,
+  PatternAttemptSignal,
 } from "@poker-coach/core/browser";
 import type { AttemptRow } from "../../../../packages/db/src/repository";
 import type { TableSimDrill } from "./drill-schema";
@@ -45,3 +46,31 @@ export function buildInterventionRecentAttempts(attempts: DrillAttempt[]): Inter
   }));
 }
 
+export function buildPatternAttemptSignals(attempts: DrillAttempt[]): PatternAttemptSignal[] {
+  return attempts.map((attempt) => ({
+    drillId: attempt.drill.drill_id,
+    nodeId: attempt.drill.node_id,
+    ts: attempt.timestamp,
+    sessionId: null,
+    conceptKeys: collectPatternConceptKeys(attempt),
+    missedTags: attempt.missedTags,
+    score: attempt.score,
+    correct: attempt.correct,
+    diagnosticType: attempt.diagnostic?.result.errorType ?? null,
+    diagnosticConceptKey: attempt.diagnostic?.result.conceptKey ?? null,
+    activePool: attempt.activePool,
+  }));
+}
+
+function collectPatternConceptKeys(attempt: DrillAttempt): string[] {
+  const conceptKeys = new Set<string>();
+  for (const tag of attempt.drill.tags) {
+    if (tag.startsWith("concept:")) {
+      conceptKeys.add(tag.slice("concept:".length));
+    }
+  }
+  if (attempt.diagnostic?.result.conceptKey) {
+    conceptKeys.add(attempt.diagnostic.result.conceptKey);
+  }
+  return [...conceptKeys];
+}

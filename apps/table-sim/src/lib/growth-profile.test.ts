@@ -96,7 +96,39 @@ describe("growth profile snapshot", () => {
       drills,
       attempts,
       attemptInsights,
+      diagnosisHistory: [
+        { conceptKey: "river_bluff_catching", diagnosticType: "threshold_error", confidence: 0.9, createdAt: "2026-03-10T10:00:00.000Z" },
+        { conceptKey: "river_bluff_catching", diagnosticType: "threshold_error", confidence: 0.85, createdAt: "2026-03-09T10:00:00.000Z" },
+      ],
       interventionHistory,
+      patternAttempts: [
+        {
+          drillId: "d1",
+          nodeId: "hu_river_01",
+          ts: "2026-03-10T10:00:00.000Z",
+          sessionId: "s1",
+          conceptKeys: ["river_bluff_catching"],
+          missedTags: ["paired_top_river"],
+          score: 0.34,
+          correct: false,
+          diagnosticType: "threshold_error",
+          diagnosticConceptKey: "river_bluff_catching",
+          activePool: "B",
+        },
+        {
+          drillId: "d1",
+          nodeId: "hu_river_01",
+          ts: "2026-03-09T10:00:00.000Z",
+          sessionId: "s2",
+          conceptKeys: ["river_bluff_catching"],
+          missedTags: ["paired_top_river"],
+          score: 0.38,
+          correct: false,
+          diagnosticType: "threshold_error",
+          diagnosticConceptKey: "river_bluff_catching",
+          activePool: "B",
+        },
+      ],
       srs: [{ drill_id: "d2", due_at: "2026-03-09T10:00:00.000Z" }],
       activePool: "B",
       now: new Date("2026-03-10T12:00:00.000Z"),
@@ -110,6 +142,8 @@ describe("growth profile snapshot", () => {
     expect(snapshot.interventionSuccess[0]?.label).toBe("Intervention success");
     expect(snapshot.conceptRecovery[0]?.label).toBe("Turn Probe");
     expect(snapshot.recurringLeaks.length).toBeGreaterThan(0);
+    expect(snapshot.coachingPatterns[0]?.title).toBe("Recurring threshold leak");
+    expect(snapshot.nextInterventionDecision?.action).toBeTruthy();
     expect(snapshot.interventionRecommendation?.plan.recommendedSessionTitle.length).toBeGreaterThan(0);
     expect(snapshot.nextActions[0]?.href).toBe("/app/weaknesses");
   });

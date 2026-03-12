@@ -67,10 +67,14 @@ export function GrowthProfile() {
 
         <MovementSection loading={loading} items={snapshot?.movement ?? []} />
         <PracticeIdentitySection loading={loading} items={snapshot?.practiceIdentity ?? []} />
-        <div className="grid gap-5 xl:grid-cols-3">
+        <div className="grid gap-5 xl:grid-cols-2">
           <InterventionSuccessSection loading={loading} items={snapshot?.interventionSuccess ?? []} />
           <ConceptRecoverySection loading={loading} items={snapshot?.conceptRecovery ?? []} />
+        </div>
+        <div className="grid gap-5 xl:grid-cols-3">
           <RecurringLeaksSection loading={loading} items={snapshot?.recurringLeaks ?? []} />
+          <CoachingPatternsSection loading={loading} items={snapshot?.coachingPatterns ?? []} />
+          <InterventionDecisionSection loading={loading} decision={snapshot?.nextInterventionDecision ?? null} />
         </div>
         <NextActionsSection loading={loading} actions={snapshot?.nextActions ?? []} onNavigate={(href) => router.push(href)} />
       </div>
@@ -238,6 +242,36 @@ function RecurringLeaksSection({ loading, items }: { loading: boolean; items: Gr
       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Recurring Leaks</p>
       <div className="mt-4 space-y-3">
         {loading ? <p className="text-sm text-slate-500">Loading recurring leak signals.</p> : items.map((item) => <SignalBlock key={item.label + item.detail} {...item} />)}
+      </div>
+    </section>
+  );
+}
+
+
+
+function InterventionDecisionSection({ loading, decision }: { loading: boolean; decision: GrowthProfileSnapshot["nextInterventionDecision"] | null }) {
+  return (
+    <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Intervention Decision</p>
+      <div className="mt-4 space-y-3">
+        {loading ? (
+          <p className="text-sm text-slate-500">Loading intervention decision.</p>
+        ) : !decision ? (
+          <p className="text-sm leading-6 text-slate-400">No stronger intervention move is justified yet beyond monitoring and the current plan context.</p>
+        ) : (
+          <SignalBlock label={decision.action.replace(/_/g, " ")} detail={`${decision.summary} ${decision.decisionReason}`.trim()} tone="neutral" />
+        )}
+      </div>
+    </section>
+  );
+}
+
+function CoachingPatternsSection({ loading, items }: { loading: boolean; items: GrowthProfileSnapshot["coachingPatterns"] }) {
+  return (
+    <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Coaching Patterns</p>
+      <div className="mt-4 space-y-3">
+        {loading ? <p className="text-sm text-slate-500">Loading cross-hand patterns.</p> : items.length === 0 ? <p className="text-sm leading-6 text-slate-400">No cross-hand pattern is strong enough yet to be part of the long-horizon coaching read.</p> : items.map((item) => <SignalBlock key={item.type + item.title} label={item.title} detail={`${item.detail} ${item.implication}`.trim()} tone="neutral" />)}
       </div>
     </section>
   );

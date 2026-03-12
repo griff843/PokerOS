@@ -232,7 +232,18 @@ function PriorityWeaknessesSection({
               <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1.15fr)_minmax(240px,0.85fr)]">
                 <div className="space-y-3">
                   <p className="text-sm leading-6 text-slate-300">{weakness.whyItMatters}</p>
+                  {weakness.interventionDecision ? <p className="text-sm leading-6 text-amber-50/90">{weakness.interventionDecision.summary}</p> : null}
                   <div className="flex flex-wrap gap-2">
+                    {weakness.interventionDecision ? (
+                      <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+                        {weakness.interventionDecision.action.replace(/_/g, " ")} ? {weakness.interventionDecision.recommendedStrategy.replace(/_/g, " ")}
+                      </span>
+                    ) : null}
+                    {weakness.coachingPattern ? (
+                      <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-100">
+                        {weakness.coachingPattern}
+                      </span>
+                    ) : null}
                     {weakness.dimensions.map((dimension) => (
                       <span key={dimension} className="rounded-full border border-white/8 bg-white/5 px-3 py-2 text-xs text-slate-300">
                         {dimension}

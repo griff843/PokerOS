@@ -13,6 +13,13 @@ import {
   type SessionPlanningReason,
 } from "./coaching-memory";
 import {
+  buildCoachingPatternSnapshot,
+  selectPatternsForConcept,
+  type CoachingPatternSnapshot,
+  type PatternAttemptSignal,
+  type PatternConceptState,
+} from "./patterns";
+import {
   buildConceptGraph,
   collectDrillConceptSources,
   getSupportedConcepts,
@@ -121,6 +128,7 @@ export interface PlayerIntelligenceSnapshot {
   recommendations: PlayerRecommendation[];
   adaptiveProfile: AdaptiveCoachingProfile;
   memory: PlayerMemorySummary;
+  patterns: CoachingPatternSnapshot;
 }
 
 interface ConceptAccumulator {
@@ -143,6 +151,7 @@ export function buildPlayerIntelligenceSnapshot(args: {
   diagnosisHistory?: PlayerDiagnosisHistoryEntry[];
   interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
+  patternAttempts?: PatternAttemptSignal[];
   now?: Date;
 }): PlayerIntelligenceSnapshot {
   const now = args.now ?? new Date();
@@ -180,16 +189,40 @@ export function buildPlayerIntelligenceSnapshot(args: {
     .filter((snapshot): snapshot is PlayerConceptSnapshot => Boolean(snapshot));
 
   const roleAssignedSnapshots = assignWeaknessRoles(graph, snapshots);
-  const priorities = roleAssignedSnapshots
+  const sortedConcepts = roleAssignedSnapshots.sort(compareConceptSnapshots);
+  const patterns = buildCoachingPatternSnapshot({
+    attempts: args.patternAttempts ?? [],
+    diagnoses: diagnosisHistory.map((entry) => ({
+      conceptKey: entry.conceptKey,
+      diagnosticType: entry.diagnosticType,
+      confidence: entry.confidence,
+      createdAt: entry.createdAt,
+    })),
+    interventions: interventionHistory.map((entry) => ({
+      id: entry.id,
+      conceptKey: entry.conceptKey,
+      source: entry.source,
+      status: entry.status,
+      createdAt: entry.createdAt,
+      improved: entry.improved,
+      preScore: entry.preScore,
+      postScore: entry.postScore,
+      outcomeCreatedAt: entry.outcomeCreatedAt,
+    })),
+    concepts: sortedConcepts.map((concept) => toPatternConceptState(concept)),
+    realPlaySignals: args.realPlaySignals,
+    now,
+  });
+  const priorities = sortedConcepts
     .filter((snapshot) => snapshot.status === "weakness" || snapshot.trainingUrgency >= 0.35)
     .sort(compareConceptSnapshots)
     .slice(0, 8);
-  const strengths = [...roleAssignedSnapshots]
+  const strengths = [...sortedConcepts]
     .filter((snapshot) => snapshot.status === "strength")
     .sort((a, b) => (b.averageScore ?? 0) - (a.averageScore ?? 0) || b.sampleSize - a.sampleSize)
     .slice(0, 5);
   const adaptiveProfile = buildAdaptiveCoachingProfile({
-    concepts: roleAssignedSnapshots,
+    concepts: sortedConcepts,
     attemptInsights: args.attemptInsights,
     confidenceInsights: args.confidenceInsights,
     diagnosticInsights: args.diagnosticInsights,
@@ -204,12 +237,13 @@ export function buildPlayerIntelligenceSnapshot(args: {
     generatedAt: now.toISOString(),
     activePool,
     graph,
-    concepts: roleAssignedSnapshots.sort(compareConceptSnapshots),
+    concepts: sortedConcepts,
     priorities,
     strengths,
-    recommendations: buildPlayerRecommendations({ activePool, priorities, strengths, adaptiveProfile }),
+    recommendations: buildPlayerRecommendations({ activePool, priorities, strengths, adaptiveProfile, patterns }),
     adaptiveProfile,
     memory,
+    patterns,
   };
 }
 
@@ -219,10 +253,14 @@ export function buildPlayerRecommendations(args: {
   strengths?: PlayerConceptSnapshot[];
   adaptiveProfile?: AdaptiveCoachingProfile;
   limit?: number;
+  patterns?: CoachingPatternSnapshot;
 }): PlayerRecommendation[] {
   const limit = args.limit ?? 3;
   const recommendations: PlayerRecommendation[] = [];
   const lead = args.priorities.find((snapshot) => snapshot.status === "weakness");
+  const leadPatterns = lead && args.patterns
+    ? selectPatternsForConcept(args.patterns.patterns, lead.conceptKey)
+    : [];
 
   if (lead) {
     recommendations.push({
@@ -232,7 +270,7 @@ export function buildPlayerRecommendations(args: {
         : lead.weaknessRole === "downstream" && lead.supportingConceptKeys[0]
           ? `Repair ${toTitleCase(lead.supportingConceptKeys[0])}`
           : `Train ${lead.label}`,
-      rationale: buildRecommendationRationale(lead),
+      rationale: buildRecommendationRationale(lead, leadPatterns),
       recommendedPool: lead.recommendedPool,
       emphasis: lead.scope === "pool" ? "pool_focus" : lead.weaknessRole === "upstream" || lead.reviewPressure > 0 ? "review" : "stabilize",
       urgency: lead.trainingUrgency,
@@ -689,7 +727,29 @@ function buildDrillConceptIndex(drills: CanonicalDrill[]): Map<string, Set<strin
   );
 }
 
-function buildRecommendationRationale(snapshot: PlayerConceptSnapshot): string {
+function buildRecommendationRationale(snapshot: PlayerConceptSnapshot, patterns: CoachingPatternSnapshot["patterns"]): string {
+  const leadPattern = patterns[0];
+
+  if (leadPattern?.type === "regression_after_recovery") {
+    return `${snapshot.label} recovered once but then regressed, so the next recommendation should reopen repair and extend follow-through.`;
+  }
+
+  if (leadPattern?.type === "real_play_transfer_gap") {
+    return `${snapshot.label} is improving in drills but the gain is not yet transferring into real play, so the next block should bridge authored reps into hand review.`;
+  }
+
+  if (leadPattern?.type === "intervention_not_sticking") {
+    return `${snapshot.label} has already had intervention work that did not fully stick, so the next recommendation should stay narrow and extend reinforcement rather than chasing novelty.`;
+  }
+
+  if (leadPattern?.type === "downstream_river_symptom" && snapshot.supportingConceptKeys[0]) {
+    return `${snapshot.label} keeps showing up as the visible river symptom, but ${toTitleCase(snapshot.supportingConceptKeys[0])} still looks like the upstream issue to repair first.`;
+  }
+
+  if (leadPattern?.type === "persistent_threshold_leak") {
+    return `${snapshot.label} keeps recurring as a threshold leak, so the next recommendation should retest practical defend-or-fold thresholds directly.`;
+  }
+
   if (snapshot.evidence.some((entry) => entry.includes("active intervention"))) {
     return `${snapshot.label} already has an active intervention, so the next recommendation should continue that thread instead of fragmenting the work.`;
   }
@@ -824,6 +884,23 @@ function rankConcepts(values: string[]): string[] {
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .slice(0, 3)
     .map(([value]) => value);
+}
+
+function toPatternConceptState(concept: PlayerConceptSnapshot): PatternConceptState {
+  return {
+    conceptKey: concept.conceptKey,
+    label: concept.label,
+    recoveryStage: concept.recoveryStage,
+    trainingUrgency: concept.trainingUrgency,
+    recurrenceCount: concept.recurrenceCount,
+    reviewPressure: concept.reviewPressure,
+    weaknessRole: concept.weaknessRole,
+    supportingConceptKeys: concept.supportingConceptKeys,
+    trendDirection: concept.trend?.direction,
+    averageScore: concept.averageScore,
+    recommendedPool: concept.recommendedPool,
+    evidence: concept.evidence,
+  };
 }
 
 function compareConceptSnapshots(a: PlayerConceptSnapshot, b: PlayerConceptSnapshot): number {

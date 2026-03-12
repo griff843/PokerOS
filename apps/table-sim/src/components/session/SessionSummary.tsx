@@ -161,7 +161,7 @@ function WhatMovedToday({
 function CoachDebriefCard({
   debrief,
 }: {
-  debrief: { takeaway: string; leak: string; nextFocus: string };
+  debrief: { takeaway: string; leak: string; pattern: string; nextFocus: string };
 }) {
   return (
     <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
@@ -169,6 +169,7 @@ function CoachDebriefCard({
       <div className="mt-4 space-y-4">
         <DebriefPanel title="Strongest takeaway" text={debrief.takeaway} tone="neutral" />
         <DebriefPanel title="Root leak diagnosis" text={debrief.leak} tone="warning" />
+        <DebriefPanel title="Recurring pattern" text={debrief.pattern} tone="neutral" />
         <DebriefPanel title="Next recommended focus" text={debrief.nextFocus} tone="good" />
       </div>
     </section>
