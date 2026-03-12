@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { InterventionHistoryEntry, InterventionRecommendation, PlayerIntelligenceSnapshot, RealPlayConceptSignal } from "@poker-coach/core/browser";
-import type { InterventionDecisionSnapshotRow, RetentionScheduleRow } from "../../../../packages/db/src/repository";
+import type { InterventionDecisionSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
 import { buildConceptCaseMap } from "./concept-case";
 
 function makePlayerIntelligence(): PlayerIntelligenceSnapshot {
@@ -162,6 +162,36 @@ describe("concept case map", () => {
       superseded_by_schedule_id: null,
       evidence_json: JSON.stringify(["Scheduled follow-up retention check."]),
     }];
+    const transferSnapshots: TransferEvaluationSnapshotRow[] = [{
+      id: "t1",
+      user_id: "local_user",
+      concept_key: "river_bluff_catching",
+      created_at: "2026-03-12T11:55:00.000Z",
+      transfer_status: "transfer_uncertain",
+      transfer_confidence: "medium",
+      evidence_sufficiency: "moderate",
+      pressure: "low",
+      study_sample_size: 6,
+      study_performance: 0.44,
+      study_recent_average: 0.44,
+      study_average: 0.48,
+      study_failed_count: 4,
+      real_play_performance: 0.51,
+      real_play_occurrences: 2,
+      real_play_review_spot_count: 1,
+      real_play_latest_hand_at: "2026-03-12T11:00:00.000Z",
+      study_vs_real_play_delta: -0.07,
+      recovery_stage: "active_repair",
+      retention_state: "upcoming",
+      retention_result: null,
+      pattern_types_json: JSON.stringify(["persistent_threshold_leak"]),
+      supporting_evidence_json: JSON.stringify(["Transfer evidence is still mixed."]),
+      risk_flags_json: JSON.stringify([]),
+      linked_decision_snapshot_id: "d1",
+      linked_retention_schedule_id: "r1",
+      source_context: "concept_case_api",
+      supersedes_snapshot_id: null,
+    }];
     const interventionHistory: InterventionHistoryEntry[] = [{
       id: "i1",
       conceptKey: "river_bluff_catching",
@@ -188,6 +218,7 @@ describe("concept case map", () => {
       interventionHistory,
       decisionSnapshots: decisions,
       retentionSchedules,
+      transferSnapshots,
       realPlaySignals,
       recommendations,
       now: new Date("2026-03-12T12:00:00.000Z"),
@@ -200,6 +231,7 @@ describe("concept case map", () => {
     expect(bundle?.retention.validationState).toBe("provisional");
     expect(bundle?.transferEvaluation.status).toBe("transfer_uncertain");
     expect(bundle?.history.transferSummary?.status).toBe("transfer_uncertain");
+    expect(bundle?.transferAudit?.latestSnapshot?.status).toBe("transfer_uncertain");
     expect(bundle?.strategyBlueprint?.strategyType).toBe("threshold_repair");
     expect(bundle?.strategyBlueprint?.title.length).toBeGreaterThan(0);
   });

@@ -9,12 +9,13 @@ import { buildDiagnosticInsightsFromAttempts, buildPatternAttemptSignals, hydrat
 import { loadLocalStudyData, resolveDbPath } from "../../../lib/local-study-data";
 import { buildTableSimPlayerIntelligence } from "../../../lib/player-intelligence";
 import { createRecommendedInterventionDecision, createRecommendedInterventionPlan } from "../../../lib/session-plan-server";
+import { syncTransferEvaluationSnapshots } from "../../../lib/transfer-audit";
 import { openDatabase } from "../../../../../../packages/db/src";
 import { buildConceptRetentionSummary } from "../../../lib/retention-scheduling";
 
 export async function GET(request: NextRequest) {
   try {
-    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots, retentionSchedules } = loadLocalStudyData();
+    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots, retentionSchedules, transferSnapshots: loadedTransferSnapshots } = loadLocalStudyData();
     const activePool = (request.nextUrl.searchParams.get("pool") ?? attempts[0]?.active_pool ?? "baseline") as WeaknessPool;
     const now = new Date();
     const diagnosisHistory = toDiagnosisHistoryEntries(diagnoses);
@@ -87,6 +88,25 @@ export async function GET(request: NextRequest) {
       realPlaySignals,
       retentionSchedules,
     });
+    let transferSnapshots = loadedTransferSnapshots;
+    if (dbPath) {
+      const db = openDatabase(dbPath);
+      try {
+        transferSnapshots = syncTransferEvaluationSnapshots({
+          db,
+          playerIntelligence,
+          diagnosisHistory,
+          interventionHistory,
+          realPlaySignals,
+          retentionSchedules,
+          decisionSnapshots,
+          now,
+          sourceContext: "intervention_plan_api",
+        });
+      } finally {
+        db.close();
+      }
+    }
     const conceptCase = decision
       ? buildConceptCaseMap({
           playerIntelligence,
@@ -94,6 +114,7 @@ export async function GET(request: NextRequest) {
           interventionHistory,
           decisionSnapshots,
           retentionSchedules,
+          transferSnapshots,
           realPlaySignals,
           recommendations,
           now,
@@ -106,6 +127,7 @@ export async function GET(request: NextRequest) {
       retentionSummary,
       conceptCase,
       transferEvaluation: conceptCase?.transferEvaluation,
+      transferAudit: conceptCase?.transferAudit,
       strategyBlueprint: conceptCase?.strategyBlueprint,
     });
   } catch (error) {

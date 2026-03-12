@@ -11,6 +11,7 @@ import {
   createIntervention,
   createInterventionDecisionSnapshot,
   createRetentionSchedule,
+  createTransferEvaluationSnapshot,
   createReflection,
   getAllAttempts,
   getAllImportedHands,
@@ -19,12 +20,15 @@ import {
   getInterventionOutcome,
   getLatestInterventionDecisionSnapshot,
   getLatestRetentionSchedule,
+  getLatestTransferEvaluationSnapshot,
   getRecentHandImports,
   getRecentInterventionDecisionSnapshots,
+  getRecentTransferEvaluationSnapshots,
   getUserDiagnosisHistory,
   getUserInterventionDecisionSnapshots,
   getUserInterventions,
   getUserRetentionSchedules,
+  getUserTransferEvaluationSnapshots,
   insertAttempt,
   insertHandImport,
   insertImportedHand,
@@ -423,5 +427,84 @@ describe("retention schedules", () => {
     expect(conceptHistory[1]?.superseded_by_schedule_id).toBe("ret-3");
     expect(due.map((entry) => entry.id)).toEqual(["ret-1"]);
     expect(userSchedules).toHaveLength(3);
+  });
+});
+
+describe("transfer evaluation snapshots", () => {
+  it("stores and reads transfer history in newest-first audit order", () => {
+    const db = openDatabase(createTempDbPath());
+
+    createTransferEvaluationSnapshot(db, {
+      id: "transfer-1",
+      user_id: "local_user",
+      concept_key: "river_bluff_catching",
+      created_at: "2026-03-12T12:00:00.000Z",
+      transfer_status: "transfer_validated",
+      transfer_confidence: "high",
+      evidence_sufficiency: "strong",
+      pressure: "low",
+      study_sample_size: 6,
+      study_performance: 0.76,
+      study_recent_average: 0.76,
+      study_average: 0.64,
+      study_failed_count: 1,
+      real_play_performance: 0.82,
+      real_play_occurrences: 4,
+      real_play_review_spot_count: 0,
+      real_play_latest_hand_at: "2026-03-12T11:00:00.000Z",
+      study_vs_real_play_delta: -0.06,
+      recovery_stage: "recovered",
+      retention_state: "completed_pass",
+      retention_result: "pass",
+      pattern_types_json: JSON.stringify([]),
+      supporting_evidence_json: JSON.stringify(["Imported hands are staying clean."]),
+      risk_flags_json: JSON.stringify([]),
+      linked_decision_snapshot_id: null,
+      linked_retention_schedule_id: null,
+      source_context: "concept_case_api",
+      supersedes_snapshot_id: null,
+    });
+
+    createTransferEvaluationSnapshot(db, {
+      id: "transfer-2",
+      user_id: "local_user",
+      concept_key: "river_bluff_catching",
+      created_at: "2026-03-12T13:00:00.000Z",
+      transfer_status: "transfer_regressed",
+      transfer_confidence: "high",
+      evidence_sufficiency: "strong",
+      pressure: "high",
+      study_sample_size: 7,
+      study_performance: 0.78,
+      study_recent_average: 0.78,
+      study_average: 0.67,
+      study_failed_count: 1,
+      real_play_performance: 0.21,
+      real_play_occurrences: 4,
+      real_play_review_spot_count: 4,
+      real_play_latest_hand_at: "2026-03-12T12:45:00.000Z",
+      study_vs_real_play_delta: 0.57,
+      recovery_stage: "recovered",
+      retention_state: "due",
+      retention_result: "pass",
+      pattern_types_json: JSON.stringify(["real_play_transfer_gap"]),
+      supporting_evidence_json: JSON.stringify(["Imported hands are again producing repeated review spots."]),
+      risk_flags_json: JSON.stringify(["validated_transfer_slipping", "recovery_contradicted_by_real_play"]),
+      linked_decision_snapshot_id: null,
+      linked_retention_schedule_id: null,
+      source_context: "intervention_plan_api",
+      supersedes_snapshot_id: "transfer-1",
+    });
+
+    const latest = getLatestTransferEvaluationSnapshot(db, "local_user", "river_bluff_catching");
+    const conceptHistory = getRecentTransferEvaluationSnapshots(db, "local_user", "river_bluff_catching", 10);
+    const userHistory = getUserTransferEvaluationSnapshots(db, "local_user", 10);
+    db.close();
+
+    expect(latest?.id).toBe("transfer-2");
+    expect(conceptHistory.map((entry) => entry.id)).toEqual(["transfer-2", "transfer-1"]);
+    expect(userHistory.map((entry) => entry.id)).toEqual(["transfer-2", "transfer-1"]);
+    expect(conceptHistory[0]?.linked_decision_snapshot_id).toBeNull();
+    expect(conceptHistory[0]?.supersedes_snapshot_id).toBe("transfer-1");
   });
 });

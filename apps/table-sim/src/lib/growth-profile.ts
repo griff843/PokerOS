@@ -13,7 +13,7 @@ import {
   type RealPlayConceptSignal,
   type WeaknessPool,
 } from "@poker-coach/core/browser";
-import type { InterventionDecisionSnapshotRow, RetentionScheduleRow } from "../../../../packages/db/src/repository";
+import type { InterventionDecisionSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
 import { buildWeaknessExplorerSnapshot, type WeaknessExplorerSnapshot } from "./weakness-explorer";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
 import { buildPrimaryInterventionRecommendation } from "./intervention-decision";
@@ -98,6 +98,12 @@ export interface GrowthProfileSnapshot {
     statusReason: string;
     transferStatus?: string;
     transferSummary?: string;
+    transferAudit?: {
+      stability: string;
+      changed: boolean;
+      firstValidatedAt?: string;
+      latestGapOrRegressionAt?: string;
+    };
     nextAction: string;
     coachNote: string;
   };
@@ -130,6 +136,7 @@ export function buildGrowthProfileSnapshot(args: {
   patternAttempts?: PatternAttemptSignal[];
   decisionSnapshots?: InterventionDecisionSnapshotRow[];
   retentionSchedules?: RetentionScheduleRow[];
+  transferSnapshots?: TransferEvaluationSnapshotRow[];
   now?: Date;
 }): GrowthProfileSnapshot {
   const now = args.now ?? new Date();
@@ -205,6 +212,7 @@ export function buildGrowthProfileSnapshot(args: {
     interventionHistory,
     decisionSnapshots: args.decisionSnapshots,
     retentionSchedules: args.retentionSchedules,
+    transferSnapshots: args.transferSnapshots,
     realPlaySignals: args.realPlaySignals,
     recommendations: nextInterventionDecision ? [nextInterventionDecision] : [],
     now,
@@ -315,6 +323,12 @@ export function buildGrowthProfileSnapshot(args: {
       statusReason: featuredConceptCase.explanation.statusReason,
       transferStatus: featuredConceptCase.transferEvaluation.status,
       transferSummary: featuredConceptCase.transferEvaluation.summary,
+      transferAudit: featuredConceptCase.transferAudit ? {
+        stability: featuredConceptCase.transferAudit.stability,
+        changed: featuredConceptCase.transferAudit.latestChanged,
+        firstValidatedAt: featuredConceptCase.transferAudit.firstValidatedAt,
+        latestGapOrRegressionAt: featuredConceptCase.transferAudit.latestGapOrRegressionAt,
+      } : undefined,
       nextAction: featuredConceptCase.nextStep.nextAction.replace(/_/g, " "),
       coachNote: featuredConceptCase.nextStep.coachNote,
     } : undefined,

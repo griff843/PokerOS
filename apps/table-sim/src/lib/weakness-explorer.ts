@@ -14,7 +14,7 @@ import {
   type WeaknessPool,
   type WeaknessTarget,
 } from "@poker-coach/core/browser";
-import type { InterventionDecisionSnapshotRow, RetentionScheduleRow } from "../../../../packages/db/src/repository";
+import type { InterventionDecisionSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
 import { analyzeWeaknessAnalyticsFromInsights } from "../../../../packages/core/src/weakness-analytics";
 import { formatSessionLabel } from "./study-session-ui";
 import { buildConceptCaseMap, type ConceptCaseBundle } from "./concept-case";
@@ -57,6 +57,10 @@ export interface WeaknessExplorerSnapshot {
       statusLabel: string;
       priorityExplanation: string;
       transferStatus: string;
+      transferAudit?: {
+        stability: string;
+        changed: boolean;
+      };
       nextAction: string;
       coachNote: string;
     };
@@ -104,6 +108,7 @@ export function buildWeaknessExplorerSnapshot(args: {
   realPlaySignals?: RealPlayConceptSignal[];
   patternAttempts?: PatternAttemptSignal[];
   retentionSchedules?: RetentionScheduleRow[];
+  transferSnapshots?: TransferEvaluationSnapshotRow[];
   now?: Date;
 }): WeaknessExplorerSnapshot {
   const now = args.now ?? new Date();
@@ -138,6 +143,7 @@ export function buildWeaknessExplorerSnapshot(args: {
     decisionSnapshots: args.decisionSnapshots,
     realPlaySignals: args.realPlaySignals,
     retentionSchedules: args.retentionSchedules,
+    transferSnapshots: args.transferSnapshots,
     recommendations: interventionRecommendations,
     now,
   });
@@ -238,6 +244,10 @@ function buildWeaknessCard(
       statusLabel: conceptCase.explanation.statusLabel,
       priorityExplanation: conceptCase.explanation.priorityExplanation,
       transferStatus: conceptCase.transferEvaluation.status,
+      transferAudit: conceptCase.transferAudit ? {
+        stability: conceptCase.transferAudit.stability,
+        changed: conceptCase.transferAudit.latestChanged,
+      } : undefined,
       nextAction: conceptCase.nextStep.nextAction.replace(/_/g, " "),
       coachNote: conceptCase.nextStep.coachNote,
     } : undefined,

@@ -13,7 +13,7 @@ import {
   type SessionPlanningReason,
   type WeaknessPool,
 } from "@poker-coach/core/browser";
-import type { RetentionScheduleRow } from "../../../../packages/db/src/repository";
+import type { RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
 import type { TableSimSessionPlan } from "./session-plan";
 import { formatSessionLabel } from "./study-session-ui";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
@@ -86,6 +86,11 @@ export interface CommandCenterSnapshot {
     priorityExplanation: string;
     transferStatus?: string;
     transferSummary?: string;
+    transferAudit?: {
+      stability: string;
+      changed: boolean;
+      latestStatus?: string;
+    };
     nextAction: string;
     coachNote: string;
   };
@@ -114,6 +119,7 @@ interface BuildCommandCenterSnapshotArgs {
   patternAttempts?: PatternAttemptSignal[];
   decisionSnapshots?: InterventionDecisionSnapshotRow[];
   retentionSchedules?: RetentionScheduleRow[];
+  transferSnapshots?: TransferEvaluationSnapshotRow[];
   now?: Date;
 }
 
@@ -130,6 +136,7 @@ export function buildCommandCenterSnapshot({
   patternAttempts,
   decisionSnapshots = [],
   retentionSchedules = [],
+  transferSnapshots = [],
   now = new Date(),
 }: BuildCommandCenterSnapshotArgs): CommandCenterSnapshot {
   const playerIntelligence = buildTableSimPlayerIntelligence({
@@ -155,6 +162,7 @@ export function buildCommandCenterSnapshot({
     interventionHistory,
     decisionSnapshots,
     retentionSchedules,
+    transferSnapshots,
     realPlaySignals,
     recommendations: interventionRecommendations,
     now,
@@ -230,6 +238,11 @@ export function buildCommandCenterSnapshot({
       priorityExplanation: leadCase.explanation.priorityExplanation,
       transferStatus: leadCase.transferEvaluation.status,
       transferSummary: leadCase.transferEvaluation.summary,
+      transferAudit: leadCase.transferAudit ? {
+        stability: leadCase.transferAudit.stability,
+        changed: leadCase.transferAudit.latestChanged,
+        latestStatus: leadCase.transferAudit.latestSnapshot?.status,
+      } : undefined,
       nextAction: leadCase.nextStep.nextAction.replace(/_/g, " "),
       coachNote: leadCase.nextStep.coachNote,
     } : undefined,

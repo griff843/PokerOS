@@ -255,6 +255,18 @@ export type RetentionScheduleReason =
   | "regression_watch"
   | "failed_retention_recheck";
 
+export type TransferSnapshotStatus =
+  | "no_real_play_evidence"
+  | "transfer_uncertain"
+  | "transfer_progressing"
+  | "transfer_validated"
+  | "transfer_gap"
+  | "transfer_regressed";
+
+export type TransferSnapshotConfidence = "low" | "medium" | "high";
+export type TransferSnapshotEvidenceSufficiency = "none" | "sparse" | "moderate" | "strong";
+export type TransferSnapshotPressure = "low" | "medium" | "high";
+
 export interface InterventionDecisionSnapshotRow {
   id: string;
   user_id: string;
@@ -296,6 +308,37 @@ export interface RetentionScheduleRow {
   supersedes_schedule_id?: string | null;
   superseded_by_schedule_id?: string | null;
   evidence_json: string;
+}
+
+export interface TransferEvaluationSnapshotRow {
+  id: string;
+  user_id: string;
+  concept_key: string;
+  created_at: string;
+  transfer_status: TransferSnapshotStatus;
+  transfer_confidence: TransferSnapshotConfidence;
+  evidence_sufficiency: TransferSnapshotEvidenceSufficiency;
+  pressure: TransferSnapshotPressure;
+  study_sample_size: number;
+  study_performance?: number | null;
+  study_recent_average?: number | null;
+  study_average?: number | null;
+  study_failed_count: number;
+  real_play_performance?: number | null;
+  real_play_occurrences: number;
+  real_play_review_spot_count: number;
+  real_play_latest_hand_at?: string | null;
+  study_vs_real_play_delta?: number | null;
+  recovery_stage: string;
+  retention_state?: string | null;
+  retention_result?: "pass" | "fail" | null;
+  pattern_types_json: string;
+  supporting_evidence_json: string;
+  risk_flags_json: string;
+  linked_decision_snapshot_id?: string | null;
+  linked_retention_schedule_id?: string | null;
+  source_context?: string | null;
+  supersedes_snapshot_id?: string | null;
 }
 
 export interface InterventionOutcomeRow {
@@ -596,6 +639,129 @@ export function createRetentionSchedule(db: Database.Database, row: RetentionSch
     superseded_by_schedule_id: row.superseded_by_schedule_id ?? null,
   });
   return row;
+}
+
+export function createTransferEvaluationSnapshot(
+  db: Database.Database,
+  row: TransferEvaluationSnapshotRow
+): TransferEvaluationSnapshotRow {
+  db.prepare(`
+    INSERT INTO transfer_evaluation_snapshots (
+      id,
+      user_id,
+      concept_key,
+      created_at,
+      transfer_status,
+      transfer_confidence,
+      evidence_sufficiency,
+      pressure,
+      study_sample_size,
+      study_performance,
+      study_recent_average,
+      study_average,
+      study_failed_count,
+      real_play_performance,
+      real_play_occurrences,
+      real_play_review_spot_count,
+      real_play_latest_hand_at,
+      study_vs_real_play_delta,
+      recovery_stage,
+      retention_state,
+      retention_result,
+      pattern_types_json,
+      supporting_evidence_json,
+      risk_flags_json,
+      linked_decision_snapshot_id,
+      linked_retention_schedule_id,
+      source_context,
+      supersedes_snapshot_id
+    )
+    VALUES (
+      @id,
+      @user_id,
+      @concept_key,
+      @created_at,
+      @transfer_status,
+      @transfer_confidence,
+      @evidence_sufficiency,
+      @pressure,
+      @study_sample_size,
+      @study_performance,
+      @study_recent_average,
+      @study_average,
+      @study_failed_count,
+      @real_play_performance,
+      @real_play_occurrences,
+      @real_play_review_spot_count,
+      @real_play_latest_hand_at,
+      @study_vs_real_play_delta,
+      @recovery_stage,
+      @retention_state,
+      @retention_result,
+      @pattern_types_json,
+      @supporting_evidence_json,
+      @risk_flags_json,
+      @linked_decision_snapshot_id,
+      @linked_retention_schedule_id,
+      @source_context,
+      @supersedes_snapshot_id
+    )
+  `).run({
+    ...row,
+    study_performance: row.study_performance ?? null,
+    study_recent_average: row.study_recent_average ?? null,
+    study_average: row.study_average ?? null,
+    real_play_performance: row.real_play_performance ?? null,
+    real_play_latest_hand_at: row.real_play_latest_hand_at ?? null,
+    study_vs_real_play_delta: row.study_vs_real_play_delta ?? null,
+    retention_state: row.retention_state ?? null,
+    retention_result: row.retention_result ?? null,
+    linked_decision_snapshot_id: row.linked_decision_snapshot_id ?? null,
+    linked_retention_schedule_id: row.linked_retention_schedule_id ?? null,
+    source_context: row.source_context ?? null,
+    supersedes_snapshot_id: row.supersedes_snapshot_id ?? null,
+  });
+  return row;
+}
+
+export function getRecentTransferEvaluationSnapshots(
+  db: Database.Database,
+  userId: string,
+  conceptKey: string,
+  limit = 20
+): TransferEvaluationSnapshotRow[] {
+  return db.prepare(`
+    SELECT * FROM transfer_evaluation_snapshots
+    WHERE user_id = ? AND concept_key = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT ?
+  `).all(userId, conceptKey, limit) as TransferEvaluationSnapshotRow[];
+}
+
+export function getUserTransferEvaluationSnapshots(
+  db: Database.Database,
+  userId: string,
+  limit = 200
+): TransferEvaluationSnapshotRow[] {
+  return db.prepare(`
+    SELECT * FROM transfer_evaluation_snapshots
+    WHERE user_id = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT ?
+  `).all(userId, limit) as TransferEvaluationSnapshotRow[];
+}
+
+export function getLatestTransferEvaluationSnapshot(
+  db: Database.Database,
+  userId: string,
+  conceptKey: string
+): TransferEvaluationSnapshotRow | undefined {
+  return db.prepare(`
+    SELECT * FROM transfer_evaluation_snapshots
+    WHERE user_id = ? AND concept_key = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT 1
+  `).get(userId, conceptKey) as TransferEvaluationSnapshotRow | undefined;
 }
 
 export function getConceptRetentionSchedules(

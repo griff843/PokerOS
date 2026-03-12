@@ -6,8 +6,10 @@ import { toDiagnosisHistoryEntries, toInterventionHistoryEntries } from "../../.
 import { buildConceptCaseMap } from "../../../../lib/concept-case";
 import { buildTableSimInterventionRecommendations } from "../../../../lib/intervention-decision";
 import { buildDiagnosticInsightsFromAttempts, buildPatternAttemptSignals, hydratePersistedStudyAttempts } from "../../../../lib/intervention-support";
-import { loadLocalStudyData } from "../../../../lib/local-study-data";
+import { loadLocalStudyData, resolveDbPath } from "../../../../lib/local-study-data";
 import { buildTableSimPlayerIntelligence } from "../../../../lib/player-intelligence";
+import { syncTransferEvaluationSnapshots } from "../../../../lib/transfer-audit";
+import { openDatabase } from "../../../../../../../packages/db/src";
 
 export async function GET(
   request: NextRequest,
@@ -16,7 +18,7 @@ export async function GET(
   try {
     const { conceptId } = await context.params;
     const conceptKey = decodeURIComponent(conceptId);
-    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots, retentionSchedules } = loadLocalStudyData();
+    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots, retentionSchedules, transferSnapshots: loadedTransferSnapshots } = loadLocalStudyData();
     const activePool = (request.nextUrl.searchParams.get("pool") ?? attempts[0]?.active_pool ?? "baseline") as WeaknessPool;
     const drillMap = new Map(drills.map((drill) => [drill.drill_id, drill]));
     const diagnosisHistory = toDiagnosisHistoryEntries(diagnoses);
@@ -43,12 +45,33 @@ export async function GET(
       realPlaySignals,
       retentionSchedules,
     });
+    let transferSnapshots = loadedTransferSnapshots;
+    const dbPath = resolveDbPath();
+    if (dbPath) {
+      const db = openDatabase(dbPath);
+      try {
+        transferSnapshots = syncTransferEvaluationSnapshots({
+          db,
+          playerIntelligence,
+          diagnosisHistory,
+          interventionHistory,
+          realPlaySignals,
+          retentionSchedules,
+          decisionSnapshots,
+          now,
+          sourceContext: "concept_case_api",
+        });
+      } finally {
+        db.close();
+      }
+    }
     const conceptCase = buildConceptCaseMap({
       playerIntelligence,
       diagnosisHistory,
       interventionHistory,
       decisionSnapshots,
       retentionSchedules,
+      transferSnapshots,
       realPlaySignals,
       recommendations,
       now,
@@ -66,6 +89,7 @@ export async function GET(
       decisionAudit: conceptCase.decisionAudit,
       retention: conceptCase.retention,
       transferEvaluation: conceptCase.transferEvaluation,
+      transferAudit: conceptCase.transferAudit,
       recommendation: conceptCase.recommendation,
       strategyBlueprint: conceptCase.strategyBlueprint,
     });

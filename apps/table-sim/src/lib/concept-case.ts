@@ -18,6 +18,7 @@ import type { InterventionDecisionSnapshotRow, RetentionScheduleRow } from "../.
 import { buildConceptDecisionAuditSummary, type InterventionDecisionAuditSummary } from "./intervention-decision-audit";
 import { buildInterventionStrategyBlueprint } from "./intervention-strategy";
 import { buildConceptRetentionSummary, type RetentionSummary } from "./retention-scheduling";
+import { buildConceptTransferAuditSummary, type TransferAuditSummary } from "./transfer-audit";
 import { buildConceptTransferEvaluationMap } from "./transfer-evaluation";
 
 export interface ConceptCaseBundle {
@@ -27,6 +28,7 @@ export interface ConceptCaseBundle {
   decisionAudit?: InterventionDecisionAuditSummary;
   retention: RetentionSummary;
   transferEvaluation: ConceptTransferEvaluation;
+  transferAudit?: TransferAuditSummary;
   recommendation?: InterventionRecommendation;
   strategyBlueprint?: InterventionStrategyBlueprint;
 }
@@ -39,6 +41,7 @@ export interface ConceptCaseResponse {
   decisionAudit?: InterventionDecisionAuditSummary;
   retention: RetentionSummary;
   transferEvaluation: ConceptTransferEvaluation;
+  transferAudit?: TransferAuditSummary;
   recommendation?: InterventionRecommendation;
   strategyBlueprint?: InterventionStrategyBlueprint;
 }
@@ -49,6 +52,7 @@ export function buildConceptCaseMap(args: {
   interventionHistory?: InterventionHistoryEntry[];
   decisionSnapshots?: InterventionDecisionSnapshotRow[];
   retentionSchedules?: RetentionScheduleRow[];
+  transferSnapshots?: import("../../../../packages/db/src/repository").TransferEvaluationSnapshotRow[];
   realPlaySignals?: RealPlayConceptSignal[];
   recommendations?: InterventionRecommendation[];
   now?: Date;
@@ -76,6 +80,11 @@ export function buildConceptCaseMap(args: {
     const retention = buildConceptRetentionSummary(concept.conceptKey, retentionSchedules, args.now);
     const recommendation = recommendationsByConcept.get(concept.conceptKey);
     const transferEvaluation = transferEvaluations.get(concept.conceptKey);
+    const transferAudit = buildConceptTransferAuditSummary({
+      conceptKey: concept.conceptKey,
+      snapshots: args.transferSnapshots ?? [],
+      currentEvaluation: transferEvaluation,
+    });
     const history = buildConceptCaseHistory({
       conceptKey: concept.conceptKey,
       label: concept.label,
@@ -136,6 +145,7 @@ export function buildConceptCaseMap(args: {
       decisionAudit,
       retention,
       transferEvaluation: transferEvaluation!,
+      transferAudit,
       recommendation,
       strategyBlueprint,
     });
@@ -151,6 +161,7 @@ export function getConceptCaseBundle(args: {
   interventionHistory?: InterventionHistoryEntry[];
   decisionSnapshots?: Parameters<typeof buildConceptDecisionAuditSummary>[0]["decisions"];
   retentionSchedules?: RetentionScheduleRow[];
+  transferSnapshots?: import("../../../../packages/db/src/repository").TransferEvaluationSnapshotRow[];
   realPlaySignals?: RealPlayConceptSignal[];
   recommendations?: InterventionRecommendation[];
   now?: Date;
