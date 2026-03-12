@@ -1,4 +1,4 @@
-# Poker OS
+﻿# Poker OS
 
 Canonical repository: [github.com/griff843/PokerOS](https://github.com/griff843/PokerOS)
 
@@ -95,7 +95,9 @@ The main app is `apps/table-sim` and runs on port `3030`.
 
 ## Key Docs
 
+- [Docs Index](/C:/Users/griff/poker-coach-os/docs/README.md)
 - [Product Constitution](/C:/Users/griff/poker-coach-os/docs/constitution/POKER_OS_PRODUCT_CONSTITUTION.md)
+- [Master Roadmap](/C:/Users/griff/poker-coach-os/docs/roadmaps/MASTER_ROADMAP.md)
 - [Coach Equivalence Roadmap](/C:/Users/griff/poker-coach-os/docs/roadmaps/COACH_EQUIVALENCE_ROADMAP.md)
 - [Coach Equivalence Requirements](/C:/Users/griff/poker-coach-os/docs/roadmaps/COACH_EQUIVALENCE_REQUIREMENTS.md)
 - [Coach Equivalence Gap Tracker](/C:/Users/griff/poker-coach-os/docs/roadmaps/COACH_EQUIVALENCE_GAP_TRACKER.md)
@@ -106,3 +108,4 @@ The main app is `apps/table-sim` and runs on port `3030`.
 Poker OS should feel like a coaching product, not a bag of features.
 
 When adding code, prefer deeper truth and cleaner seams over wider surface area.
+
