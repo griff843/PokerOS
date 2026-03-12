@@ -13,7 +13,7 @@ import {
   type RealPlayConceptSignal,
   type WeaknessPool,
 } from "@poker-coach/core/browser";
-import type { InterventionDecisionSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
+import type { CoachingInputSnapshotRow, InterventionDecisionSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
 import { buildWeaknessExplorerSnapshot, type WeaknessExplorerSnapshot } from "./weakness-explorer";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
 import { buildPrimaryInterventionRecommendation } from "./intervention-decision";
@@ -104,6 +104,12 @@ export interface GrowthProfileSnapshot {
       firstValidatedAt?: string;
       latestGapOrRegressionAt?: string;
     };
+    replay?: {
+      recommendationInputSnapshotId?: string;
+      transferInputSnapshotId?: string;
+      recommendationInterpretation: string;
+      transferInterpretation: string;
+    };
     nextAction: string;
     coachNote: string;
   };
@@ -137,6 +143,7 @@ export function buildGrowthProfileSnapshot(args: {
   decisionSnapshots?: InterventionDecisionSnapshotRow[];
   retentionSchedules?: RetentionScheduleRow[];
   transferSnapshots?: TransferEvaluationSnapshotRow[];
+  inputSnapshots?: CoachingInputSnapshotRow[];
   now?: Date;
 }): GrowthProfileSnapshot {
   const now = args.now ?? new Date();
@@ -213,6 +220,7 @@ export function buildGrowthProfileSnapshot(args: {
     decisionSnapshots: args.decisionSnapshots,
     retentionSchedules: args.retentionSchedules,
     transferSnapshots: args.transferSnapshots,
+    inputSnapshots: args.inputSnapshots,
     realPlaySignals: args.realPlaySignals,
     recommendations: nextInterventionDecision ? [nextInterventionDecision] : [],
     now,
@@ -329,6 +337,12 @@ export function buildGrowthProfileSnapshot(args: {
         firstValidatedAt: featuredConceptCase.transferAudit.firstValidatedAt,
         latestGapOrRegressionAt: featuredConceptCase.transferAudit.latestGapOrRegressionAt,
       } : undefined,
+      replay: {
+        recommendationInputSnapshotId: featuredConceptCase.replayMetadata.recommendation.latestInputSnapshot?.id,
+        transferInputSnapshotId: featuredConceptCase.replayMetadata.transfer.latestInputSnapshot?.id,
+        recommendationInterpretation: featuredConceptCase.replayMetadata.recommendation.interpretation,
+        transferInterpretation: featuredConceptCase.replayMetadata.transfer.interpretation,
+      },
       nextAction: featuredConceptCase.nextStep.nextAction.replace(/_/g, " "),
       coachNote: featuredConceptCase.nextStep.coachNote,
     } : undefined,

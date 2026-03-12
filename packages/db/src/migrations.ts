@@ -144,6 +144,27 @@ const MIGRATIONS: string[] = [
     supersedes_snapshot_id TEXT REFERENCES transfer_evaluation_snapshots(id)
   )`,
 
+  `CREATE TABLE IF NOT EXISTS coaching_input_snapshots (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    concept_key TEXT NOT NULL,
+    snapshot_type TEXT NOT NULL,
+    schema_version TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    payload_json TEXT NOT NULL,
+    recovery_stage TEXT NOT NULL,
+    retention_state TEXT,
+    pattern_types_json TEXT NOT NULL DEFAULT '[]',
+    diagnosis_count INTEGER NOT NULL DEFAULT 0,
+    intervention_count INTEGER NOT NULL DEFAULT 0,
+    study_sample_size INTEGER NOT NULL DEFAULT 0,
+    real_play_occurrences INTEGER NOT NULL DEFAULT 0,
+    linked_decision_snapshot_id TEXT REFERENCES intervention_decision_snapshots(id),
+    linked_transfer_snapshot_id TEXT REFERENCES transfer_evaluation_snapshots(id),
+    source_context TEXT,
+    supersedes_snapshot_id TEXT REFERENCES coaching_input_snapshots(id)
+  )`,
+
   `CREATE TABLE IF NOT EXISTS intervention_outcomes (
     id TEXT PRIMARY KEY,
     intervention_id TEXT NOT NULL UNIQUE REFERENCES coaching_interventions(id),
@@ -215,6 +236,8 @@ const MIGRATIONS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_retention_schedules_status ON retention_schedules(user_id, status, scheduled_for ASC)`,
   `CREATE INDEX IF NOT EXISTS idx_transfer_snapshots_concept ON transfer_evaluation_snapshots(user_id, concept_key, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_transfer_snapshots_created ON transfer_evaluation_snapshots(user_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_coaching_input_snapshots_concept ON coaching_input_snapshots(user_id, concept_key, snapshot_type, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_coaching_input_snapshots_created ON coaching_input_snapshots(user_id, snapshot_type, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_srs_due ON srs(due_at)`,
   `CREATE INDEX IF NOT EXISTS idx_hand_imports_created ON hand_imports(created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_imported_hands_played ON imported_hands(played_at DESC)`,

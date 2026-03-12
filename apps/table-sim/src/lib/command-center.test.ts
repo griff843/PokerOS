@@ -213,6 +213,7 @@ describe("command center snapshot", () => {
     expect(snapshot.leadConceptCase?.statusLabel).toBeTruthy();
     expect(snapshot.leadConceptCase?.transferStatus).toBeTruthy();
     expect(snapshot.leadConceptCase?.transferAudit?.stability).toBeTruthy();
+    expect(snapshot.leadConceptCase?.replay?.transferInterpretation).toBeTruthy();
     expect(snapshot.leadConceptCase?.nextAction.length).toBeGreaterThan(0);
     expect(snapshot.interventions.active[0]?.status).toContain("Assigned");
     expect(snapshot.interventions.completed[0]?.status).toBe("Recovered");

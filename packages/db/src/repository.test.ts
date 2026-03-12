@@ -8,6 +8,7 @@ import {
   completeIntervention,
   completeRetentionSchedule,
   createDiagnosis,
+  createCoachingInputSnapshot,
   createIntervention,
   createInterventionDecisionSnapshot,
   createRetentionSchedule,
@@ -20,11 +21,14 @@ import {
   getInterventionOutcome,
   getLatestInterventionDecisionSnapshot,
   getLatestRetentionSchedule,
+  getLatestCoachingInputSnapshot,
   getLatestTransferEvaluationSnapshot,
   getRecentHandImports,
+  getRecentCoachingInputSnapshots,
   getRecentInterventionDecisionSnapshots,
   getRecentTransferEvaluationSnapshots,
   getUserDiagnosisHistory,
+  getUserCoachingInputSnapshots,
   getUserInterventionDecisionSnapshots,
   getUserInterventions,
   getUserRetentionSchedules,
@@ -506,5 +510,65 @@ describe("transfer evaluation snapshots", () => {
     expect(userHistory.map((entry) => entry.id)).toEqual(["transfer-2", "transfer-1"]);
     expect(conceptHistory[0]?.linked_decision_snapshot_id).toBeNull();
     expect(conceptHistory[0]?.supersedes_snapshot_id).toBe("transfer-1");
+  });
+});
+
+describe("coaching input snapshots", () => {
+  it("stores and reads normalized input snapshots in newest-first order", () => {
+    const db = openDatabase(createTempDbPath());
+
+    createCoachingInputSnapshot(db, {
+      id: "input-1",
+      user_id: "local_user",
+      concept_key: "river_bluff_catching",
+      snapshot_type: "intervention_recommendation",
+      schema_version: "intervention_recommendation_input.v1",
+      created_at: "2026-03-12T12:00:00.000Z",
+      payload_json: JSON.stringify({ schemaVersion: "intervention_recommendation_input.v1", conceptKey: "river_bluff_catching" }),
+      recovery_stage: "active_repair",
+      retention_state: "due",
+      pattern_types_json: JSON.stringify(["persistent_threshold_leak"]),
+      diagnosis_count: 2,
+      intervention_count: 1,
+      study_sample_size: 6,
+      real_play_occurrences: 2,
+      linked_decision_snapshot_id: null,
+      linked_transfer_snapshot_id: null,
+      source_context: "intervention_plan_api",
+      supersedes_snapshot_id: null,
+    });
+
+    createCoachingInputSnapshot(db, {
+      id: "input-2",
+      user_id: "local_user",
+      concept_key: "river_bluff_catching",
+      snapshot_type: "transfer_evaluation",
+      schema_version: "transfer_evaluation_input.v1",
+      created_at: "2026-03-12T12:30:00.000Z",
+      payload_json: JSON.stringify({ schemaVersion: "transfer_evaluation_input.v1", conceptKey: "river_bluff_catching" }),
+      recovery_stage: "recovered",
+      retention_state: "completed_pass",
+      pattern_types_json: JSON.stringify(["real_play_transfer_gap"]),
+      diagnosis_count: 2,
+      intervention_count: 1,
+      study_sample_size: 7,
+      real_play_occurrences: 4,
+      linked_decision_snapshot_id: null,
+      linked_transfer_snapshot_id: null,
+      source_context: "concept_case_api",
+      supersedes_snapshot_id: "input-1",
+    });
+
+    const latestRecommendation = getLatestCoachingInputSnapshot(db, "local_user", "river_bluff_catching", "intervention_recommendation");
+    const latestTransfer = getLatestCoachingInputSnapshot(db, "local_user", "river_bluff_catching", "transfer_evaluation");
+    const conceptSnapshots = getRecentCoachingInputSnapshots(db, "local_user", "river_bluff_catching", undefined, 10);
+    const userSnapshots = getUserCoachingInputSnapshots(db, "local_user");
+    db.close();
+
+    expect(latestRecommendation?.id).toBe("input-1");
+    expect(latestTransfer?.id).toBe("input-2");
+    expect(conceptSnapshots.map((entry) => entry.id)).toEqual(["input-2", "input-1"]);
+    expect(userSnapshots.map((entry) => entry.id)).toEqual(["input-2", "input-1"]);
+    expect(conceptSnapshots[0]?.linked_transfer_snapshot_id).toBeNull();
   });
 });

@@ -2,14 +2,16 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { buildAttemptInsights, buildRealPlayConceptSignals, type WeaknessPool } from "@poker-coach/core/browser";
-import { toDiagnosisHistoryEntries, toInterventionHistoryEntries } from "../../../../lib/coaching-memory";
+import { getLocalCoachingUserId, toDiagnosisHistoryEntries, toInterventionHistoryEntries } from "../../../../lib/coaching-memory";
 import { buildConceptCaseMap } from "../../../../lib/concept-case";
 import { buildTableSimInterventionRecommendations } from "../../../../lib/intervention-decision";
+import { syncInterventionDecisionSnapshots } from "../../../../lib/intervention-decision-audit";
 import { buildDiagnosticInsightsFromAttempts, buildPatternAttemptSignals, hydratePersistedStudyAttempts } from "../../../../lib/intervention-support";
 import { loadLocalStudyData, resolveDbPath } from "../../../../lib/local-study-data";
 import { buildTableSimPlayerIntelligence } from "../../../../lib/player-intelligence";
 import { syncTransferEvaluationSnapshots } from "../../../../lib/transfer-audit";
 import { openDatabase } from "../../../../../../../packages/db/src";
+import { getUserCoachingInputSnapshots } from "../../../../../../../packages/db/src/repository";
 
 export async function GET(
   request: NextRequest,
@@ -18,7 +20,7 @@ export async function GET(
   try {
     const { conceptId } = await context.params;
     const conceptKey = decodeURIComponent(conceptId);
-    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots, retentionSchedules, transferSnapshots: loadedTransferSnapshots } = loadLocalStudyData();
+    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots: loadedDecisionSnapshots, retentionSchedules, transferSnapshots: loadedTransferSnapshots, inputSnapshots: loadedInputSnapshots } = loadLocalStudyData();
     const activePool = (request.nextUrl.searchParams.get("pool") ?? attempts[0]?.active_pool ?? "baseline") as WeaknessPool;
     const drillMap = new Map(drills.map((drill) => [drill.drill_id, drill]));
     const diagnosisHistory = toDiagnosisHistoryEntries(diagnoses);
@@ -45,11 +47,24 @@ export async function GET(
       realPlaySignals,
       retentionSchedules,
     });
+    let decisionSnapshots = loadedDecisionSnapshots;
     let transferSnapshots = loadedTransferSnapshots;
+    let inputSnapshots = loadedInputSnapshots;
     const dbPath = resolveDbPath();
     if (dbPath) {
       const db = openDatabase(dbPath);
       try {
+        decisionSnapshots = syncInterventionDecisionSnapshots({
+          db,
+          playerIntelligence,
+          recommendations,
+          diagnosisHistory,
+          interventionHistory,
+          realPlaySignals,
+          retentionSchedules,
+          now,
+          sourceContext: "concept_case_api",
+        });
         transferSnapshots = syncTransferEvaluationSnapshots({
           db,
           playerIntelligence,
@@ -61,6 +76,7 @@ export async function GET(
           now,
           sourceContext: "concept_case_api",
         });
+        inputSnapshots = getUserCoachingInputSnapshots(db, getLocalCoachingUserId());
       } finally {
         db.close();
       }
@@ -72,6 +88,7 @@ export async function GET(
       decisionSnapshots,
       retentionSchedules,
       transferSnapshots,
+      inputSnapshots,
       realPlaySignals,
       recommendations,
       now,
@@ -90,6 +107,7 @@ export async function GET(
       retention: conceptCase.retention,
       transferEvaluation: conceptCase.transferEvaluation,
       transferAudit: conceptCase.transferAudit,
+      replayMetadata: conceptCase.replayMetadata,
       recommendation: conceptCase.recommendation,
       strategyBlueprint: conceptCase.strategyBlueprint,
     });

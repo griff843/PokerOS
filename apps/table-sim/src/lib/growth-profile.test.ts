@@ -148,6 +148,7 @@ describe("growth profile snapshot", () => {
     expect(snapshot.featuredConceptCase?.statusLabel).toBeTruthy();
     expect(snapshot.featuredConceptCase?.transferStatus).toBeTruthy();
     expect(snapshot.featuredConceptCase?.transferAudit?.stability).toBeTruthy();
+    expect(snapshot.featuredConceptCase?.replay?.transferInterpretation).toBeTruthy();
     expect(snapshot.featuredConceptCase?.nextAction.length).toBeGreaterThan(0);
     expect(snapshot.interventionRecommendation?.plan.recommendedSessionTitle.length).toBeGreaterThan(0);
     expect(snapshot.nextActions[0]?.href).toBe("/app/weaknesses");

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { InterventionHistoryEntry, InterventionRecommendation, PlayerIntelligenceSnapshot, RealPlayConceptSignal } from "@poker-coach/core/browser";
-import type { InterventionDecisionSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
+import type { CoachingInputSnapshotRow, InterventionDecisionSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
 import { buildConceptCaseMap } from "./concept-case";
 
 function makePlayerIntelligence(): PlayerIntelligenceSnapshot {
@@ -192,6 +192,26 @@ describe("concept case map", () => {
       source_context: "concept_case_api",
       supersedes_snapshot_id: null,
     }];
+    const inputSnapshots: CoachingInputSnapshotRow[] = [{
+      id: "input-1",
+      user_id: "local_user",
+      concept_key: "river_bluff_catching",
+      snapshot_type: "transfer_evaluation",
+      schema_version: "transfer_evaluation_input.v1",
+      created_at: "2026-03-12T11:54:00.000Z",
+      payload_json: JSON.stringify({ schemaVersion: "transfer_evaluation_input.v1", conceptKey: "river_bluff_catching" }),
+      recovery_stage: "active_repair",
+      retention_state: "upcoming",
+      pattern_types_json: JSON.stringify(["persistent_threshold_leak"]),
+      diagnosis_count: 1,
+      intervention_count: 1,
+      study_sample_size: 6,
+      real_play_occurrences: 2,
+      linked_decision_snapshot_id: "d1",
+      linked_transfer_snapshot_id: "t1",
+      source_context: "concept_case_api",
+      supersedes_snapshot_id: null,
+    }];
     const interventionHistory: InterventionHistoryEntry[] = [{
       id: "i1",
       conceptKey: "river_bluff_catching",
@@ -219,6 +239,7 @@ describe("concept case map", () => {
       decisionSnapshots: decisions,
       retentionSchedules,
       transferSnapshots,
+      inputSnapshots,
       realPlaySignals,
       recommendations,
       now: new Date("2026-03-12T12:00:00.000Z"),
@@ -232,6 +253,7 @@ describe("concept case map", () => {
     expect(bundle?.transferEvaluation.status).toBe("transfer_uncertain");
     expect(bundle?.history.transferSummary?.status).toBe("transfer_uncertain");
     expect(bundle?.transferAudit?.latestSnapshot?.status).toBe("transfer_uncertain");
+    expect(bundle?.replayMetadata.transfer.latestInputSnapshot?.id).toBe("input-1");
     expect(bundle?.strategyBlueprint?.strategyType).toBe("threshold_repair");
     expect(bundle?.strategyBlueprint?.title.length).toBeGreaterThan(0);
   });

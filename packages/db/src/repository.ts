@@ -266,6 +266,7 @@ export type TransferSnapshotStatus =
 export type TransferSnapshotConfidence = "low" | "medium" | "high";
 export type TransferSnapshotEvidenceSufficiency = "none" | "sparse" | "moderate" | "strong";
 export type TransferSnapshotPressure = "low" | "medium" | "high";
+export type CoachingInputSnapshotType = "intervention_recommendation" | "transfer_evaluation";
 
 export interface InterventionDecisionSnapshotRow {
   id: string;
@@ -337,6 +338,27 @@ export interface TransferEvaluationSnapshotRow {
   risk_flags_json: string;
   linked_decision_snapshot_id?: string | null;
   linked_retention_schedule_id?: string | null;
+  source_context?: string | null;
+  supersedes_snapshot_id?: string | null;
+}
+
+export interface CoachingInputSnapshotRow {
+  id: string;
+  user_id: string;
+  concept_key: string;
+  snapshot_type: CoachingInputSnapshotType;
+  schema_version: string;
+  created_at: string;
+  payload_json: string;
+  recovery_stage: string;
+  retention_state?: string | null;
+  pattern_types_json: string;
+  diagnosis_count: number;
+  intervention_count: number;
+  study_sample_size: number;
+  real_play_occurrences: number;
+  linked_decision_snapshot_id?: string | null;
+  linked_transfer_snapshot_id?: string | null;
   source_context?: string | null;
   supersedes_snapshot_id?: string | null;
 }
@@ -762,6 +784,123 @@ export function getLatestTransferEvaluationSnapshot(
     ORDER BY created_at DESC, id DESC
     LIMIT 1
   `).get(userId, conceptKey) as TransferEvaluationSnapshotRow | undefined;
+}
+
+export function createCoachingInputSnapshot(
+  db: Database.Database,
+  row: CoachingInputSnapshotRow
+): CoachingInputSnapshotRow {
+  db.prepare(`
+    INSERT INTO coaching_input_snapshots (
+      id,
+      user_id,
+      concept_key,
+      snapshot_type,
+      schema_version,
+      created_at,
+      payload_json,
+      recovery_stage,
+      retention_state,
+      pattern_types_json,
+      diagnosis_count,
+      intervention_count,
+      study_sample_size,
+      real_play_occurrences,
+      linked_decision_snapshot_id,
+      linked_transfer_snapshot_id,
+      source_context,
+      supersedes_snapshot_id
+    )
+    VALUES (
+      @id,
+      @user_id,
+      @concept_key,
+      @snapshot_type,
+      @schema_version,
+      @created_at,
+      @payload_json,
+      @recovery_stage,
+      @retention_state,
+      @pattern_types_json,
+      @diagnosis_count,
+      @intervention_count,
+      @study_sample_size,
+      @real_play_occurrences,
+      @linked_decision_snapshot_id,
+      @linked_transfer_snapshot_id,
+      @source_context,
+      @supersedes_snapshot_id
+    )
+  `).run({
+    ...row,
+    retention_state: row.retention_state ?? null,
+    linked_decision_snapshot_id: row.linked_decision_snapshot_id ?? null,
+    linked_transfer_snapshot_id: row.linked_transfer_snapshot_id ?? null,
+    source_context: row.source_context ?? null,
+    supersedes_snapshot_id: row.supersedes_snapshot_id ?? null,
+  });
+  return row;
+}
+
+export function getRecentCoachingInputSnapshots(
+  db: Database.Database,
+  userId: string,
+  conceptKey: string,
+  snapshotType?: CoachingInputSnapshotType,
+  limit = 20
+): CoachingInputSnapshotRow[] {
+  if (snapshotType) {
+    return db.prepare(`
+      SELECT * FROM coaching_input_snapshots
+      WHERE user_id = ? AND concept_key = ? AND snapshot_type = ?
+      ORDER BY created_at DESC, id DESC
+      LIMIT ?
+    `).all(userId, conceptKey, snapshotType, limit) as CoachingInputSnapshotRow[];
+  }
+
+  return db.prepare(`
+    SELECT * FROM coaching_input_snapshots
+    WHERE user_id = ? AND concept_key = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT ?
+  `).all(userId, conceptKey, limit) as CoachingInputSnapshotRow[];
+}
+
+export function getLatestCoachingInputSnapshot(
+  db: Database.Database,
+  userId: string,
+  conceptKey: string,
+  snapshotType: CoachingInputSnapshotType
+): CoachingInputSnapshotRow | undefined {
+  return db.prepare(`
+    SELECT * FROM coaching_input_snapshots
+    WHERE user_id = ? AND concept_key = ? AND snapshot_type = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT 1
+  `).get(userId, conceptKey, snapshotType) as CoachingInputSnapshotRow | undefined;
+}
+
+export function getUserCoachingInputSnapshots(
+  db: Database.Database,
+  userId: string,
+  snapshotType?: CoachingInputSnapshotType,
+  limit = 300
+): CoachingInputSnapshotRow[] {
+  if (snapshotType) {
+    return db.prepare(`
+      SELECT * FROM coaching_input_snapshots
+      WHERE user_id = ? AND snapshot_type = ?
+      ORDER BY created_at DESC, id DESC
+      LIMIT ?
+    `).all(userId, snapshotType, limit) as CoachingInputSnapshotRow[];
+  }
+
+  return db.prepare(`
+    SELECT * FROM coaching_input_snapshots
+    WHERE user_id = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT ?
+  `).all(userId, limit) as CoachingInputSnapshotRow[];
 }
 
 export function getConceptRetentionSchedules(

@@ -16,6 +16,7 @@ import {
 } from "@poker-coach/core/browser";
 import type { InterventionDecisionSnapshotRow, RetentionScheduleRow } from "../../../../packages/db/src/repository";
 import { buildConceptDecisionAuditSummary, type InterventionDecisionAuditSummary } from "./intervention-decision-audit";
+import { buildEngineReplaySummary, type EngineReplaySummary } from "./input-snapshots";
 import { buildInterventionStrategyBlueprint } from "./intervention-strategy";
 import { buildConceptRetentionSummary, type RetentionSummary } from "./retention-scheduling";
 import { buildConceptTransferAuditSummary, type TransferAuditSummary } from "./transfer-audit";
@@ -29,6 +30,10 @@ export interface ConceptCaseBundle {
   retention: RetentionSummary;
   transferEvaluation: ConceptTransferEvaluation;
   transferAudit?: TransferAuditSummary;
+  replayMetadata: {
+    recommendation: EngineReplaySummary;
+    transfer: EngineReplaySummary;
+  };
   recommendation?: InterventionRecommendation;
   strategyBlueprint?: InterventionStrategyBlueprint;
 }
@@ -42,6 +47,10 @@ export interface ConceptCaseResponse {
   retention: RetentionSummary;
   transferEvaluation: ConceptTransferEvaluation;
   transferAudit?: TransferAuditSummary;
+  replayMetadata: {
+    recommendation: EngineReplaySummary;
+    transfer: EngineReplaySummary;
+  };
   recommendation?: InterventionRecommendation;
   strategyBlueprint?: InterventionStrategyBlueprint;
 }
@@ -53,6 +62,7 @@ export function buildConceptCaseMap(args: {
   decisionSnapshots?: InterventionDecisionSnapshotRow[];
   retentionSchedules?: RetentionScheduleRow[];
   transferSnapshots?: import("../../../../packages/db/src/repository").TransferEvaluationSnapshotRow[];
+  inputSnapshots?: import("../../../../packages/db/src/repository").CoachingInputSnapshotRow[];
   realPlaySignals?: RealPlayConceptSignal[];
   recommendations?: InterventionRecommendation[];
   now?: Date;
@@ -85,6 +95,20 @@ export function buildConceptCaseMap(args: {
       snapshots: args.transferSnapshots ?? [],
       currentEvaluation: transferEvaluation,
     });
+    const replayMetadata = {
+      recommendation: buildEngineReplaySummary({
+        conceptKey: concept.conceptKey,
+        snapshotType: "intervention_recommendation",
+        inputSnapshots: args.inputSnapshots ?? [],
+        outputSnapshots: args.decisionSnapshots ?? [],
+      }),
+      transfer: buildEngineReplaySummary({
+        conceptKey: concept.conceptKey,
+        snapshotType: "transfer_evaluation",
+        inputSnapshots: args.inputSnapshots ?? [],
+        outputSnapshots: args.transferSnapshots ?? [],
+      }),
+    };
     const history = buildConceptCaseHistory({
       conceptKey: concept.conceptKey,
       label: concept.label,
@@ -146,6 +170,7 @@ export function buildConceptCaseMap(args: {
       retention,
       transferEvaluation: transferEvaluation!,
       transferAudit,
+      replayMetadata,
       recommendation,
       strategyBlueprint,
     });
@@ -162,6 +187,7 @@ export function getConceptCaseBundle(args: {
   decisionSnapshots?: Parameters<typeof buildConceptDecisionAuditSummary>[0]["decisions"];
   retentionSchedules?: RetentionScheduleRow[];
   transferSnapshots?: import("../../../../packages/db/src/repository").TransferEvaluationSnapshotRow[];
+  inputSnapshots?: import("../../../../packages/db/src/repository").CoachingInputSnapshotRow[];
   realPlaySignals?: RealPlayConceptSignal[];
   recommendations?: InterventionRecommendation[];
   now?: Date;

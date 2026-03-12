@@ -18,6 +18,12 @@ import {
   getUserTransferEvaluationSnapshots,
 } from "../../../../packages/db/src/repository";
 import { getLocalCoachingUserId } from "./coaching-memory";
+import {
+  TRANSFER_INPUT_SCHEMA_VERSION,
+  buildTransferInputSnapshotPayloadMap,
+  persistCoachingInputSnapshot,
+  type TransferEvaluationInputSnapshotPayload,
+} from "./input-snapshots";
 import { buildConceptRetentionSummary } from "./retention-scheduling";
 import { buildConceptTransferEvaluationMap } from "./transfer-evaluation";
 
@@ -69,6 +75,7 @@ export interface TransferAuditSummary {
 export function persistTransferEvaluationSnapshot(args: {
   db: Database.Database;
   evaluation: ConceptTransferEvaluation;
+  inputPayload?: TransferEvaluationInputSnapshotPayload;
   studySampleSize: number;
   studyRecentAverage?: number;
   studyAverage?: number;
@@ -88,6 +95,27 @@ export function persistTransferEvaluationSnapshot(args: {
   const latest = getLatestTransferEvaluationSnapshot(args.db, userId, args.evaluation.conceptKey);
 
   if (latest && shouldSuppressTransferSnapshot(latest, args.evaluation, createdAt)) {
+    if (args.inputPayload) {
+      persistCoachingInputSnapshot({
+        db: args.db,
+        conceptKey: args.evaluation.conceptKey,
+        snapshotType: "transfer_evaluation",
+        schemaVersion: TRANSFER_INPUT_SCHEMA_VERSION,
+        payload: args.inputPayload,
+        recoveryStage: args.recoveryStage,
+        retentionState: args.retentionState ?? null,
+        patternTypes: args.patternTypes,
+        diagnosisCount: args.inputPayload.diagnosisSummary.count,
+        interventionCount: args.inputPayload.interventionSummary.count,
+        studySampleSize: args.inputPayload.studySummary.sampleSize,
+        realPlayOccurrences: args.inputPayload.realPlaySummary.occurrences,
+        linkedTransferSnapshotId: latest.id,
+        linkedDecisionSnapshotId: args.linkedDecisionSnapshotId ?? null,
+        sourceContext: args.sourceContext,
+        createdAt,
+        userId,
+      });
+    }
     return {
       record: toTransferAuditRecord(latest),
       suppressed: true,
@@ -126,6 +154,27 @@ export function persistTransferEvaluationSnapshot(args: {
   };
 
   createTransferEvaluationSnapshot(args.db, row);
+  if (args.inputPayload) {
+    persistCoachingInputSnapshot({
+      db: args.db,
+      conceptKey: args.evaluation.conceptKey,
+      snapshotType: "transfer_evaluation",
+      schemaVersion: TRANSFER_INPUT_SCHEMA_VERSION,
+      payload: args.inputPayload,
+      recoveryStage: args.recoveryStage,
+      retentionState: args.retentionState ?? null,
+      patternTypes: args.patternTypes,
+      diagnosisCount: args.inputPayload.diagnosisSummary.count,
+      interventionCount: args.inputPayload.interventionSummary.count,
+      studySampleSize: args.inputPayload.studySummary.sampleSize,
+      realPlayOccurrences: args.inputPayload.realPlaySummary.occurrences,
+      linkedTransferSnapshotId: row.id,
+      linkedDecisionSnapshotId: args.linkedDecisionSnapshotId ?? null,
+      sourceContext: args.sourceContext,
+      createdAt,
+      userId,
+    });
+  }
   return {
     record: toTransferAuditRecord(row),
     suppressed: false,
@@ -153,6 +202,13 @@ export function syncTransferEvaluationSnapshots(args: {
     retentionSchedules: args.retentionSchedules,
     now: args.now,
   });
+  const inputPayloads = buildTransferInputSnapshotPayloadMap({
+    playerIntelligence: args.playerIntelligence,
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory: args.interventionHistory,
+    realPlaySignals: args.realPlaySignals,
+    retentionSchedules: args.retentionSchedules,
+  });
 
   for (const concept of args.playerIntelligence.concepts) {
     const evaluation = transferEvaluations.get(concept.conceptKey);
@@ -168,6 +224,7 @@ export function syncTransferEvaluationSnapshots(args: {
     persistTransferEvaluationSnapshot({
       db: args.db,
       evaluation,
+      inputPayload: inputPayloads.get(concept.conceptKey),
       studySampleSize: concept.sampleSize,
       studyRecentAverage: concept.recentAverage,
       studyAverage: concept.averageScore,

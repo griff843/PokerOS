@@ -2,20 +2,22 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { buildAttemptInsights, buildRealPlayConceptSignals, type WeaknessPool } from "@poker-coach/core/browser";
-import { ensureInterventionForPlan, toDiagnosisHistoryEntries, toInterventionHistoryEntries } from "../../../lib/coaching-memory";
+import { ensureInterventionForPlan, getLocalCoachingUserId, toDiagnosisHistoryEntries, toInterventionHistoryEntries } from "../../../lib/coaching-memory";
 import { buildConceptCaseMap } from "../../../lib/concept-case";
 import { buildTableSimInterventionRecommendations } from "../../../lib/intervention-decision";
+import { syncInterventionDecisionSnapshots } from "../../../lib/intervention-decision-audit";
 import { buildDiagnosticInsightsFromAttempts, buildPatternAttemptSignals, hydratePersistedStudyAttempts } from "../../../lib/intervention-support";
 import { loadLocalStudyData, resolveDbPath } from "../../../lib/local-study-data";
 import { buildTableSimPlayerIntelligence } from "../../../lib/player-intelligence";
 import { createRecommendedInterventionDecision, createRecommendedInterventionPlan } from "../../../lib/session-plan-server";
 import { syncTransferEvaluationSnapshots } from "../../../lib/transfer-audit";
 import { openDatabase } from "../../../../../../packages/db/src";
+import { getUserCoachingInputSnapshots } from "../../../../../../packages/db/src/repository";
 import { buildConceptRetentionSummary } from "../../../lib/retention-scheduling";
 
 export async function GET(request: NextRequest) {
   try {
-    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots, retentionSchedules, transferSnapshots: loadedTransferSnapshots } = loadLocalStudyData();
+    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots: loadedDecisionSnapshots, retentionSchedules, transferSnapshots: loadedTransferSnapshots, inputSnapshots: loadedInputSnapshots } = loadLocalStudyData();
     const activePool = (request.nextUrl.searchParams.get("pool") ?? attempts[0]?.active_pool ?? "baseline") as WeaknessPool;
     const now = new Date();
     const diagnosisHistory = toDiagnosisHistoryEntries(diagnoses);
@@ -88,10 +90,23 @@ export async function GET(request: NextRequest) {
       realPlaySignals,
       retentionSchedules,
     });
+    let decisionSnapshots = loadedDecisionSnapshots;
     let transferSnapshots = loadedTransferSnapshots;
+    let inputSnapshots = loadedInputSnapshots;
     if (dbPath) {
       const db = openDatabase(dbPath);
       try {
+        decisionSnapshots = syncInterventionDecisionSnapshots({
+          db,
+          playerIntelligence,
+          recommendations,
+          diagnosisHistory,
+          interventionHistory,
+          realPlaySignals,
+          retentionSchedules,
+          now,
+          sourceContext: "intervention_plan_api",
+        });
         transferSnapshots = syncTransferEvaluationSnapshots({
           db,
           playerIntelligence,
@@ -103,6 +118,7 @@ export async function GET(request: NextRequest) {
           now,
           sourceContext: "intervention_plan_api",
         });
+        inputSnapshots = getUserCoachingInputSnapshots(db, getLocalCoachingUserId());
       } finally {
         db.close();
       }
@@ -115,6 +131,7 @@ export async function GET(request: NextRequest) {
           decisionSnapshots,
           retentionSchedules,
           transferSnapshots,
+          inputSnapshots,
           realPlaySignals,
           recommendations,
           now,
@@ -128,6 +145,7 @@ export async function GET(request: NextRequest) {
       conceptCase,
       transferEvaluation: conceptCase?.transferEvaluation,
       transferAudit: conceptCase?.transferAudit,
+      replayMetadata: conceptCase?.replayMetadata,
       strategyBlueprint: conceptCase?.strategyBlueprint,
     });
   } catch (error) {

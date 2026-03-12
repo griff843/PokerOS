@@ -1,17 +1,29 @@
 import { randomUUID } from "node:crypto";
 import type Database from "better-sqlite3";
 import type {
+  InterventionHistoryEntry,
   InterventionRecommendation,
   InterventionRecommendationReasonCode,
   InterventionSupportingSignal,
+  PlayerDiagnosisHistoryEntry,
+  PlayerIntelligenceSnapshot,
+  RealPlayConceptSignal,
 } from "@poker-coach/core/browser";
 import {
   createInterventionDecisionSnapshot,
   getLatestInterventionDecisionSnapshot,
+  getUserInterventionDecisionSnapshots,
   markInterventionDecisionActedUpon,
   type InterventionDecisionSnapshotRow,
+  type RetentionScheduleRow,
 } from "../../../../packages/db/src/repository";
 import { getLocalCoachingUserId } from "./coaching-memory";
+import {
+  INTERVENTION_INPUT_SCHEMA_VERSION,
+  buildRecommendationInputSnapshotPayloadMap,
+  persistCoachingInputSnapshot,
+  type InterventionRecommendationInputSnapshotPayload,
+} from "./input-snapshots";
 
 const DECISION_DUPLICATE_WINDOW_MS = 15 * 60 * 1000;
 
@@ -53,6 +65,7 @@ export interface InterventionDecisionAuditSummary {
 export interface PersistInterventionDecisionSnapshotArgs {
   db: Database.Database;
   recommendation: InterventionRecommendation;
+  inputPayload?: InterventionRecommendationInputSnapshotPayload;
   createdAt?: string;
   sourceContext?: string;
   userId?: string;
@@ -71,6 +84,26 @@ export function persistInterventionDecisionSnapshot(
   const latest = getLatestInterventionDecisionSnapshot(args.db, userId, args.recommendation.conceptKey);
 
   if (latest && shouldSuppressDecisionSnapshot(latest, args.recommendation, createdAt)) {
+    if (args.inputPayload) {
+      persistCoachingInputSnapshot({
+        db: args.db,
+        conceptKey: args.recommendation.conceptKey,
+        snapshotType: "intervention_recommendation",
+        schemaVersion: INTERVENTION_INPUT_SCHEMA_VERSION,
+        payload: args.inputPayload,
+        recoveryStage: latest.recovery_stage,
+        retentionState: args.inputPayload.retentionSummary.latestState ?? null,
+        patternTypes: args.inputPayload.patternSummary.types,
+        diagnosisCount: args.inputPayload.diagnosisSummary.count,
+        interventionCount: args.inputPayload.interventionSummary.count,
+        studySampleSize: 0,
+        realPlayOccurrences: args.inputPayload.transferSummary?.realPlayOccurrences ?? 0,
+        linkedDecisionSnapshotId: latest.id,
+        sourceContext: args.sourceContext,
+        createdAt,
+        userId,
+      });
+    }
     return {
       record: toInterventionDecisionAuditRecord(latest),
       suppressed: true,
@@ -102,10 +135,70 @@ export function persistInterventionDecisionSnapshot(
   };
 
   createInterventionDecisionSnapshot(args.db, row);
+  if (args.inputPayload) {
+    persistCoachingInputSnapshot({
+      db: args.db,
+      conceptKey: args.recommendation.conceptKey,
+      snapshotType: "intervention_recommendation",
+      schemaVersion: INTERVENTION_INPUT_SCHEMA_VERSION,
+      payload: args.inputPayload,
+      recoveryStage: row.recovery_stage,
+      retentionState: args.inputPayload.retentionSummary.latestState ?? null,
+      patternTypes: args.inputPayload.patternSummary.types,
+      diagnosisCount: args.inputPayload.diagnosisSummary.count,
+      interventionCount: args.inputPayload.interventionSummary.count,
+      studySampleSize: 0,
+      realPlayOccurrences: args.inputPayload.transferSummary?.realPlayOccurrences ?? 0,
+      linkedDecisionSnapshotId: row.id,
+      sourceContext: args.sourceContext,
+      createdAt,
+      userId,
+    });
+  }
   return {
     record: toInterventionDecisionAuditRecord(row),
     suppressed: false,
   };
+}
+
+export function syncInterventionDecisionSnapshots(args: {
+  db: Database.Database;
+  playerIntelligence: PlayerIntelligenceSnapshot;
+  recommendations: InterventionRecommendation[];
+  diagnosisHistory?: PlayerDiagnosisHistoryEntry[];
+  interventionHistory?: InterventionHistoryEntry[];
+  realPlaySignals?: RealPlayConceptSignal[];
+  retentionSchedules?: RetentionScheduleRow[];
+  now?: Date;
+  sourceContext?: string;
+  userId?: string;
+}): InterventionDecisionSnapshotRow[] {
+  const userId = args.userId ?? getLocalCoachingUserId();
+  const inputPayloads = buildRecommendationInputSnapshotPayloadMap({
+    playerIntelligence: args.playerIntelligence,
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory: args.interventionHistory,
+    realPlaySignals: args.realPlaySignals,
+    retentionSchedules: args.retentionSchedules,
+  });
+
+  for (const recommendation of args.recommendations) {
+    const concept = args.playerIntelligence.concepts.find((entry) => entry.conceptKey === recommendation.conceptKey);
+    if (!concept || !shouldTrackRecommendationSnapshot(concept, recommendation, args.diagnosisHistory ?? [], args.interventionHistory ?? [])) {
+      continue;
+    }
+
+    persistInterventionDecisionSnapshot({
+      db: args.db,
+      recommendation,
+      inputPayload: inputPayloads.get(recommendation.conceptKey),
+      createdAt: args.now?.toISOString(),
+      sourceContext: args.sourceContext,
+      userId,
+    });
+  }
+
+  return getUserInterventionDecisionSnapshots(args.db, userId);
 }
 
 export function linkInterventionDecisionToIntervention(args: {
@@ -199,6 +292,22 @@ function shouldSuppressDecisionSnapshot(
   return latest.recommended_action === recommendation.action
     && latest.recommended_strategy === recommendation.recommendedStrategy
     && normalizeReasonCodes(latestReasons) === normalizeReasonCodes(recommendation.reasonCodes);
+}
+
+function shouldTrackRecommendationSnapshot(
+  concept: PlayerIntelligenceSnapshot["concepts"][number],
+  recommendation: InterventionRecommendation,
+  diagnosisHistory: PlayerDiagnosisHistoryEntry[],
+  interventionHistory: InterventionHistoryEntry[]
+): boolean {
+  if (recommendation.action !== "monitor_only") {
+    return true;
+  }
+
+  return concept.status === "weakness"
+    || concept.trainingUrgency >= 0.35
+    || diagnosisHistory.some((entry) => entry.conceptKey === concept.conceptKey)
+    || interventionHistory.some((entry) => entry.conceptKey === concept.conceptKey);
 }
 
 function latestRecoveryStage(recommendation: InterventionRecommendation): string {

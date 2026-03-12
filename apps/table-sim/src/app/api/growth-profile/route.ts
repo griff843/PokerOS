@@ -3,7 +3,8 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { buildAttemptInsights, buildRealPlayConceptSignals, type WeaknessPool } from "@poker-coach/core/browser";
 import { toDiagnosisHistoryEntries, toInterventionHistoryEntries } from "../../../lib/coaching-memory";
-import { buildConceptDecisionAuditSummary } from "../../../lib/intervention-decision-audit";
+import { buildConceptDecisionAuditSummary, syncInterventionDecisionSnapshots } from "../../../lib/intervention-decision-audit";
+import { buildTableSimInterventionRecommendations } from "../../../lib/intervention-decision";
 import { buildGrowthProfileSnapshot } from "../../../lib/growth-profile";
 import { loadLocalStudyData, resolveDbPath } from "../../../lib/local-study-data";
 import { buildTableSimPlayerIntelligence } from "../../../lib/player-intelligence";
@@ -14,10 +15,12 @@ import {
   hydratePersistedStudyAttempts,
 } from "../../../lib/intervention-support";
 import { openDatabase } from "../../../../../../packages/db/src";
+import { getLocalCoachingUserId } from "../../../lib/coaching-memory";
+import { getUserCoachingInputSnapshots } from "../../../../../../packages/db/src/repository";
 
 export async function GET() {
   try {
-    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots, retentionSchedules, transferSnapshots: loadedTransferSnapshots } = loadLocalStudyData();
+    const { drills, attempts, srs, importedHands, diagnoses, interventions, decisionSnapshots, retentionSchedules, transferSnapshots: loadedTransferSnapshots, inputSnapshots: loadedInputSnapshots } = loadLocalStudyData();
     const drillMap = new Map(drills.map((drill) => [drill.drill_id, drill]));
     const activePool = (attempts[0]?.active_pool ?? "baseline") as WeaknessPool;
     const hydratedAttempts = hydratePersistedStudyAttempts(attempts, drills);
@@ -39,11 +42,31 @@ export async function GET() {
       patternAttempts,
       now,
     });
+    const recommendations = buildTableSimInterventionRecommendations({
+      playerIntelligence,
+      diagnosisHistory,
+      interventionHistory,
+      realPlaySignals,
+      retentionSchedules,
+    });
     let transferSnapshots = loadedTransferSnapshots;
+    let refreshedDecisionSnapshots = decisionSnapshots;
+    let inputSnapshots = loadedInputSnapshots;
     const dbPath = resolveDbPath();
     if (dbPath) {
       const db = openDatabase(dbPath);
       try {
+        refreshedDecisionSnapshots = syncInterventionDecisionSnapshots({
+          db,
+          playerIntelligence,
+          recommendations,
+          diagnosisHistory,
+          interventionHistory,
+          realPlaySignals,
+          retentionSchedules,
+          now,
+          sourceContext: "growth_profile",
+        });
         transferSnapshots = syncTransferEvaluationSnapshots({
           db,
           playerIntelligence,
@@ -51,10 +74,11 @@ export async function GET() {
           interventionHistory,
           realPlaySignals,
           retentionSchedules,
-          decisionSnapshots,
+          decisionSnapshots: refreshedDecisionSnapshots,
           now,
           sourceContext: "growth_profile",
         });
+        inputSnapshots = getUserCoachingInputSnapshots(db, getLocalCoachingUserId());
       } finally {
         db.close();
       }
@@ -79,16 +103,17 @@ export async function GET() {
       activePool,
       realPlaySignals,
       patternAttempts,
-      decisionSnapshots,
+      decisionSnapshots: refreshedDecisionSnapshots,
       retentionSchedules,
       transferSnapshots,
+      inputSnapshots,
       now,
     });
 
     const interventionDecisionAudit = snapshot.nextInterventionDecision
       ? buildConceptDecisionAuditSummary({
           conceptKey: snapshot.nextInterventionDecision.conceptKey,
-          decisions: decisionSnapshots,
+          decisions: refreshedDecisionSnapshots,
           currentRecommendation: snapshot.nextInterventionDecision,
         })
       : undefined;

@@ -14,7 +14,7 @@ import {
   type WeaknessPool,
   type WeaknessTarget,
 } from "@poker-coach/core/browser";
-import type { InterventionDecisionSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
+import type { CoachingInputSnapshotRow, InterventionDecisionSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
 import { analyzeWeaknessAnalyticsFromInsights } from "../../../../packages/core/src/weakness-analytics";
 import { formatSessionLabel } from "./study-session-ui";
 import { buildConceptCaseMap, type ConceptCaseBundle } from "./concept-case";
@@ -109,6 +109,7 @@ export function buildWeaknessExplorerSnapshot(args: {
   patternAttempts?: PatternAttemptSignal[];
   retentionSchedules?: RetentionScheduleRow[];
   transferSnapshots?: TransferEvaluationSnapshotRow[];
+  inputSnapshots?: CoachingInputSnapshotRow[];
   now?: Date;
 }): WeaknessExplorerSnapshot {
   const now = args.now ?? new Date();
@@ -144,6 +145,7 @@ export function buildWeaknessExplorerSnapshot(args: {
     realPlaySignals: args.realPlaySignals,
     retentionSchedules: args.retentionSchedules,
     transferSnapshots: args.transferSnapshots,
+    inputSnapshots: args.inputSnapshots,
     recommendations: interventionRecommendations,
     now,
   });

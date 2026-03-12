@@ -13,7 +13,7 @@ import {
   type SessionPlanningReason,
   type WeaknessPool,
 } from "@poker-coach/core/browser";
-import type { RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
+import type { CoachingInputSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
 import type { TableSimSessionPlan } from "./session-plan";
 import { formatSessionLabel } from "./study-session-ui";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
@@ -91,6 +91,11 @@ export interface CommandCenterSnapshot {
       changed: boolean;
       latestStatus?: string;
     };
+    replay?: {
+      recommendationInputSnapshotId?: string;
+      transferInputSnapshotId?: string;
+      transferInterpretation: string;
+    };
     nextAction: string;
     coachNote: string;
   };
@@ -120,6 +125,7 @@ interface BuildCommandCenterSnapshotArgs {
   decisionSnapshots?: InterventionDecisionSnapshotRow[];
   retentionSchedules?: RetentionScheduleRow[];
   transferSnapshots?: TransferEvaluationSnapshotRow[];
+  inputSnapshots?: CoachingInputSnapshotRow[];
   now?: Date;
 }
 
@@ -137,6 +143,7 @@ export function buildCommandCenterSnapshot({
   decisionSnapshots = [],
   retentionSchedules = [],
   transferSnapshots = [],
+  inputSnapshots = [],
   now = new Date(),
 }: BuildCommandCenterSnapshotArgs): CommandCenterSnapshot {
   const playerIntelligence = buildTableSimPlayerIntelligence({
@@ -163,6 +170,7 @@ export function buildCommandCenterSnapshot({
     decisionSnapshots,
     retentionSchedules,
     transferSnapshots,
+    inputSnapshots,
     realPlaySignals,
     recommendations: interventionRecommendations,
     now,
@@ -243,6 +251,11 @@ export function buildCommandCenterSnapshot({
         changed: leadCase.transferAudit.latestChanged,
         latestStatus: leadCase.transferAudit.latestSnapshot?.status,
       } : undefined,
+      replay: {
+        recommendationInputSnapshotId: leadCase.replayMetadata.recommendation.latestInputSnapshot?.id,
+        transferInputSnapshotId: leadCase.replayMetadata.transfer.latestInputSnapshot?.id,
+        transferInterpretation: leadCase.replayMetadata.transfer.interpretation,
+      },
       nextAction: leadCase.nextStep.nextAction.replace(/_/g, " "),
       coachNote: leadCase.nextStep.coachNote,
     } : undefined,

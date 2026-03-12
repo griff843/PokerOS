@@ -8,6 +8,7 @@ import {
   getAllSrs,
   getRecentHandImports,
   getUserDiagnosisHistory,
+  getUserCoachingInputSnapshots,
   getUserInterventionDecisionSnapshots,
   getUserInterventions,
   getUserRetentionSchedules,
@@ -56,6 +57,7 @@ export function loadLocalStudyData() {
       decisionSnapshots: [],
       retentionSchedules: [],
       transferSnapshots: [],
+      inputSnapshots: [],
     };
   }
 
@@ -86,6 +88,7 @@ export function loadLocalStudyData() {
       decisionSnapshots: getUserInterventionDecisionSnapshots(db, userId),
       retentionSchedules: getUserRetentionSchedules(db, userId),
       transferSnapshots: getUserTransferEvaluationSnapshots(db, userId),
+      inputSnapshots: getUserCoachingInputSnapshots(db, userId),
     };
   } finally {
     db.close();
