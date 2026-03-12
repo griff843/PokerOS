@@ -84,6 +84,8 @@ export interface CommandCenterSnapshot {
     statusLabel: string;
     statusReason: string;
     priorityExplanation: string;
+    transferStatus?: string;
+    transferSummary?: string;
     nextAction: string;
     coachNote: string;
   };
@@ -145,6 +147,7 @@ export function buildCommandCenterSnapshot({
     diagnosisHistory,
     interventionHistory,
     realPlaySignals,
+    retentionSchedules,
   });
   const conceptCases = buildConceptCaseMap({
     playerIntelligence,
@@ -152,6 +155,7 @@ export function buildCommandCenterSnapshot({
     interventionHistory,
     decisionSnapshots,
     retentionSchedules,
+    realPlaySignals,
     recommendations: interventionRecommendations,
     now,
   });
@@ -173,6 +177,7 @@ export function buildCommandCenterSnapshot({
     diagnosisHistory,
     interventionHistory,
     realPlaySignals,
+    retentionSchedules,
     conceptKey: interventionPlan.rootConceptKey,
   });
   const leadCase = conceptCases.get(nextInterventionDecision?.conceptKey ?? interventionPlan.rootConceptKey);
@@ -223,6 +228,8 @@ export function buildCommandCenterSnapshot({
       statusLabel: leadCase.explanation.statusLabel,
       statusReason: leadCase.explanation.statusReason,
       priorityExplanation: leadCase.explanation.priorityExplanation,
+      transferStatus: leadCase.transferEvaluation.status,
+      transferSummary: leadCase.transferEvaluation.summary,
       nextAction: leadCase.nextStep.nextAction.replace(/_/g, " "),
       coachNote: leadCase.nextStep.coachNote,
     } : undefined,

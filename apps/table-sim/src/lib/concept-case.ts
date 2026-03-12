@@ -2,6 +2,7 @@ import {
   buildConceptCaseHistory,
   deriveConceptCoachingExplanation,
   deriveConceptNextStep,
+  type ConceptTransferEvaluation,
   type InterventionStrategyBlueprint,
   selectPatternsForConcept,
   type ConceptCaseExplanation,
@@ -11,11 +12,13 @@ import {
   type InterventionRecommendation,
   type PlayerDiagnosisHistoryEntry,
   type PlayerIntelligenceSnapshot,
+  type RealPlayConceptSignal,
 } from "@poker-coach/core/browser";
 import type { InterventionDecisionSnapshotRow, RetentionScheduleRow } from "../../../../packages/db/src/repository";
 import { buildConceptDecisionAuditSummary, type InterventionDecisionAuditSummary } from "./intervention-decision-audit";
 import { buildInterventionStrategyBlueprint } from "./intervention-strategy";
 import { buildConceptRetentionSummary, type RetentionSummary } from "./retention-scheduling";
+import { buildConceptTransferEvaluationMap } from "./transfer-evaluation";
 
 export interface ConceptCaseBundle {
   history: ConceptCaseHistory;
@@ -23,6 +26,7 @@ export interface ConceptCaseBundle {
   nextStep: ConceptCaseNextStep;
   decisionAudit?: InterventionDecisionAuditSummary;
   retention: RetentionSummary;
+  transferEvaluation: ConceptTransferEvaluation;
   recommendation?: InterventionRecommendation;
   strategyBlueprint?: InterventionStrategyBlueprint;
 }
@@ -34,6 +38,7 @@ export interface ConceptCaseResponse {
   nextStep: ConceptCaseNextStep;
   decisionAudit?: InterventionDecisionAuditSummary;
   retention: RetentionSummary;
+  transferEvaluation: ConceptTransferEvaluation;
   recommendation?: InterventionRecommendation;
   strategyBlueprint?: InterventionStrategyBlueprint;
 }
@@ -44,6 +49,7 @@ export function buildConceptCaseMap(args: {
   interventionHistory?: InterventionHistoryEntry[];
   decisionSnapshots?: InterventionDecisionSnapshotRow[];
   retentionSchedules?: RetentionScheduleRow[];
+  realPlaySignals?: RealPlayConceptSignal[];
   recommendations?: InterventionRecommendation[];
   now?: Date;
 }): Map<string, ConceptCaseBundle> {
@@ -51,6 +57,14 @@ export function buildConceptCaseMap(args: {
   const interventionHistory = args.interventionHistory ?? [];
   const retentionSchedules = args.retentionSchedules ?? [];
   const recommendationsByConcept = new Map((args.recommendations ?? []).map((entry) => [entry.conceptKey, entry]));
+  const transferEvaluations = buildConceptTransferEvaluationMap({
+    playerIntelligence: args.playerIntelligence,
+    diagnosisHistory,
+    interventionHistory,
+    realPlaySignals: args.realPlaySignals,
+    retentionSchedules,
+    now: args.now,
+  });
   const bundles = new Map<string, ConceptCaseBundle>();
 
   for (const concept of args.playerIntelligence.concepts) {
@@ -61,6 +75,7 @@ export function buildConceptCaseMap(args: {
     });
     const retention = buildConceptRetentionSummary(concept.conceptKey, retentionSchedules, args.now);
     const recommendation = recommendationsByConcept.get(concept.conceptKey);
+    const transferEvaluation = transferEvaluations.get(concept.conceptKey);
     const history = buildConceptCaseHistory({
       conceptKey: concept.conceptKey,
       label: concept.label,
@@ -103,6 +118,7 @@ export function buildConceptCaseMap(args: {
       recurrenceCount: concept.recurrenceCount,
       reviewPressure: concept.reviewPressure,
       planningReasons: concept.planningReasons,
+      transferEvaluation,
     });
     const explanation = deriveConceptCoachingExplanation(history);
     const nextStep = deriveConceptNextStep(history);
@@ -119,6 +135,7 @@ export function buildConceptCaseMap(args: {
       nextStep,
       decisionAudit,
       retention,
+      transferEvaluation: transferEvaluation!,
       recommendation,
       strategyBlueprint,
     });
@@ -134,6 +151,7 @@ export function getConceptCaseBundle(args: {
   interventionHistory?: InterventionHistoryEntry[];
   decisionSnapshots?: Parameters<typeof buildConceptDecisionAuditSummary>[0]["decisions"];
   retentionSchedules?: RetentionScheduleRow[];
+  realPlaySignals?: RealPlayConceptSignal[];
   recommendations?: InterventionRecommendation[];
   now?: Date;
 }): ConceptCaseBundle | undefined {

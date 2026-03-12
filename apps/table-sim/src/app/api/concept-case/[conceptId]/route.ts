@@ -23,6 +23,7 @@ export async function GET(
     const interventionHistory = toInterventionHistoryEntries(interventions);
     const hydratedAttempts = hydratePersistedStudyAttempts(attempts, drills);
     const now = new Date();
+    const realPlaySignals = buildRealPlayConceptSignals(importedHands);
     const playerIntelligence = buildTableSimPlayerIntelligence({
       drills,
       attemptInsights: buildAttemptInsights(attempts, drillMap),
@@ -31,7 +32,7 @@ export async function GET(
       diagnosticInsights: buildDiagnosticInsightsFromAttempts(hydratedAttempts),
       diagnosisHistory,
       interventionHistory,
-      realPlaySignals: buildRealPlayConceptSignals(importedHands),
+      realPlaySignals,
       patternAttempts: buildPatternAttemptSignals(hydratedAttempts),
       now,
     });
@@ -39,7 +40,8 @@ export async function GET(
       playerIntelligence,
       diagnosisHistory,
       interventionHistory,
-      realPlaySignals: buildRealPlayConceptSignals(importedHands),
+      realPlaySignals,
+      retentionSchedules,
     });
     const conceptCase = buildConceptCaseMap({
       playerIntelligence,
@@ -47,6 +49,7 @@ export async function GET(
       interventionHistory,
       decisionSnapshots,
       retentionSchedules,
+      realPlaySignals,
       recommendations,
       now,
     }).get(conceptKey);
@@ -62,6 +65,7 @@ export async function GET(
       nextStep: conceptCase.nextStep,
       decisionAudit: conceptCase.decisionAudit,
       retention: conceptCase.retention,
+      transferEvaluation: conceptCase.transferEvaluation,
       recommendation: conceptCase.recommendation,
       strategyBlueprint: conceptCase.strategyBlueprint,
     });

@@ -2,6 +2,7 @@ import type { ConceptRecoveryStage, InterventionLifecycleStatus, MemoryDiagnosis
 import type { CoachingPattern, CoachingPatternType } from "./patterns";
 import type { InterventionRecommendation, InterventionRecommendationAction, InterventionRecommendationReasonCode, InterventionRecommendationStrength, InterventionStrategyType } from "./intervention-recommendations";
 import type { RetentionScheduleReason, RetentionScheduleState } from "./retention-scheduler";
+import type { ConceptTransferEvaluation, ConceptTransferStatus } from "./transfer-evaluation";
 
 export type ConceptCaseDecisionStability = "stable" | "shifting" | "flipping";
 export type ConceptCaseRecoveryConfidence = "low" | "medium" | "high";
@@ -64,10 +65,11 @@ export interface ConceptCaseHistoryInput {
   recurrenceCount: number;
   reviewPressure: number;
   planningReasons: SessionPlanningReason[];
+  transferEvaluation?: ConceptTransferEvaluation;
 }
 
 export interface ConceptCaseEvidenceItem {
-  kind: "diagnosis" | "intervention" | "pattern" | "retention" | "decision" | "attempt" | "planning";
+  kind: "diagnosis" | "intervention" | "pattern" | "retention" | "decision" | "attempt" | "planning" | "transfer";
   code: string;
   detail: string;
 }
@@ -121,6 +123,17 @@ export interface ConceptCaseHistory {
     currentRecommendationChanged: boolean;
   };
   retentionSummary: ConceptCaseRetentionSummaryInput;
+  transferSummary?: {
+    status: ConceptTransferStatus;
+    confidence: ConceptTransferEvaluation["confidence"];
+    pressure: ConceptTransferEvaluation["pressure"];
+    evidenceSufficiency: ConceptTransferEvaluation["evidenceSufficiency"];
+    riskFlags: ConceptTransferEvaluation["riskFlags"];
+    studyVsRealPlayDelta?: number;
+    reviewSpotCount: number;
+    occurrences: number;
+    summary: string;
+  };
   recentAttemptSummary: ConceptCaseRecentAttemptSummaryInput;
   prioritizationContext: {
     planningReasons: SessionPlanningReason[];
@@ -139,6 +152,7 @@ export interface ConceptCaseExplanation {
   recommendedActionReason: string;
   stabilityAssessment: string;
   recoveryConfidence: ConceptCaseRecoveryConfidence;
+  transferExplanation?: string;
   riskFlags: ConceptCaseRiskFlag[];
   supportingEvidence: ConceptCaseEvidenceItem[];
 }
@@ -225,6 +239,19 @@ export function buildConceptCaseHistory(input: ConceptCaseHistoryInput): Concept
         }
       : undefined,
     retentionSummary: input.retentionSummary,
+    transferSummary: input.transferEvaluation
+      ? {
+          status: input.transferEvaluation.status,
+          confidence: input.transferEvaluation.confidence,
+          pressure: input.transferEvaluation.pressure,
+          evidenceSufficiency: input.transferEvaluation.evidenceSufficiency,
+          riskFlags: input.transferEvaluation.riskFlags,
+          studyVsRealPlayDelta: input.transferEvaluation.studyVsRealPlayDelta,
+          reviewSpotCount: input.transferEvaluation.realPlayEvidence.reviewSpotCount,
+          occurrences: input.transferEvaluation.realPlayEvidence.occurrences,
+          summary: input.transferEvaluation.summary,
+        }
+      : undefined,
     recentAttemptSummary: input.recentAttempts,
     prioritizationContext: {
       planningReasons: input.planningReasons,
@@ -248,6 +275,7 @@ export function deriveConceptCoachingExplanation(history: ConceptCaseHistory): C
     recommendedActionReason: buildRecommendedActionReason(history, recommendedNextAction),
     stabilityAssessment: buildStabilityAssessment(history),
     recoveryConfidence: deriveRecoveryConfidence(history),
+    transferExplanation: history.transferSummary ? buildTransferExplanation(history) : undefined,
     riskFlags,
     supportingEvidence: history.supportingEvidence.slice(0, 6),
   };
@@ -322,6 +350,14 @@ function buildSupportingEvidence(
     });
   }
 
+  if (input.transferEvaluation) {
+    evidence.push({
+      kind: "transfer",
+      code: input.transferEvaluation.status,
+      detail: input.transferEvaluation.summary,
+    });
+  }
+
   if (input.decisionSummary?.latestAction) {
     evidence.push({
       kind: "decision",
@@ -358,7 +394,7 @@ function collectRiskFlags(history: ConceptCaseHistory): ConceptCaseRiskFlag[] {
   if (history.retentionSummary.latestState === "overdue") flags.add("retention_overdue");
   if (history.recoveryStage === "regressed" || history.patternSummary.types.includes("regression_after_recovery")) flags.add("regression_risk");
   if (history.decisionStabilitySummary && history.decisionStabilitySummary.stability !== "stable") flags.add("decision_instability");
-  if (history.patternSummary.transferGap) flags.add("transfer_gap");
+  if (history.patternSummary.transferGap || history.transferSummary?.status === "transfer_gap" || history.transferSummary?.status === "transfer_regressed") flags.add("transfer_gap");
   if (history.patternSummary.interventionNotSticking) flags.add("intervention_not_sticking");
   if (history.recentAttemptSummary.failedCount >= 2 || history.reviewPressure > 0) flags.add("review_pressure");
   if (history.recoveryStage === "active_repair" || history.interventionLifecycleSummary.hasActiveIntervention) flags.add("active_repair");
@@ -368,6 +404,9 @@ function collectRiskFlags(history: ConceptCaseHistory): ConceptCaseRiskFlag[] {
 function buildStatusLabel(history: ConceptCaseHistory): string {
   if (history.recoveryStage === "regressed") {
     return "Regressed";
+  }
+  if (history.transferSummary?.status === "transfer_regressed") {
+    return "Transfer Regressed";
   }
   if (history.retentionSummary.latestState === "overdue") {
     return "Recovered, Validation Overdue";
@@ -393,6 +432,12 @@ function buildStatusLabel(history: ConceptCaseHistory): string {
 function buildStatusReason(history: ConceptCaseHistory): string {
   if (history.recoveryStage === "regressed" && history.retentionSummary.lastResult === "fail") {
     return `${history.label} failed a retention check after earlier improvement, so the concept is treated as regressed rather than safely recovered.`;
+  }
+  if (history.transferSummary?.status === "transfer_regressed") {
+    return `${history.label} previously looked healthier, but imported-hand evidence is now contradicting that transfer confidence.`;
+  }
+  if (history.transferSummary?.status === "transfer_gap") {
+    return `${history.label} is improving in study, but the real-play evidence is still lagging behind the lab-side gain.`;
   }
   if (history.recoveryStage === "regressed") {
     return `${history.label} previously improved, but the current combination of diagnoses, outcomes, or worsening trend says the gain has slipped.`;
@@ -422,6 +467,12 @@ function buildPriorityExplanation(history: ConceptCaseHistory, riskFlags: Concep
   if (riskFlags.includes("retention_overdue")) {
     return `${history.label} is high priority because recovery is still unvalidated and the retention check is overdue.`;
   }
+  if (history.transferSummary?.status === "transfer_regressed") {
+    return `${history.label} is high priority because prior recovery confidence is now being contradicted by imported real-play evidence.`;
+  }
+  if (history.transferSummary?.status === "transfer_gap") {
+    return `${history.label} is high priority because study improvement is outrunning what imported hands are showing in real play.`;
+  }
   if (riskFlags.includes("regression_risk")) {
     return `${history.label} is high priority because the concept has already slipped after prior recovery.`;
   }
@@ -440,6 +491,9 @@ function buildPriorityExplanation(history: ConceptCaseHistory, riskFlags: Concep
 function chooseRecommendedNextAction(history: ConceptCaseHistory): InterventionRecommendationAction | "run_retention_validation" {
   if (history.retentionSummary.latestState === "due" || history.retentionSummary.latestState === "overdue") {
     return "run_retention_validation";
+  }
+  if (!history.prioritizationContext.currentRecommendationAction && (history.transferSummary?.status === "transfer_gap" || history.transferSummary?.status === "transfer_regressed")) {
+    return "add_transfer_block";
   }
   if (history.prioritizationContext.currentRecommendationAction) {
     return history.prioritizationContext.currentRecommendationAction;
@@ -468,6 +522,10 @@ function buildRecommendedActionReason(
     return `${history.label} needs to reopen intervention work because the prior recovery is no longer holding cleanly.`;
   }
 
+  if (action === "add_transfer_block") {
+    return `${history.label} needs an explicit transfer block because study improvement is not yet showing up cleanly in imported hands.`;
+  }
+
   if (action === "continue_intervention") {
     return `${history.label} should stay on the current intervention thread because the concept is still under active repair.`;
   }
@@ -490,12 +548,21 @@ function buildStabilityAssessment(history: ConceptCaseHistory): string {
   if (history.retentionSummary.validationState === "validated") {
     return `${history.label} has a stable recent decision picture and validated recovery evidence.`;
   }
+  if (history.transferSummary?.status === "transfer_uncertain") {
+    return `Transfer evidence for ${history.label} is still too thin to treat the current recovery read as fully settled.`;
+  }
   return `Decision behavior is currently stable enough to keep the coaching thread coherent for ${history.label}.`;
 }
 
 function deriveRecoveryConfidence(history: ConceptCaseHistory): ConceptCaseRecoveryConfidence {
   if (history.recoveryStage === "recovered" && history.retentionSummary.validationState === "validated") {
+    if (history.transferSummary?.status === "transfer_gap" || history.transferSummary?.status === "transfer_regressed") {
+      return "medium";
+    }
     return "high";
+  }
+  if (history.transferSummary?.status === "transfer_regressed") {
+    return "low";
   }
   if (history.recoveryStage === "stabilizing" || (history.recoveryStage === "recovered" && history.retentionSummary.validationState === "provisional")) {
     return "medium";
@@ -545,10 +612,26 @@ function buildCoachNote(
   if (explanation.recommendedNextAction === "change_intervention_strategy") {
     return `${history.label} is still a live coaching problem, but the current repair angle is not sticking well enough. The next move should change approach, not just repeat reps.`;
   }
+  if (history.transferSummary?.status === "transfer_gap" || explanation.recommendedNextAction === "add_transfer_block") {
+    return `${history.label} is cleaner in study than it is in imported hands, so the next move should explicitly bridge drills into real-play transfer rather than assuming the concept is already generalized.`;
+  }
   if (priority === "urgent") {
     return `${history.label} is carrying enough pressure that the next coaching move should happen before broader balancing or novelty work.`;
   }
   return `${history.label} now has enough stored history that the next coaching move can be explained from the evidence instead of guessed from a single session.`;
+}
+
+function buildTransferExplanation(history: ConceptCaseHistory): string {
+  if (!history.transferSummary) {
+    return "";
+  }
+  if (history.transferSummary.status === "no_real_play_evidence") {
+    return `${history.label} has no imported-hand evidence yet, so transfer remains unproven rather than assumed.`;
+  }
+  if (history.transferSummary.status === "transfer_uncertain") {
+    return `${history.label} has some real-play signal, but it is still too sparse or mixed to make a stronger transfer claim.`;
+  }
+  return history.transferSummary.summary;
 }
 
 function formatReasonCode(reason: InterventionRecommendationReasonCode): string {

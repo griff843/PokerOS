@@ -96,6 +96,8 @@ export interface GrowthProfileSnapshot {
     label: string;
     statusLabel: string;
     statusReason: string;
+    transferStatus?: string;
+    transferSummary?: string;
     nextAction: string;
     coachNote: string;
   };
@@ -194,6 +196,7 @@ export function buildGrowthProfileSnapshot(args: {
     diagnosisHistory: args.diagnosisHistory,
     interventionHistory,
     realPlaySignals: args.realPlaySignals,
+    retentionSchedules: args.retentionSchedules,
     conceptKey: interventionPlan.rootConceptKey,
   });
   const conceptCases = buildConceptCaseMap({
@@ -202,6 +205,7 @@ export function buildGrowthProfileSnapshot(args: {
     interventionHistory,
     decisionSnapshots: args.decisionSnapshots,
     retentionSchedules: args.retentionSchedules,
+    realPlaySignals: args.realPlaySignals,
     recommendations: nextInterventionDecision ? [nextInterventionDecision] : [],
     now,
   });
@@ -309,6 +313,8 @@ export function buildGrowthProfileSnapshot(args: {
       label: featuredConceptCase.history.label,
       statusLabel: featuredConceptCase.explanation.statusLabel,
       statusReason: featuredConceptCase.explanation.statusReason,
+      transferStatus: featuredConceptCase.transferEvaluation.status,
+      transferSummary: featuredConceptCase.transferEvaluation.summary,
       nextAction: featuredConceptCase.nextStep.nextAction.replace(/_/g, " "),
       coachNote: featuredConceptCase.nextStep.coachNote,
     } : undefined,

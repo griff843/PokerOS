@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { InterventionHistoryEntry, InterventionRecommendation, PlayerIntelligenceSnapshot } from "@poker-coach/core/browser";
+import type { InterventionHistoryEntry, InterventionRecommendation, PlayerIntelligenceSnapshot, RealPlayConceptSignal } from "@poker-coach/core/browser";
 import type { InterventionDecisionSnapshotRow, RetentionScheduleRow } from "../../../../packages/db/src/repository";
 import { buildConceptCaseMap } from "./concept-case";
 
@@ -169,6 +169,16 @@ describe("concept case map", () => {
       status: "in_progress",
       createdAt: "2026-03-12T10:00:00.000Z",
     }];
+    const realPlaySignals: RealPlayConceptSignal[] = [{
+      conceptKey: "river_bluff_catching",
+      label: "River Bluff Catching",
+      occurrences: 2,
+      reviewSpotCount: 1,
+      weight: 0.2,
+      recommendedPool: "baseline",
+      latestHandAt: "2026-03-12T11:00:00.000Z",
+      evidence: ["Two imported hands mapped into this concept.", "One review-worthy river decision is attached here."],
+    }];
 
     const bundle = buildConceptCaseMap({
       playerIntelligence: makePlayerIntelligence(),
@@ -178,6 +188,7 @@ describe("concept case map", () => {
       interventionHistory,
       decisionSnapshots: decisions,
       retentionSchedules,
+      realPlaySignals,
       recommendations,
       now: new Date("2026-03-12T12:00:00.000Z"),
     }).get("river_bluff_catching");
@@ -187,6 +198,8 @@ describe("concept case map", () => {
     expect(bundle?.nextStep.nextAction).toBe("continue_intervention");
     expect(bundle?.decisionAudit?.latestDecision?.actedUpon).toBe(true);
     expect(bundle?.retention.validationState).toBe("provisional");
+    expect(bundle?.transferEvaluation.status).toBe("transfer_uncertain");
+    expect(bundle?.history.transferSummary?.status).toBe("transfer_uncertain");
     expect(bundle?.strategyBlueprint?.strategyType).toBe("threshold_repair");
     expect(bundle?.strategyBlueprint?.title.length).toBeGreaterThan(0);
   });

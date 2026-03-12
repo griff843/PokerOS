@@ -130,18 +130,26 @@ describe("intervention recommendations", () => {
       recentAverage: 0.74,
       averageScore: 0.61,
       realPlayReviewSpotCount: 3,
-      patterns: [
-        {
-          id: "p1",
-          type: "real_play_transfer_gap",
-          confidence: "high",
-          severity: 0.86,
-          implicatedConcepts: ["river_bluff_catching"],
-          evidence: ["Real-play transfer has not happened yet."],
-          coachingImplication: "Bridge drills to hands.",
-          suggestedBiases: ["real_play_transfer"],
+      transferEvaluation: {
+        conceptKey: "river_bluff_catching",
+        label: "River Bluff Catching",
+        status: "transfer_gap",
+        confidence: "high",
+        evidenceSufficiency: "strong",
+        pressure: "medium",
+        studyPerformance: 0.74,
+        realPlayPerformance: 0.28,
+        studyVsRealPlayDelta: 0.46,
+        supportingEvidence: ["Study performance is ahead of real play."],
+        riskFlags: ["study_ahead_of_real_play", "real_play_review_pressure", "recovery_contradicted_by_real_play"],
+        summary: "River Bluff Catching is improving in study faster than it is holding up in real play.",
+        coachExplanation: "Imported hands are still producing review pressure.",
+        realPlayEvidence: {
+          occurrences: 3,
+          reviewSpotCount: 3,
+          latestHandAt: "2026-03-12T12:00:00.000Z",
         },
-      ],
+      },
     });
 
     expect(recommendation.action).toBe("add_transfer_block");

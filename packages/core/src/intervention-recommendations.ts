@@ -1,5 +1,6 @@
 import type { MemoryDiagnosisHistoryEntry, MemoryInterventionHistoryEntry, ConceptRecoveryStage, InterventionLifecycleStatus } from "./coaching-memory";
 import type { CoachingPattern, CoachingPatternType } from "./patterns";
+import type { ConceptTransferEvaluation } from "./transfer-evaluation";
 
 export type InterventionRecommendationAction =
   | "assign_intervention"
@@ -63,6 +64,7 @@ export interface InterventionRecommendationInput {
   averageScore?: number;
   realPlayReviewSpotCount?: number;
   realPlayEvidence?: string[];
+  transferEvaluation?: ConceptTransferEvaluation;
 }
 
 export interface InterventionRecommendation {
@@ -108,9 +110,13 @@ export function recommendIntervention(input: InterventionRecommendationInput): I
   const recurringLeak = input.recurrenceCount >= 2 || diagnosisCount >= 2;
   const improving = input.trendDirection === "improving" || ((input.recentAverage ?? 0) - (input.averageScore ?? input.recentAverage ?? 0)) >= 0.05;
   const worsening = input.trendDirection === "worsening";
-  const transferGap = hasPattern("real_play_transfer_gap");
+  const transferGap = input.transferEvaluation?.status === "transfer_gap"
+    || input.transferEvaluation?.status === "transfer_regressed"
+    || hasPattern("real_play_transfer_gap");
   const interventionNotSticking = hasPattern("intervention_not_sticking");
-  const regressionAfterRecovery = hasPattern("regression_after_recovery") || (input.recoveryStage === "regressed" && hasCompletedImprovement);
+  const regressionAfterRecovery = hasPattern("regression_after_recovery")
+    || input.transferEvaluation?.status === "transfer_regressed"
+    || (input.recoveryStage === "regressed" && hasCompletedImprovement);
   const thresholdPattern = hasPattern("persistent_threshold_leak") || countDiagnoses(input.diagnosisHistory, "threshold_error") >= 2;
   const blockerPattern = hasPattern("persistent_blocker_blindness") || countDiagnoses(input.diagnosisHistory, "blocker_blindness") >= 2;
   const downstreamPattern = hasPattern("downstream_river_symptom");
@@ -149,8 +155,10 @@ export function recommendIntervention(input: InterventionRecommendationInput): I
   if (transferGap || (input.realPlayReviewSpotCount ?? 0) > 0) {
     supportingSignals.push({
       kind: "real_play",
-      code: "real_play_review_spots",
-      detail: `${input.realPlayReviewSpotCount ?? 0} real-play review spot${(input.realPlayReviewSpotCount ?? 0) === 1 ? " still maps" : "s still map"} to this concept.`,
+      code: input.transferEvaluation?.status ?? "real_play_review_spots",
+      detail: input.transferEvaluation
+        ? input.transferEvaluation.summary
+        : `${input.realPlayReviewSpotCount ?? 0} real-play review spot${(input.realPlayReviewSpotCount ?? 0) === 1 ? " still maps" : "s still map"} to this concept.`,
     });
   }
   if (latestIntervention) {
@@ -352,6 +360,9 @@ function buildEvidence(
     `${input.recurrenceCount} recurring signal${input.recurrenceCount === 1 ? " is" : "s are"} currently attached to the concept.`,
     `${input.patterns.length} cross-hand pattern${input.patterns.length === 1 ? " is" : "s are"} influencing the intervention decision.`,
   ];
+  if (input.transferEvaluation) {
+    evidence.push(input.transferEvaluation.summary);
+  }
   if ((input.realPlayReviewSpotCount ?? 0) > 0) {
     evidence.push(`${input.realPlayReviewSpotCount} real-play review spot${input.realPlayReviewSpotCount === 1 ? " still maps" : "s still map"} here.`);
   }

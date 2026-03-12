@@ -56,6 +56,7 @@ export interface WeaknessExplorerSnapshot {
     caseSummary?: {
       statusLabel: string;
       priorityExplanation: string;
+      transferStatus: string;
       nextAction: string;
       coachNote: string;
     };
@@ -128,12 +129,14 @@ export function buildWeaknessExplorerSnapshot(args: {
     diagnosisHistory: args.diagnosisHistory,
     interventionHistory: args.interventionHistory,
     realPlaySignals: args.realPlaySignals,
+    retentionSchedules: args.retentionSchedules,
   });
   const conceptCases = buildConceptCaseMap({
     playerIntelligence,
     diagnosisHistory: args.diagnosisHistory,
     interventionHistory: args.interventionHistory,
     decisionSnapshots: args.decisionSnapshots,
+    realPlaySignals: args.realPlaySignals,
     retentionSchedules: args.retentionSchedules,
     recommendations: interventionRecommendations,
     now,
@@ -234,6 +237,7 @@ function buildWeaknessCard(
     caseSummary: conceptCase ? {
       statusLabel: conceptCase.explanation.statusLabel,
       priorityExplanation: conceptCase.explanation.priorityExplanation,
+      transferStatus: conceptCase.transferEvaluation.status,
       nextAction: conceptCase.nextStep.nextAction.replace(/_/g, " "),
       coachNote: conceptCase.nextStep.coachNote,
     } : undefined,

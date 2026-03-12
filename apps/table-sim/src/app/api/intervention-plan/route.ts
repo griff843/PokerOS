@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     const now = new Date();
     const diagnosisHistory = toDiagnosisHistoryEntries(diagnoses);
     const interventionHistory = toInterventionHistoryEntries(interventions);
+    const realPlaySignals = buildRealPlayConceptSignals(importedHands);
     const decision = createRecommendedInterventionDecision({
       drills,
       attempts,
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
       activePool,
       diagnosisHistory,
       interventionHistory,
+      realPlaySignals,
       now,
     });
     const plan = createRecommendedInterventionPlan({
@@ -35,6 +37,7 @@ export async function GET(request: NextRequest) {
       activePool,
       diagnosisHistory,
       interventionHistory,
+      realPlaySignals,
       now,
     });
     const requestedId = request.nextUrl.searchParams.get("id");
@@ -65,7 +68,6 @@ export async function GET(request: NextRequest) {
       : undefined;
     const drillMap = new Map(drills.map((drill) => [drill.drill_id, drill]));
     const hydratedAttempts = hydratePersistedStudyAttempts(attempts, drills);
-    const realPlaySignals = buildRealPlayConceptSignals(importedHands);
     const playerIntelligence = buildTableSimPlayerIntelligence({
       drills,
       attemptInsights: buildAttemptInsights(attempts, drillMap),
@@ -83,6 +85,7 @@ export async function GET(request: NextRequest) {
       diagnosisHistory,
       interventionHistory,
       realPlaySignals,
+      retentionSchedules,
     });
     const conceptCase = decision
       ? buildConceptCaseMap({
@@ -91,6 +94,7 @@ export async function GET(request: NextRequest) {
           interventionHistory,
           decisionSnapshots,
           retentionSchedules,
+          realPlaySignals,
           recommendations,
           now,
         }).get(decision.conceptKey)
@@ -101,6 +105,7 @@ export async function GET(request: NextRequest) {
       nextInterventionDecision: decision,
       retentionSummary,
       conceptCase,
+      transferEvaluation: conceptCase?.transferEvaluation,
       strategyBlueprint: conceptCase?.strategyBlueprint,
     });
   } catch (error) {
