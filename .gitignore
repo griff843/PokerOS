@@ -3,11 +3,9 @@ dist/
 .local/
 .tmp/
 .pnpm-home/
+out/
 *.db
 *.db-journal
-out/proofs/*.txt
-out/proofs/*.md
-out/reports/*.md
 .DS_Store
 
 # Next.js
