@@ -94,7 +94,11 @@ export interface CommandCenterSnapshot {
     replay?: {
       recommendationInputSnapshotId?: string;
       transferInputSnapshotId?: string;
+      recommendationEngineVersion?: string;
+      transferEngineVersion?: string;
+      manifestMatch: boolean;
       transferInterpretation: string;
+      driftSummary: string;
     };
     nextAction: string;
     coachNote: string;
@@ -254,7 +258,15 @@ export function buildCommandCenterSnapshot({
       replay: {
         recommendationInputSnapshotId: leadCase.replayMetadata.recommendation.latestInputSnapshot?.id,
         transferInputSnapshotId: leadCase.replayMetadata.transfer.latestInputSnapshot?.id,
+        recommendationEngineVersion: leadCase.replayMetadata.recommendation.latestEngineManifest?.engineVersion,
+        transferEngineVersion: leadCase.replayMetadata.transfer.latestEngineManifest?.engineVersion,
+        manifestMatch: leadCase.replayMetadata.recommendation.manifestDrift.matches
+          && leadCase.replayMetadata.transfer.manifestDrift.matches,
         transferInterpretation: leadCase.replayMetadata.transfer.interpretation,
+        driftSummary: summarizeReplayDrift(
+          leadCase.replayMetadata.recommendation.interpretation,
+          leadCase.replayMetadata.transfer.interpretation
+        ),
       },
       nextAction: leadCase.nextStep.nextAction.replace(/_/g, " "),
       coachNote: leadCase.nextStep.coachNote,
@@ -270,6 +282,19 @@ export function buildCommandCenterSnapshot({
       tsLabel: formatRecentDate(attempt.ts),
     })),
   };
+}
+
+function summarizeReplayDrift(
+  recommendationInterpretation: string,
+  transferInterpretation: string
+): string {
+  if (recommendationInterpretation.includes("engine_changed") || transferInterpretation.includes("engine_changed")) {
+    return "Engine-version drift is present in recent replay history.";
+  }
+  if (recommendationInterpretation.includes("evidence_changed") || transferInterpretation.includes("evidence_changed")) {
+    return "Recent replay history shows evidence drift under a stable manifest.";
+  }
+  return "Recent replay history is stable under the latest stored manifests.";
 }
 
 function buildRetentionSection(

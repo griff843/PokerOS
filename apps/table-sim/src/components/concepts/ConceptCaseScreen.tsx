@@ -90,6 +90,12 @@ export function ConceptCaseScreen({ state }: { state: ConceptCaseScreenState }) 
             >
               Open Weakness Explorer
             </Link>
+            <Link
+              href={`/app/concepts/${encodeURIComponent(history.conceptKey)}/replay`}
+              className="rounded-[18px] border border-amber-400/18 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100 transition hover:border-amber-300/28 hover:bg-amber-500/16"
+            >
+              Open Replay Inspector
+            </Link>
             {recommendation ? (
               <span className="rounded-[18px] border border-emerald-400/18 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-100">
                 Current recommendation: {recommendation.action.replace(/_/g, " ")}

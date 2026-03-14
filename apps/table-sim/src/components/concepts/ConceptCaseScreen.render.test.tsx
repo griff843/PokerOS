@@ -197,7 +197,7 @@ describe("ConceptCaseScreen", () => {
     expect(html).toContain("Stabilizing");
     expect(html).toContain("River Bluff Catching moves up because a retention validation block is due now.");
     expect(html).toContain("run retention validation");
-    expect(html).toContain("/app/session");
+    expect(html).toContain("/app/concepts/river_bluff_catching/replay");
   });
 
   it("renders a loading state cleanly", () => {
