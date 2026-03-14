@@ -284,6 +284,13 @@ describe("intervention decision snapshots", () => {
       user_id: "local_user",
       concept_key: "river_bluff_catching",
       created_at: "2026-03-10T12:00:00.000Z",
+      engine_family: "intervention_recommendation",
+      engine_name: "table-sim-intervention-recommendation",
+      engine_version: "1.0.0",
+      engine_schema_version: "intervention_recommendation.v1",
+      engine_config_fingerprint: "table-sim-intervention-config.v1",
+      engine_ruleset_version: "recommendation-rules.v1",
+      engine_authored_at: "2026-03-13T00:00:00.000Z",
       recommended_action: "assign_intervention",
       recommended_strategy: "threshold_repair",
       confidence: "high",
@@ -319,6 +326,13 @@ describe("intervention decision snapshots", () => {
       user_id: "local_user",
       concept_key: "river_bluff_catching",
       created_at: "2026-03-10T12:30:00.000Z",
+      engine_family: "intervention_recommendation",
+      engine_name: "table-sim-intervention-recommendation",
+      engine_version: "1.0.0",
+      engine_schema_version: "intervention_recommendation.v1",
+      engine_config_fingerprint: "table-sim-intervention-config.v1",
+      engine_ruleset_version: "recommendation-rules.v1",
+      engine_authored_at: "2026-03-13T00:00:00.000Z",
       recommended_action: "continue_intervention",
       recommended_strategy: "threshold_repair",
       confidence: "medium",
@@ -349,6 +363,7 @@ describe("intervention decision snapshots", () => {
     expect(conceptHistory[1]?.acted_upon_bool).toBe(1);
     expect(conceptHistory[1]?.linked_intervention_id).toBe(intervention.id);
     expect(conceptHistory[0]?.supersedes_decision_id).toBe("decision-1");
+    expect(conceptHistory[0]?.engine_version).toBe("1.0.0");
   });
 });
 
@@ -443,6 +458,13 @@ describe("transfer evaluation snapshots", () => {
       user_id: "local_user",
       concept_key: "river_bluff_catching",
       created_at: "2026-03-12T12:00:00.000Z",
+      engine_family: "transfer_evaluation",
+      engine_name: "table-sim-transfer-evaluation",
+      engine_version: "1.0.0",
+      engine_schema_version: "transfer_evaluation.v1",
+      engine_config_fingerprint: "table-sim-transfer-config.v1",
+      engine_ruleset_version: "transfer-rules.v1",
+      engine_authored_at: "2026-03-13T00:00:00.000Z",
       transfer_status: "transfer_validated",
       transfer_confidence: "high",
       evidence_sufficiency: "strong",
@@ -474,6 +496,13 @@ describe("transfer evaluation snapshots", () => {
       user_id: "local_user",
       concept_key: "river_bluff_catching",
       created_at: "2026-03-12T13:00:00.000Z",
+      engine_family: "transfer_evaluation",
+      engine_name: "table-sim-transfer-evaluation",
+      engine_version: "1.0.0",
+      engine_schema_version: "transfer_evaluation.v1",
+      engine_config_fingerprint: "table-sim-transfer-config.v1",
+      engine_ruleset_version: "transfer-rules.v1",
+      engine_authored_at: "2026-03-13T00:00:00.000Z",
       transfer_status: "transfer_regressed",
       transfer_confidence: "high",
       evidence_sufficiency: "strong",
@@ -510,6 +539,7 @@ describe("transfer evaluation snapshots", () => {
     expect(userHistory.map((entry) => entry.id)).toEqual(["transfer-2", "transfer-1"]);
     expect(conceptHistory[0]?.linked_decision_snapshot_id).toBeNull();
     expect(conceptHistory[0]?.supersedes_snapshot_id).toBe("transfer-1");
+    expect(conceptHistory[0]?.engine_family).toBe("transfer_evaluation");
   });
 });
 
@@ -524,6 +554,13 @@ describe("coaching input snapshots", () => {
       snapshot_type: "intervention_recommendation",
       schema_version: "intervention_recommendation_input.v1",
       created_at: "2026-03-12T12:00:00.000Z",
+      engine_family: "intervention_recommendation",
+      engine_name: "table-sim-intervention-recommendation",
+      engine_version: "1.0.0",
+      engine_schema_version: "intervention_recommendation.v1",
+      engine_config_fingerprint: "table-sim-intervention-config.v1",
+      engine_ruleset_version: "recommendation-rules.v1",
+      engine_authored_at: "2026-03-13T00:00:00.000Z",
       payload_json: JSON.stringify({ schemaVersion: "intervention_recommendation_input.v1", conceptKey: "river_bluff_catching" }),
       recovery_stage: "active_repair",
       retention_state: "due",
@@ -545,6 +582,13 @@ describe("coaching input snapshots", () => {
       snapshot_type: "transfer_evaluation",
       schema_version: "transfer_evaluation_input.v1",
       created_at: "2026-03-12T12:30:00.000Z",
+      engine_family: "transfer_evaluation",
+      engine_name: "table-sim-transfer-evaluation",
+      engine_version: "1.0.0",
+      engine_schema_version: "transfer_evaluation.v1",
+      engine_config_fingerprint: "table-sim-transfer-config.v1",
+      engine_ruleset_version: "transfer-rules.v1",
+      engine_authored_at: "2026-03-13T00:00:00.000Z",
       payload_json: JSON.stringify({ schemaVersion: "transfer_evaluation_input.v1", conceptKey: "river_bluff_catching" }),
       recovery_stage: "recovered",
       retention_state: "completed_pass",
@@ -570,5 +614,6 @@ describe("coaching input snapshots", () => {
     expect(conceptSnapshots.map((entry) => entry.id)).toEqual(["input-2", "input-1"]);
     expect(userSnapshots.map((entry) => entry.id)).toEqual(["input-2", "input-1"]);
     expect(conceptSnapshots[0]?.linked_transfer_snapshot_id).toBeNull();
+    expect(conceptSnapshots[0]?.engine_version).toBe("1.0.0");
   });
 });

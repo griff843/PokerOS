@@ -19,6 +19,12 @@ import {
 } from "../../../../packages/db/src/repository";
 import { getLocalCoachingUserId } from "./coaching-memory";
 import {
+  TRANSFER_ENGINE_MANIFEST,
+  fromEngineManifestColumns,
+  toEngineManifestColumns,
+  type TableSimEngineManifest,
+} from "./engine-manifest";
+import {
   TRANSFER_INPUT_SCHEMA_VERSION,
   buildTransferInputSnapshotPayloadMap,
   persistCoachingInputSnapshot,
@@ -33,6 +39,7 @@ export interface TransferAuditRecord {
   id: string;
   conceptKey: string;
   createdAt: string;
+  engineManifest: TableSimEngineManifest;
   status: ConceptTransferEvaluation["status"];
   confidence: ConceptTransferEvaluation["confidence"];
   evidenceSufficiency: ConceptTransferEvaluation["evidenceSufficiency"];
@@ -101,6 +108,7 @@ export function persistTransferEvaluationSnapshot(args: {
         conceptKey: args.evaluation.conceptKey,
         snapshotType: "transfer_evaluation",
         schemaVersion: TRANSFER_INPUT_SCHEMA_VERSION,
+        engineManifest: TRANSFER_ENGINE_MANIFEST,
         payload: args.inputPayload,
         recoveryStage: args.recoveryStage,
         retentionState: args.retentionState ?? null,
@@ -127,6 +135,7 @@ export function persistTransferEvaluationSnapshot(args: {
     user_id: userId,
     concept_key: args.evaluation.conceptKey,
     created_at: createdAt,
+    ...toEngineManifestColumns(TRANSFER_ENGINE_MANIFEST),
     transfer_status: args.evaluation.status,
     transfer_confidence: args.evaluation.confidence,
     evidence_sufficiency: args.evaluation.evidenceSufficiency,
@@ -160,6 +169,7 @@ export function persistTransferEvaluationSnapshot(args: {
       conceptKey: args.evaluation.conceptKey,
       snapshotType: "transfer_evaluation",
       schemaVersion: TRANSFER_INPUT_SCHEMA_VERSION,
+      engineManifest: TRANSFER_ENGINE_MANIFEST,
       payload: args.inputPayload,
       recoveryStage: args.recoveryStage,
       retentionState: args.retentionState ?? null,
@@ -292,6 +302,7 @@ export function toTransferAuditRecord(row: TransferEvaluationSnapshotRow): Trans
     id: row.id,
     conceptKey: row.concept_key,
     createdAt: row.created_at,
+    engineManifest: fromEngineManifestColumns(row),
     status: row.transfer_status,
     confidence: row.transfer_confidence,
     evidenceSufficiency: row.evidence_sufficiency,

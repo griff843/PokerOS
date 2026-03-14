@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { InterventionHistoryEntry, InterventionRecommendation, PlayerIntelligenceSnapshot, RealPlayConceptSignal } from "@poker-coach/core/browser";
 import type { CoachingInputSnapshotRow, InterventionDecisionSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
+import { RECOMMENDATION_ENGINE_MANIFEST, TRANSFER_ENGINE_MANIFEST, toEngineManifestColumns } from "./engine-manifest";
 import { buildConceptCaseMap } from "./concept-case";
 
 function makePlayerIntelligence(): PlayerIntelligenceSnapshot {
@@ -126,6 +127,7 @@ describe("concept case map", () => {
       user_id: "local_user",
       concept_key: "river_bluff_catching",
       created_at: "2026-03-12T12:00:00.000Z",
+      ...toEngineManifestColumns(RECOMMENDATION_ENGINE_MANIFEST),
       recommended_action: "continue_intervention",
       recommended_strategy: "threshold_repair",
       confidence: "high",
@@ -167,6 +169,7 @@ describe("concept case map", () => {
       user_id: "local_user",
       concept_key: "river_bluff_catching",
       created_at: "2026-03-12T11:55:00.000Z",
+      ...toEngineManifestColumns(TRANSFER_ENGINE_MANIFEST),
       transfer_status: "transfer_uncertain",
       transfer_confidence: "medium",
       evidence_sufficiency: "moderate",
@@ -199,6 +202,7 @@ describe("concept case map", () => {
       snapshot_type: "transfer_evaluation",
       schema_version: "transfer_evaluation_input.v1",
       created_at: "2026-03-12T11:54:00.000Z",
+      ...toEngineManifestColumns(TRANSFER_ENGINE_MANIFEST),
       payload_json: JSON.stringify({ schemaVersion: "transfer_evaluation_input.v1", conceptKey: "river_bluff_catching" }),
       recovery_stage: "active_repair",
       retention_state: "upcoming",

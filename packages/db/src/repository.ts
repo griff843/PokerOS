@@ -1,4 +1,5 @@
 import Database from "better-sqlite3";
+import type { CoachingEngineFamily } from "./engine-manifest";
 
 // Node operations
 
@@ -268,7 +269,17 @@ export type TransferSnapshotEvidenceSufficiency = "none" | "sparse" | "moderate"
 export type TransferSnapshotPressure = "low" | "medium" | "high";
 export type CoachingInputSnapshotType = "intervention_recommendation" | "transfer_evaluation";
 
-export interface InterventionDecisionSnapshotRow {
+export interface EngineManifestRowFields {
+  engine_family: CoachingEngineFamily;
+  engine_name: string;
+  engine_version: string;
+  engine_schema_version: string;
+  engine_config_fingerprint?: string | null;
+  engine_ruleset_version?: string | null;
+  engine_authored_at?: string | null;
+}
+
+export interface InterventionDecisionSnapshotRow extends EngineManifestRowFields {
   id: string;
   user_id: string;
   concept_key: string;
@@ -311,7 +322,7 @@ export interface RetentionScheduleRow {
   evidence_json: string;
 }
 
-export interface TransferEvaluationSnapshotRow {
+export interface TransferEvaluationSnapshotRow extends EngineManifestRowFields {
   id: string;
   user_id: string;
   concept_key: string;
@@ -342,7 +353,7 @@ export interface TransferEvaluationSnapshotRow {
   supersedes_snapshot_id?: string | null;
 }
 
-export interface CoachingInputSnapshotRow {
+export interface CoachingInputSnapshotRow extends EngineManifestRowFields {
   id: string;
   user_id: string;
   concept_key: string;
@@ -505,6 +516,13 @@ export function createInterventionDecisionSnapshot(db: Database.Database, row: I
       user_id,
       concept_key,
       created_at,
+      engine_family,
+      engine_name,
+      engine_version,
+      engine_schema_version,
+      engine_config_fingerprint,
+      engine_ruleset_version,
+      engine_authored_at,
       recommended_action,
       recommended_strategy,
       confidence,
@@ -528,6 +546,13 @@ export function createInterventionDecisionSnapshot(db: Database.Database, row: I
       @user_id,
       @concept_key,
       @created_at,
+      @engine_family,
+      @engine_name,
+      @engine_version,
+      @engine_schema_version,
+      @engine_config_fingerprint,
+      @engine_ruleset_version,
+      @engine_authored_at,
       @recommended_action,
       @recommended_strategy,
       @confidence,
@@ -552,6 +577,9 @@ export function createInterventionDecisionSnapshot(db: Database.Database, row: I
     linked_intervention_id: row.linked_intervention_id ?? null,
     source_context: row.source_context ?? null,
     supersedes_decision_id: row.supersedes_decision_id ?? null,
+    engine_config_fingerprint: row.engine_config_fingerprint ?? null,
+    engine_ruleset_version: row.engine_ruleset_version ?? null,
+    engine_authored_at: row.engine_authored_at ?? null,
   });
   return row;
 }
@@ -673,6 +701,13 @@ export function createTransferEvaluationSnapshot(
       user_id,
       concept_key,
       created_at,
+      engine_family,
+      engine_name,
+      engine_version,
+      engine_schema_version,
+      engine_config_fingerprint,
+      engine_ruleset_version,
+      engine_authored_at,
       transfer_status,
       transfer_confidence,
       evidence_sufficiency,
@@ -703,6 +738,13 @@ export function createTransferEvaluationSnapshot(
       @user_id,
       @concept_key,
       @created_at,
+      @engine_family,
+      @engine_name,
+      @engine_version,
+      @engine_schema_version,
+      @engine_config_fingerprint,
+      @engine_ruleset_version,
+      @engine_authored_at,
       @transfer_status,
       @transfer_confidence,
       @evidence_sufficiency,
@@ -742,6 +784,9 @@ export function createTransferEvaluationSnapshot(
     linked_retention_schedule_id: row.linked_retention_schedule_id ?? null,
     source_context: row.source_context ?? null,
     supersedes_snapshot_id: row.supersedes_snapshot_id ?? null,
+    engine_config_fingerprint: row.engine_config_fingerprint ?? null,
+    engine_ruleset_version: row.engine_ruleset_version ?? null,
+    engine_authored_at: row.engine_authored_at ?? null,
   });
   return row;
 }
@@ -798,6 +843,13 @@ export function createCoachingInputSnapshot(
       snapshot_type,
       schema_version,
       created_at,
+      engine_family,
+      engine_name,
+      engine_version,
+      engine_schema_version,
+      engine_config_fingerprint,
+      engine_ruleset_version,
+      engine_authored_at,
       payload_json,
       recovery_stage,
       retention_state,
@@ -818,6 +870,13 @@ export function createCoachingInputSnapshot(
       @snapshot_type,
       @schema_version,
       @created_at,
+      @engine_family,
+      @engine_name,
+      @engine_version,
+      @engine_schema_version,
+      @engine_config_fingerprint,
+      @engine_ruleset_version,
+      @engine_authored_at,
       @payload_json,
       @recovery_stage,
       @retention_state,
@@ -838,6 +897,9 @@ export function createCoachingInputSnapshot(
     linked_transfer_snapshot_id: row.linked_transfer_snapshot_id ?? null,
     source_context: row.source_context ?? null,
     supersedes_snapshot_id: row.supersedes_snapshot_id ?? null,
+    engine_config_fingerprint: row.engine_config_fingerprint ?? null,
+    engine_ruleset_version: row.engine_ruleset_version ?? null,
+    engine_authored_at: row.engine_authored_at ?? null,
   });
   return row;
 }

@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { openDatabase } from "../../../../packages/db/src";
 import { createIntervention } from "../../../../packages/db/src/repository";
 import type { InterventionRecommendation } from "@poker-coach/core/browser";
+import type { InterventionDecisionSnapshotRow } from "../../../../packages/db/src/repository";
 import {
   buildConceptDecisionAuditSummary,
   linkInterventionDecisionToIntervention,
@@ -75,6 +76,7 @@ describe("intervention decision audit", () => {
     expect(result.record.action).toBe("assign_intervention");
     expect(result.record.reasonCodes).toContain("threshold_pattern");
     expect(result.record.sourceContext).toBe("intervention_plan_api");
+    expect(result.record.engineManifest.engineVersion).toBe("1.0.0");
   });
 
   it("suppresses identical near-duplicate decisions inside the anti-noise window", () => {
@@ -133,6 +135,44 @@ describe("intervention decision audit", () => {
     expect(changed.record.id).not.toBe(first.record.id);
     expect(changed.record.supersedesDecisionId).toBe(first.record.id);
     expect(changed.record.action).toBe("escalate_intervention");
+  });
+
+  it("stamps decision and input snapshots with the canonical recommendation manifest", () => {
+    const db = openDatabase(createTempDbPath());
+
+    persistInterventionDecisionSnapshot({
+      db,
+      recommendation: makeRecommendation(),
+      inputPayload: {
+        schemaVersion: "intervention_recommendation_input.v1",
+        conceptKey: "river_bluff_catching",
+        label: "River Bluff Catching",
+        diagnosisSummary: { count: 1, types: ["threshold_error"] },
+        interventionSummary: { count: 0, activeCount: 0, improvedCount: 0, failedCount: 0, latestStatus: undefined },
+        recoveryStage: "active_repair",
+        patternSummary: { count: 1, types: ["persistent_threshold_leak"] },
+        studySampleSize: 6,
+        recurrenceCount: 1,
+        reviewPressure: 1,
+        trainingUrgency: 0.8,
+        trendSummary: { direction: "stable", recentAverage: 0.5, averageScore: 0.5 },
+        retentionSummary: { latestState: "due", validationState: "provisional", lastResult: null, dueCount: 1, overdueCount: 0 },
+      },
+      createdAt: "2026-03-12T12:00:00.000Z",
+    });
+
+    const decision = db.prepare("SELECT * FROM intervention_decision_snapshots LIMIT 1").get() as InterventionDecisionSnapshotRow;
+    const input = db.prepare("SELECT * FROM coaching_input_snapshots LIMIT 1").get() as {
+      engine_family: string;
+      engine_version: string;
+      engine_schema_version: string;
+    };
+    db.close();
+
+    expect(decision.engine_family).toBe("intervention_recommendation");
+    expect(decision.engine_version).toBe("1.0.0");
+    expect(input.engine_family).toBe("intervention_recommendation");
+    expect(input.engine_schema_version).toBe("intervention_recommendation.v1");
   });
 
   it("links an acted-on decision to an intervention", () => {

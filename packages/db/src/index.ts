@@ -4,6 +4,7 @@ import fs from "node:fs";
 import { runMigrations } from "./migrations";
 
 export { runMigrations } from "./migrations";
+export * from "./engine-manifest";
 export * from "./repository";
 
 const DEFAULT_DB_DIR = ".local";

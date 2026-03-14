@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CoachingInputSnapshotRow } from "../../../../packages/db/src/repository";
+import { RECOMMENDATION_ENGINE_MANIFEST, toEngineManifestColumns } from "./engine-manifest";
 import {
   buildEngineReplaySummary,
   buildRecommendationInputSnapshotPayloadMap,
@@ -143,6 +144,7 @@ describe("input snapshots", () => {
     }).get("river_bluff_catching");
 
     expect(recommendationPayload?.diagnosisSummary.count).toBe(1);
+    expect(recommendationPayload?.studySampleSize).toBe(6);
     expect(recommendationPayload?.transferSummary?.status).toBe("transfer_gap");
     expect(transferPayload?.studySummary.sampleSize).toBe(6);
     expect(transferPayload?.realPlaySummary.occurrences).toBe(3);
@@ -174,14 +176,36 @@ describe("input snapshots", () => {
     expect(summary.inputChanged).toBe(true);
     expect(summary.outputChanged).toBe(true);
     expect(summary.changedEvidenceFields).toContain("recurrenceCount");
+    expect(summary.manifestDrift.matches).toBe(true);
     expect(pairs[0]?.outputId).toBe("decision-2");
+  });
+
+  it("distinguishes engine drift from evidence drift", () => {
+    const summary = buildEngineReplaySummary({
+      conceptKey: "river_bluff_catching",
+      snapshotType: "intervention_recommendation",
+      inputSnapshots: [
+        makeInputSnapshot("input-2", "2026-03-12T13:00:00.000Z", {}, { engine_version: "1.1.0" }),
+        makeInputSnapshot("input-1", "2026-03-12T12:00:00.000Z"),
+      ],
+      outputSnapshots: [
+        { id: "decision-2", concept_key: "river_bluff_catching", created_at: "2026-03-12T13:00:00.000Z" },
+        { id: "decision-1", concept_key: "river_bluff_catching", created_at: "2026-03-12T12:00:00.000Z" },
+      ],
+    });
+
+    expect(summary.inputChanged).toBe(false);
+    expect(summary.manifestDrift.matches).toBe(false);
+    expect(summary.manifestDrift.changedFields).toContain("engineVersion");
+    expect(summary.interpretation).toBe("engine_changed");
   });
 });
 
 function makeInputSnapshot(
   id: string,
   createdAt: string,
-  overrides: Partial<Record<string, unknown>> = {}
+  payloadOverrides: Partial<Record<string, unknown>> = {},
+  rowOverrides: Partial<CoachingInputSnapshotRow> = {}
 ): CoachingInputSnapshotRow {
   return {
     id,
@@ -190,6 +214,7 @@ function makeInputSnapshot(
     snapshot_type: "intervention_recommendation",
     schema_version: "intervention_recommendation_input.v1",
     created_at: createdAt,
+    ...toEngineManifestColumns(RECOMMENDATION_ENGINE_MANIFEST),
     payload_json: JSON.stringify({
       schemaVersion: "intervention_recommendation_input.v1",
       conceptKey: "river_bluff_catching",
@@ -204,7 +229,7 @@ function makeInputSnapshot(
       trendSummary: { direction: "improving", recentAverage: 0.66, averageScore: 0.54 },
       retentionSummary: { latestState: "due", validationState: "provisional", lastResult: null, dueCount: 1, overdueCount: 0 },
       transferSummary: { status: "transfer_gap", confidence: "medium", evidenceSufficiency: "moderate", pressure: "medium", studyVsRealPlayDelta: 0.32, realPlayOccurrences: 2, realPlayReviewSpotCount: 2 },
-      ...overrides,
+      ...payloadOverrides,
     }),
     recovery_stage: "active_repair",
     retention_state: "due",
@@ -217,5 +242,6 @@ function makeInputSnapshot(
     linked_transfer_snapshot_id: null,
     source_context: "intervention_plan_api",
     supersedes_snapshot_id: null,
+    ...rowOverrides,
   };
 }

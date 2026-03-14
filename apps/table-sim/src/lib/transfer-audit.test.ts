@@ -6,6 +6,7 @@ import type { ConceptTransferEvaluation } from "@poker-coach/core/browser";
 import { openDatabase } from "../../../../packages/db/src";
 import type { TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
 import { getUserTransferEvaluationSnapshots } from "../../../../packages/db/src/repository";
+import { TRANSFER_ENGINE_MANIFEST, toEngineManifestColumns } from "./engine-manifest";
 import { buildConceptTransferAuditSummary, persistTransferEvaluationSnapshot } from "./transfer-audit";
 
 const tempDirs: string[] = [];
@@ -63,6 +64,7 @@ describe("transfer audit", () => {
     expect(first.suppressed).toBe(false);
     expect(duplicate.suppressed).toBe(true);
     expect(snapshots).toHaveLength(1);
+    expect(first.record.engineManifest.engineVersion).toBe("1.0.0");
   });
 
   it("creates a new snapshot when transfer status materially changes", () => {
@@ -129,6 +131,49 @@ describe("transfer audit", () => {
     expect(summary.previousSnapshot?.id).toBe("transfer-2");
     expect(summary.stability).toBe("flipping");
   });
+
+  it("stamps transfer and input snapshots with the canonical transfer manifest", () => {
+    const db = openDatabase(createTempDbPath());
+
+    persistTransferEvaluationSnapshot({
+      db,
+      evaluation: makeEvaluation(),
+      inputPayload: {
+        schemaVersion: "transfer_evaluation_input.v1",
+        conceptKey: "river_bluff_catching",
+        label: "River Bluff Catching",
+        studySummary: { sampleSize: 6, recentAverage: 0.74, averageScore: 0.61, trendDirection: "improving", failedCount: 1 },
+        realPlaySummary: { occurrences: 3, reviewSpotCount: 3, weight: 0.4, latestHandAt: "2026-03-12T12:00:00.000Z", evidenceCount: 2 },
+        diagnosisSummary: { count: 1 },
+        interventionSummary: { count: 1, improvedCount: 0, failedCount: 0, latestStatus: "in_progress" },
+        recoveryStage: "recovered",
+        retentionSummary: { latestState: "completed_pass", validationState: "validated", lastResult: "pass" },
+        patternSummary: { count: 1, types: ["real_play_transfer_gap"] },
+      },
+      studySampleSize: 6,
+      studyRecentAverage: 0.74,
+      studyAverage: 0.61,
+      studyFailedCount: 1,
+      recoveryStage: "recovered",
+      retentionState: "completed_pass",
+      retentionResult: "pass",
+      patternTypes: ["real_play_transfer_gap"],
+      createdAt: "2026-03-12T12:00:00.000Z",
+    });
+
+    const snapshot = db.prepare("SELECT * FROM transfer_evaluation_snapshots LIMIT 1").get() as TransferEvaluationSnapshotRow;
+    const input = db.prepare("SELECT * FROM coaching_input_snapshots LIMIT 1").get() as {
+      engine_family: string;
+      engine_version: string;
+      engine_schema_version: string;
+    };
+    db.close();
+
+    expect(snapshot.engine_family).toBe("transfer_evaluation");
+    expect(snapshot.engine_version).toBe("1.0.0");
+    expect(input.engine_family).toBe("transfer_evaluation");
+    expect(input.engine_schema_version).toBe("transfer_evaluation.v1");
+  });
 });
 
 function makeEvaluation(overrides: Partial<Parameters<typeof persistTransferEvaluationSnapshot>[0]["evaluation"]> = {}) {
@@ -165,6 +210,7 @@ function makeSnapshotRow(
     user_id: "local_user",
     concept_key: "river_bluff_catching",
     created_at: createdAt,
+    ...toEngineManifestColumns(TRANSFER_ENGINE_MANIFEST),
     transfer_status: status,
     transfer_confidence: "high",
     evidence_sufficiency: "strong",

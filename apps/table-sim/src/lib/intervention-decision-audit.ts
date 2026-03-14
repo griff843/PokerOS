@@ -19,6 +19,12 @@ import {
 } from "../../../../packages/db/src/repository";
 import { getLocalCoachingUserId } from "./coaching-memory";
 import {
+  RECOMMENDATION_ENGINE_MANIFEST,
+  fromEngineManifestColumns,
+  toEngineManifestColumns,
+  type TableSimEngineManifest,
+} from "./engine-manifest";
+import {
   INTERVENTION_INPUT_SCHEMA_VERSION,
   buildRecommendationInputSnapshotPayloadMap,
   persistCoachingInputSnapshot,
@@ -31,6 +37,7 @@ export interface InterventionDecisionAuditRecord {
   id: string;
   conceptKey: string;
   createdAt: string;
+  engineManifest: TableSimEngineManifest;
   action: InterventionRecommendation["action"];
   recommendedStrategy: InterventionRecommendation["recommendedStrategy"];
   confidence: InterventionRecommendation["confidence"];
@@ -90,13 +97,14 @@ export function persistInterventionDecisionSnapshot(
         conceptKey: args.recommendation.conceptKey,
         snapshotType: "intervention_recommendation",
         schemaVersion: INTERVENTION_INPUT_SCHEMA_VERSION,
+        engineManifest: RECOMMENDATION_ENGINE_MANIFEST,
         payload: args.inputPayload,
         recoveryStage: latest.recovery_stage,
         retentionState: args.inputPayload.retentionSummary.latestState ?? null,
         patternTypes: args.inputPayload.patternSummary.types,
         diagnosisCount: args.inputPayload.diagnosisSummary.count,
         interventionCount: args.inputPayload.interventionSummary.count,
-        studySampleSize: 0,
+        studySampleSize: args.inputPayload.studySampleSize,
         realPlayOccurrences: args.inputPayload.transferSummary?.realPlayOccurrences ?? 0,
         linkedDecisionSnapshotId: latest.id,
         sourceContext: args.sourceContext,
@@ -115,6 +123,7 @@ export function persistInterventionDecisionSnapshot(
     user_id: userId,
     concept_key: args.recommendation.conceptKey,
     created_at: createdAt,
+    ...toEngineManifestColumns(RECOMMENDATION_ENGINE_MANIFEST),
     recommended_action: args.recommendation.action,
     recommended_strategy: args.recommendation.recommendedStrategy,
     confidence: args.recommendation.confidence,
@@ -141,6 +150,7 @@ export function persistInterventionDecisionSnapshot(
       conceptKey: args.recommendation.conceptKey,
       snapshotType: "intervention_recommendation",
       schemaVersion: INTERVENTION_INPUT_SCHEMA_VERSION,
+      engineManifest: RECOMMENDATION_ENGINE_MANIFEST,
       payload: args.inputPayload,
       recoveryStage: row.recovery_stage,
       retentionState: args.inputPayload.retentionSummary.latestState ?? null,
@@ -254,6 +264,7 @@ export function toInterventionDecisionAuditRecord(row: InterventionDecisionSnaps
     id: row.id,
     conceptKey: row.concept_key,
     createdAt: row.created_at,
+    engineManifest: fromEngineManifestColumns(row),
     action: row.recommended_action,
     recommendedStrategy: row.recommended_strategy,
     confidence: row.confidence,

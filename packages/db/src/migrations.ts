@@ -75,6 +75,13 @@ const MIGRATIONS: string[] = [
     user_id TEXT NOT NULL,
     concept_key TEXT NOT NULL,
     created_at TEXT NOT NULL,
+    engine_family TEXT NOT NULL DEFAULT 'intervention_recommendation',
+    engine_name TEXT NOT NULL DEFAULT 'unknown',
+    engine_version TEXT NOT NULL DEFAULT 'unknown',
+    engine_schema_version TEXT NOT NULL DEFAULT 'unknown',
+    engine_config_fingerprint TEXT,
+    engine_ruleset_version TEXT,
+    engine_authored_at TEXT,
     recommended_action TEXT NOT NULL,
     recommended_strategy TEXT NOT NULL,
     confidence TEXT NOT NULL,
@@ -118,6 +125,13 @@ const MIGRATIONS: string[] = [
     user_id TEXT NOT NULL,
     concept_key TEXT NOT NULL,
     created_at TEXT NOT NULL,
+    engine_family TEXT NOT NULL DEFAULT 'transfer_evaluation',
+    engine_name TEXT NOT NULL DEFAULT 'unknown',
+    engine_version TEXT NOT NULL DEFAULT 'unknown',
+    engine_schema_version TEXT NOT NULL DEFAULT 'unknown',
+    engine_config_fingerprint TEXT,
+    engine_ruleset_version TEXT,
+    engine_authored_at TEXT,
     transfer_status TEXT NOT NULL,
     transfer_confidence TEXT NOT NULL,
     evidence_sufficiency TEXT NOT NULL,
@@ -151,6 +165,13 @@ const MIGRATIONS: string[] = [
     snapshot_type TEXT NOT NULL,
     schema_version TEXT NOT NULL,
     created_at TEXT NOT NULL,
+    engine_family TEXT NOT NULL DEFAULT 'intervention_recommendation',
+    engine_name TEXT NOT NULL DEFAULT 'unknown',
+    engine_version TEXT NOT NULL DEFAULT 'unknown',
+    engine_schema_version TEXT NOT NULL DEFAULT 'unknown',
+    engine_config_fingerprint TEXT,
+    engine_ruleset_version TEXT,
+    engine_authored_at TEXT,
     payload_json TEXT NOT NULL,
     recovery_stage TEXT NOT NULL,
     retention_state TEXT,
@@ -290,6 +311,10 @@ export function runMigrations(db: Database.Database): void {
       db.exec("UPDATE coaching_interventions SET status = 'in_progress' WHERE status = 'started'");
     }
 
+    addManifestColumns(db, "intervention_decision_snapshots", "intervention_recommendation");
+    addManifestColumns(db, "transfer_evaluation_snapshots", "transfer_evaluation");
+    addManifestColumns(db, "coaching_input_snapshots", "intervention_recommendation");
+
     if (tableExists(db, "imported_hands")) {
       if (!columnExists(db, "imported_hands", "concept_matches_json")) {
         db.exec("ALTER TABLE imported_hands ADD COLUMN concept_matches_json TEXT NOT NULL DEFAULT '[]'");
@@ -301,5 +326,33 @@ export function runMigrations(db: Database.Database): void {
   });
 
   migrate();
+}
+
+function addManifestColumns(db: Database.Database, tableName: string, defaultFamily: string): void {
+  if (!tableExists(db, tableName)) {
+    return;
+  }
+
+  if (!columnExists(db, tableName, "engine_family")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_family TEXT NOT NULL DEFAULT '${defaultFamily}'`);
+  }
+  if (!columnExists(db, tableName, "engine_name")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_name TEXT NOT NULL DEFAULT 'unknown'`);
+  }
+  if (!columnExists(db, tableName, "engine_version")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_version TEXT NOT NULL DEFAULT 'unknown'`);
+  }
+  if (!columnExists(db, tableName, "engine_schema_version")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_schema_version TEXT NOT NULL DEFAULT 'unknown'`);
+  }
+  if (!columnExists(db, tableName, "engine_config_fingerprint")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_config_fingerprint TEXT`);
+  }
+  if (!columnExists(db, tableName, "engine_ruleset_version")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_ruleset_version TEXT`);
+  }
+  if (!columnExists(db, tableName, "engine_authored_at")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_authored_at TEXT`);
+  }
 }
 

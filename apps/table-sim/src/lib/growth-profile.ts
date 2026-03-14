@@ -107,6 +107,9 @@ export interface GrowthProfileSnapshot {
     replay?: {
       recommendationInputSnapshotId?: string;
       transferInputSnapshotId?: string;
+      recommendationEngineVersion?: string;
+      transferEngineVersion?: string;
+      manifestMatch: boolean;
       recommendationInterpretation: string;
       transferInterpretation: string;
     };
@@ -171,6 +174,8 @@ export function buildGrowthProfileSnapshot(args: {
     realPlaySignals: args.realPlaySignals,
     patternAttempts: args.patternAttempts,
     retentionSchedules: args.retentionSchedules,
+    transferSnapshots: args.transferSnapshots,
+    inputSnapshots: args.inputSnapshots,
     now,
   });
   const windowSize = Math.max(3, Math.min(12, Math.floor(args.attempts.length / 2)));
@@ -340,6 +345,10 @@ export function buildGrowthProfileSnapshot(args: {
       replay: {
         recommendationInputSnapshotId: featuredConceptCase.replayMetadata.recommendation.latestInputSnapshot?.id,
         transferInputSnapshotId: featuredConceptCase.replayMetadata.transfer.latestInputSnapshot?.id,
+        recommendationEngineVersion: featuredConceptCase.replayMetadata.recommendation.latestEngineManifest?.engineVersion,
+        transferEngineVersion: featuredConceptCase.replayMetadata.transfer.latestEngineManifest?.engineVersion,
+        manifestMatch: featuredConceptCase.replayMetadata.recommendation.manifestDrift.matches
+          && featuredConceptCase.replayMetadata.transfer.manifestDrift.matches,
         recommendationInterpretation: featuredConceptCase.replayMetadata.recommendation.interpretation,
         transferInterpretation: featuredConceptCase.replayMetadata.transfer.interpretation,
       },

@@ -17,6 +17,13 @@ import {
   getLatestCoachingInputSnapshot,
 } from "../../../../packages/db/src/repository";
 import { getLocalCoachingUserId } from "./coaching-memory";
+import {
+  compareEngineManifests,
+  fromEngineManifestColumns,
+  toEngineManifestColumns,
+  type EngineManifestDriftSummary,
+  type TableSimEngineManifest,
+} from "./engine-manifest";
 import { buildConceptRetentionSummary } from "./retention-scheduling";
 import { buildConceptTransferEvaluationMap } from "./transfer-evaluation";
 
@@ -46,6 +53,7 @@ export interface InterventionRecommendationInputSnapshotPayload {
   recurrenceCount: number;
   reviewPressure: number;
   trainingUrgency: number;
+  studySampleSize: number;
   trendSummary: {
     direction?: "improving" | "worsening" | "stable";
     recentAverage?: number;
@@ -113,6 +121,7 @@ export interface CoachingInputSnapshotRecord {
   conceptKey: string;
   snapshotType: CoachingInputSnapshotType;
   schemaVersion: string;
+  engineManifest: TableSimEngineManifest;
   createdAt: string;
   recoveryStage: string;
   retentionState?: string | null;
@@ -133,10 +142,13 @@ export interface EngineReplaySummary {
   previousInputSnapshot?: CoachingInputSnapshotRecord;
   latestOutputSnapshotId?: string;
   previousOutputSnapshotId?: string;
+  latestEngineManifest?: TableSimEngineManifest;
+  previousEngineManifest?: TableSimEngineManifest;
   inputChanged: boolean;
   outputChanged: boolean;
   changedEvidenceFields: string[];
-  interpretation: "stable" | "evidence_changed" | "output_changed_without_input_delta";
+  manifestDrift: EngineManifestDriftSummary;
+  interpretation: "stable" | "evidence_changed" | "engine_changed" | "evidence_and_engine_changed" | "output_changed_without_input_delta";
 }
 
 export function persistCoachingInputSnapshot(args: {
@@ -144,6 +156,7 @@ export function persistCoachingInputSnapshot(args: {
   conceptKey: string;
   snapshotType: CoachingInputSnapshotType;
   schemaVersion: string;
+  engineManifest: TableSimEngineManifest;
   payload: InterventionRecommendationInputSnapshotPayload | TransferEvaluationInputSnapshotPayload;
   recoveryStage: string;
   retentionState?: string | null;
@@ -168,6 +181,7 @@ export function persistCoachingInputSnapshot(args: {
     snapshot_type: args.snapshotType,
     schema_version: args.schemaVersion,
     created_at: createdAt,
+    ...toEngineManifestColumns(args.engineManifest),
     payload_json: JSON.stringify(args.payload),
     recovery_stage: args.recoveryStage,
     retention_state: args.retentionState ?? null,
@@ -230,6 +244,7 @@ export function buildRecommendationInputSnapshotPayloadMap(args: {
         count: patterns.length,
         types: patterns.map((pattern) => pattern.type),
       },
+      studySampleSize: concept.sampleSize,
       recurrenceCount: concept.recurrenceCount,
       reviewPressure: concept.reviewPressure,
       trainingUrgency: concept.trainingUrgency,
@@ -339,6 +354,7 @@ export function buildEngineReplaySummary(args: {
   const previousInput = inputs[1];
   const latestOutput = outputs[0];
   const previousOutput = outputs[1];
+  const manifestDrift = compareEngineManifests(latestInput?.engineManifest, previousInput?.engineManifest);
   const changedEvidenceFields = latestInput && previousInput
     ? diffSnapshotPayloads(latestInput.payload, previousInput.payload)
     : [];
@@ -350,13 +366,20 @@ export function buildEngineReplaySummary(args: {
     previousInputSnapshot: previousInput,
     latestOutputSnapshotId: latestOutput?.id,
     previousOutputSnapshotId: previousOutput?.id,
+    latestEngineManifest: latestInput?.engineManifest,
+    previousEngineManifest: previousInput?.engineManifest,
     inputChanged,
     outputChanged,
     changedEvidenceFields,
-    interpretation: !inputChanged && !outputChanged
+    manifestDrift,
+    interpretation: !inputChanged && !outputChanged && manifestDrift.matches
       ? "stable"
-      : inputChanged
+      : inputChanged && !manifestDrift.matches
+        ? "evidence_and_engine_changed"
+        : inputChanged
         ? "evidence_changed"
+        : !manifestDrift.matches
+          ? "engine_changed"
         : "output_changed_without_input_delta",
   };
 }
@@ -396,6 +419,7 @@ export function toCoachingInputSnapshotRecord(row: CoachingInputSnapshotRow): Co
     conceptKey: row.concept_key,
     snapshotType: row.snapshot_type,
     schemaVersion: row.schema_version,
+    engineManifest: fromEngineManifestColumns(row),
     createdAt: row.created_at,
     recoveryStage: row.recovery_stage,
     retentionState: row.retention_state ?? null,
