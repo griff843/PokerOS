@@ -148,7 +148,14 @@ export interface EngineReplaySummary {
   outputChanged: boolean;
   changedEvidenceFields: string[];
   manifestDrift: EngineManifestDriftSummary;
-  interpretation: "stable" | "evidence_changed" | "engine_changed" | "evidence_and_engine_changed" | "output_changed_without_input_delta";
+  interpretation:
+    | "stable"
+    | "evidence_changed_output_changed"
+    | "evidence_changed_output_stable"
+    | "engine_changed"
+    | "evidence_and_engine_changed_output_changed"
+    | "evidence_and_engine_changed_output_stable"
+    | "output_changed_without_input_delta";
 }
 
 export function persistCoachingInputSnapshot(args: {
@@ -375,12 +382,16 @@ export function buildEngineReplaySummary(args: {
     interpretation: !inputChanged && !outputChanged && manifestDrift.matches
       ? "stable"
       : inputChanged && !manifestDrift.matches
-        ? "evidence_and_engine_changed"
+        ? outputChanged
+          ? "evidence_and_engine_changed_output_changed"
+          : "evidence_and_engine_changed_output_stable"
         : inputChanged
-        ? "evidence_changed"
-        : !manifestDrift.matches
-          ? "engine_changed"
-        : "output_changed_without_input_delta",
+          ? outputChanged
+            ? "evidence_changed_output_changed"
+            : "evidence_changed_output_stable"
+          : !manifestDrift.matches
+            ? "engine_changed"
+            : "output_changed_without_input_delta",
   };
 }
 

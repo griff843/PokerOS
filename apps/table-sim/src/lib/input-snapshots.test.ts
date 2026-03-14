@@ -177,7 +177,66 @@ describe("input snapshots", () => {
     expect(summary.outputChanged).toBe(true);
     expect(summary.changedEvidenceFields).toContain("recurrenceCount");
     expect(summary.manifestDrift.matches).toBe(true);
+    expect(summary.interpretation).toBe("evidence_changed_output_changed");
     expect(pairs[0]?.outputId).toBe("decision-2");
+  });
+
+  it("classifies evidence_changed_output_stable when evidence shifted but output held", () => {
+    const summary = buildEngineReplaySummary({
+      conceptKey: "river_bluff_catching",
+      snapshotType: "intervention_recommendation",
+      inputSnapshots: [
+        makeInputSnapshot("input-2", "2026-03-12T13:00:00.000Z", { recurrenceCount: 3 }),
+        makeInputSnapshot("input-1", "2026-03-12T12:00:00.000Z", { recurrenceCount: 1 }),
+      ],
+      outputSnapshots: [
+        { id: "decision-1", concept_key: "river_bluff_catching", created_at: "2026-03-12T13:00:00.000Z" },
+      ],
+    });
+
+    expect(summary.inputChanged).toBe(true);
+    expect(summary.outputChanged).toBe(false);
+    expect(summary.changedEvidenceFields).toContain("recurrenceCount");
+    expect(summary.interpretation).toBe("evidence_changed_output_stable");
+  });
+
+  it("classifies stable when evidence and output are both unchanged", () => {
+    const summary = buildEngineReplaySummary({
+      conceptKey: "river_bluff_catching",
+      snapshotType: "intervention_recommendation",
+      inputSnapshots: [
+        makeInputSnapshot("input-2", "2026-03-12T13:00:00.000Z"),
+        makeInputSnapshot("input-1", "2026-03-12T12:00:00.000Z"),
+      ],
+      outputSnapshots: [
+        { id: "decision-1", concept_key: "river_bluff_catching", created_at: "2026-03-12T13:00:00.000Z" },
+      ],
+    });
+
+    expect(summary.inputChanged).toBe(false);
+    expect(summary.outputChanged).toBe(false);
+    expect(summary.manifestDrift.matches).toBe(true);
+    expect(summary.interpretation).toBe("stable");
+  });
+
+  it("classifies output_changed_without_input_delta when output shifts without evidence change", () => {
+    const summary = buildEngineReplaySummary({
+      conceptKey: "river_bluff_catching",
+      snapshotType: "intervention_recommendation",
+      inputSnapshots: [
+        makeInputSnapshot("input-2", "2026-03-12T13:00:00.000Z"),
+        makeInputSnapshot("input-1", "2026-03-12T12:00:00.000Z"),
+      ],
+      outputSnapshots: [
+        { id: "decision-2", concept_key: "river_bluff_catching", created_at: "2026-03-12T13:00:00.000Z" },
+        { id: "decision-1", concept_key: "river_bluff_catching", created_at: "2026-03-12T12:00:00.000Z" },
+      ],
+    });
+
+    expect(summary.inputChanged).toBe(false);
+    expect(summary.outputChanged).toBe(true);
+    expect(summary.manifestDrift.matches).toBe(true);
+    expect(summary.interpretation).toBe("output_changed_without_input_delta");
   });
 
   it("distinguishes engine drift from evidence drift", () => {
