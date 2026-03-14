@@ -131,7 +131,7 @@ describe("InterventionExecutionScreen", () => {
       <InterventionExecutionScreen state={{ loading: false, data: makeActiveBundle() }} />
     );
 
-    expect(html).toContain("Success Criteria");
+    expect(html).toContain("Exit Conditions");
     expect(html).toContain("Real-play score closes within 10 points of study score.");
     expect(html).toContain("Escalation Triggers");
     expect(html).toContain("No improvement in real-play occurrences after 2 sessions.");
@@ -158,7 +158,7 @@ describe("InterventionExecutionScreen", () => {
     expect(html).toContain("/app/concepts/river_bluff_catching/replay");
   });
 
-  it("renders recommended (not yet active) intervention state", () => {
+  it("renders recommended state with distinct header chips", () => {
     const data: InterventionExecutionBundle = {
       ...makeActiveBundle(),
       executionStatus: "recommended",
@@ -173,6 +173,7 @@ describe("InterventionExecutionScreen", () => {
     );
 
     expect(html).toContain("Recommended Intervention");
+    expect(html).toContain("new assignment required");
     expect(html).toContain("add transfer block");
   });
 
@@ -189,8 +190,198 @@ describe("InterventionExecutionScreen", () => {
       <InterventionExecutionScreen state={{ loading: false, data }} />
     );
 
-    expect(html).toContain("No active intervention");
+    expect(html).toContain("No Active Intervention");
     expect(html).toContain("No intervention is currently active or recommended");
+    expect(html).toContain("stabilizing");
+  });
+
+  it("renders progress banner for approaching_success", () => {
+    const data: InterventionExecutionBundle = {
+      ...makeActiveBundle(),
+      progressContext: {
+        progressSummary: "approaching_success",
+        recentSuccessSignals: ["Retention check passed recently — gain is holding."],
+        recentEscalationSignals: [],
+        mostRecentEventLabel: "Retention check passed",
+        mostRecentEventAt: "2026-03-14T10:00:00.000Z",
+      },
+    };
+    const html = renderToStaticMarkup(
+      <InterventionExecutionScreen state={{ loading: false, data }} />
+    );
+
+    expect(html).toContain("Approaching success");
+    expect(html).toContain("Retention check passed recently — gain is holding.");
+  });
+
+  it("renders progress banner for approaching_escalation", () => {
+    const data: InterventionExecutionBundle = {
+      ...makeActiveBundle(),
+      progressContext: {
+        progressSummary: "approaching_escalation",
+        recentSuccessSignals: [],
+        recentEscalationSignals: ["Retention check is overdue — validation has not been completed."],
+        mostRecentEventLabel: "Retention check became overdue",
+        mostRecentEventAt: "2026-03-14T10:00:00.000Z",
+      },
+    };
+    const html = renderToStaticMarkup(
+      <InterventionExecutionScreen state={{ loading: false, data }} />
+    );
+
+    expect(html).toContain("Escalation signals present");
+    expect(html).toContain("Retention check is overdue");
+  });
+
+  it("does not render progress banner for stable context", () => {
+    const data: InterventionExecutionBundle = {
+      ...makeActiveBundle(),
+      progressContext: {
+        progressSummary: "stable",
+        recentSuccessSignals: [],
+        recentEscalationSignals: [],
+      },
+    };
+    const html = renderToStaticMarkup(
+      <InterventionExecutionScreen state={{ loading: false, data }} />
+    );
+
+    expect(html).not.toContain("Approaching success");
+    expect(html).not.toContain("Escalation signals present");
+  });
+
+  it("renders success signal in SuccessCriteriaPanel when approaching success", () => {
+    const data: InterventionExecutionBundle = {
+      ...makeActiveBundle(),
+      progressContext: {
+        progressSummary: "approaching_success",
+        recentSuccessSignals: ["Transfer validated in recent evaluation."],
+        recentEscalationSignals: [],
+      },
+    };
+    const html = renderToStaticMarkup(
+      <InterventionExecutionScreen state={{ loading: false, data }} />
+    );
+
+    expect(html).toContain("Recent progress signals");
+    expect(html).toContain("Transfer validated in recent evaluation.");
+  });
+
+  it("renders escalation signal in EscalationPanel when approaching escalation", () => {
+    const data: InterventionExecutionBundle = {
+      ...makeActiveBundle(),
+      progressContext: {
+        progressSummary: "approaching_escalation",
+        recentSuccessSignals: [],
+        recentEscalationSignals: ["Intervention was reopened after apparent recovery."],
+      },
+    };
+    const html = renderToStaticMarkup(
+      <InterventionExecutionScreen state={{ loading: false, data }} />
+    );
+
+    expect(html).toContain("Active escalation signals");
+    expect(html).toContain("Intervention was reopened after apparent recovery.");
+  });
+
+  it("renders timeline strip with recent events", () => {
+    const data: InterventionExecutionBundle = {
+      ...makeActiveBundle(),
+      recentFeed: {
+        state: "partial_history",
+        eventCount: 3,
+        recentEvents: [
+          {
+            id: "decision:dec-1",
+            timestamp: "2026-03-12T12:00:00.000Z",
+            eventType: "intervention_transfer_block_added",
+            sourceFamily: "intervention",
+            label: "Intervention decision recorded: add transfer block",
+            severity: "info",
+            metadata: { action: "add_transfer_block" },
+          },
+          {
+            id: "transfer:t-1",
+            timestamp: "2026-03-12T11:00:00.000Z",
+            eventType: "transfer_status_recorded",
+            sourceFamily: "transfer",
+            label: "Transfer status recorded: transfer gap",
+            severity: "important",
+            metadata: { status: "transfer_gap" },
+          },
+          {
+            id: "diagnosis:d-1",
+            timestamp: "2026-03-12T10:00:00.000Z",
+            eventType: "diagnosis_recorded",
+            sourceFamily: "diagnosis",
+            label: "Diagnosis recorded: threshold error",
+            severity: "notable",
+            metadata: { diagnosticType: "threshold_error" },
+          },
+        ],
+        hasEscalations: false,
+        hasRecentSuccess: false,
+        mostRecentAt: "2026-03-12T12:00:00.000Z",
+      },
+    };
+    const html = renderToStaticMarkup(
+      <InterventionExecutionScreen state={{ loading: false, data }} />
+    );
+
+    expect(html).toContain("Recent Activity");
+    expect(html).toContain("Concept Timeline");
+    expect(html).toContain("3 total events recorded");
+    expect(html).toContain("Intervention decision recorded: add transfer block");
+    expect(html).toContain("Transfer status recorded: transfer gap");
+    expect(html).toContain("Diagnosis recorded: threshold error");
+  });
+
+  it("shows escalation badge in timeline strip when escalations present", () => {
+    const data: InterventionExecutionBundle = {
+      ...makeActiveBundle(),
+      recentFeed: {
+        state: "audit_history",
+        eventCount: 2,
+        recentEvents: [
+          {
+            id: "decision:esc-1",
+            timestamp: "2026-03-14T09:00:00.000Z",
+            eventType: "intervention_escalated",
+            sourceFamily: "intervention",
+            label: "Intervention decision changed: escalate intervention",
+            severity: "important",
+            metadata: {},
+          },
+        ],
+        hasEscalations: true,
+        hasRecentSuccess: false,
+        mostRecentAt: "2026-03-14T09:00:00.000Z",
+      },
+    };
+    const html = renderToStaticMarkup(
+      <InterventionExecutionScreen state={{ loading: false, data }} />
+    );
+
+    expect(html).toContain("escalations present");
+  });
+
+  it("renders timeline empty state when no events", () => {
+    const data: InterventionExecutionBundle = {
+      ...makeActiveBundle(),
+      recentFeed: {
+        state: "no_history",
+        eventCount: 0,
+        recentEvents: [],
+        hasEscalations: false,
+        hasRecentSuccess: false,
+      },
+    };
+    const html = renderToStaticMarkup(
+      <InterventionExecutionScreen state={{ loading: false, data }} />
+    );
+
+    expect(html).toContain("Recent Activity");
+    expect(html).toContain("No coaching events are recorded yet");
   });
 
   it("renders sparse blueprint gracefully when absent", () => {
