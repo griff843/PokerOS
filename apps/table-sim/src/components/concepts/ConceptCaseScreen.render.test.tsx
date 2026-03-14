@@ -3,6 +3,40 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { ConceptCaseScreen } from "./ConceptCaseScreen";
 import type { ConceptCaseResponse } from "@/lib/concept-case";
+import type { EngineReplaySummary } from "@/lib/input-snapshots";
+import type { ConceptTransferEvaluation } from "@poker-coach/core/browser";
+
+function makeReplaySummary(): EngineReplaySummary {
+  return {
+    inputChanged: false,
+    outputChanged: false,
+    changedEvidenceFields: [],
+    manifestDrift: { matches: true, changedFields: [] },
+    interpretation: "stable",
+  };
+}
+
+function makeTransferEvaluation(): ConceptTransferEvaluation {
+  return {
+    conceptKey: "river_bluff_catching",
+    label: "River Bluff Catching",
+    status: "transfer_gap",
+    confidence: "medium",
+    evidenceSufficiency: "moderate",
+    pressure: "medium",
+    studyPerformance: 0.72,
+    realPlayPerformance: 0.40,
+    studyVsRealPlayDelta: 0.32,
+    supportingEvidence: ["Study improvement is outpacing real play."],
+    riskFlags: ["study_ahead_of_real_play"],
+    summary: "Study gains are not transferring to real play.",
+    coachExplanation: "The player is improving in drills but the real-play evidence still shows a gap.",
+    realPlayEvidence: {
+      occurrences: 3,
+      reviewSpotCount: 2,
+    },
+  };
+}
 
 function makeConceptCaseResponse(): ConceptCaseResponse {
   return {
@@ -163,6 +197,11 @@ function makeConceptCaseResponse(): ConceptCaseResponse {
       lastResult: null,
       validationState: "provisional",
     },
+    transferEvaluation: makeTransferEvaluation(),
+    replayMetadata: {
+      recommendation: makeReplaySummary(),
+      transfer: makeReplaySummary(),
+    },
     recommendation: {
       conceptKey: "river_bluff_catching",
       label: "River Bluff Catching",
@@ -198,6 +237,101 @@ describe("ConceptCaseScreen", () => {
     expect(html).toContain("River Bluff Catching moves up because a retention validation block is due now.");
     expect(html).toContain("run retention validation");
     expect(html).toContain("/app/concepts/river_bluff_catching/replay");
+  });
+
+  it("renders transfer evaluation panel with status and coach explanation", () => {
+    const html = renderToStaticMarkup(<ConceptCaseScreen state={{ loading: false, data: makeConceptCaseResponse() }} />);
+
+    expect(html).toContain("transfer gap");
+    expect(html).toContain("The player is improving in drills but the real-play evidence still shows a gap.");
+    expect(html).toContain("Real-Play Transfer");
+  });
+
+  it("renders retention panel with schedule state and validation state", () => {
+    const html = renderToStaticMarkup(<ConceptCaseScreen state={{ loading: false, data: makeConceptCaseResponse() }} />);
+
+    expect(html).toContain("Retention Validation");
+    expect(html).toContain("provisional");
+    expect(html).toContain("stabilizing followup");
+  });
+
+  it("renders decision audit panel with latest decision fields", () => {
+    const html = renderToStaticMarkup(<ConceptCaseScreen state={{ loading: false, data: makeConceptCaseResponse() }} />);
+
+    expect(html).toContain("Decision Audit");
+    expect(html).toContain("add transfer block");
+    expect(html).toContain("transfer training");
+    expect(html).toContain("shifting");
+  });
+
+  it("renders replay panel with stable interpretation", () => {
+    const html = renderToStaticMarkup(<ConceptCaseScreen state={{ loading: false, data: makeConceptCaseResponse() }} />);
+
+    expect(html).toContain("Replayability Summary");
+    expect(html).toContain("No meaningful change in evidence or output across the latest stored snapshot pair.");
+  });
+
+  it("renders replay panel with evidence_changed_output_changed interpretation", () => {
+    const data = makeConceptCaseResponse();
+    data.replayMetadata.recommendation = {
+      ...makeReplaySummary(),
+      inputChanged: true,
+      outputChanged: true,
+      changedEvidenceFields: ["recurrenceCount"],
+      interpretation: "evidence_changed_output_changed",
+    };
+    const html = renderToStaticMarkup(<ConceptCaseScreen state={{ loading: false, data }} />);
+
+    expect(html).toContain("Evidence shifted and the output also changed");
+    expect(html).toContain("recurrenceCount");
+  });
+
+  it("renders strategy blueprint panel when present", () => {
+    const data = makeConceptCaseResponse();
+    data.strategyBlueprint = {
+      strategyType: "transfer_training",
+      title: "Transfer Training Plan",
+      objective: "Bridge drill gains into real-play performance for river bluff-catching.",
+      intensity: "high",
+      targetWeaknessProfile: ["transfer_gap"],
+      recommendedAttemptWindow: { sessions: 4, attempts: 12 },
+      recommendedDrillMix: { repair: 0.2, review: 0.3, applied: 0.35, validation: 0.15 },
+      sessionEmphasis: [],
+      reviewEmphasis: [],
+      transferEmphasis: ["imported_hand_review"],
+      stabilizationEmphasis: [],
+      successCriteriaHints: ["Real-play score closes within 10 points of study score."],
+      escalationTriggerHints: ["No improvement in real-play occurrences after 2 sessions."],
+      retentionFollowUpGuidance: [],
+      coachNotes: ["Focus on applied and review drills that map to live hands."],
+      rationale: "Transfer is the active gap.",
+      modifiers: [],
+    };
+    const html = renderToStaticMarkup(<ConceptCaseScreen state={{ loading: false, data }} />);
+
+    expect(html).toContain("Strategy Blueprint");
+    expect(html).toContain("Transfer Training Plan");
+    expect(html).toContain("Bridge drill gains into real-play performance for river bluff-catching.");
+    expect(html).toContain("Real-play score closes within 10 points of study score.");
+    expect(html).toContain("Focus on applied and review drills that map to live hands.");
+  });
+
+  it("renders sparse strategy blueprint panel when blueprint is absent", () => {
+    const data = makeConceptCaseResponse();
+    data.strategyBlueprint = undefined;
+    const html = renderToStaticMarkup(<ConceptCaseScreen state={{ loading: false, data }} />);
+
+    expect(html).toContain("Strategy Blueprint");
+    expect(html).toContain("No strategy blueprint is available yet.");
+  });
+
+  it("renders sparse decision panel when decisionAudit is absent", () => {
+    const data = makeConceptCaseResponse();
+    data.decisionAudit = undefined;
+    const html = renderToStaticMarkup(<ConceptCaseScreen state={{ loading: false, data }} />);
+
+    expect(html).toContain("Decision Audit");
+    expect(html).toContain("No intervention decision snapshots are stored yet");
   });
 
   it("renders a loading state cleanly", () => {

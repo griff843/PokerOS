@@ -1,6 +1,12 @@
 import React, { type ReactNode } from "react";
 import Link from "next/link";
 import type { ConceptCaseResponse } from "@/lib/concept-case";
+import type { EngineReplaySummary } from "@/lib/input-snapshots";
+import type { InterventionStrategyBlueprint } from "@poker-coach/core/browser";
+import type { ConceptTransferEvaluation } from "@poker-coach/core/browser";
+import type { TransferAuditSummary } from "@/lib/transfer-audit";
+import type { RetentionSummary } from "@/lib/retention-scheduling";
+import type { InterventionDecisionAuditSummary } from "@/lib/intervention-decision-audit";
 
 export interface ConceptCaseScreenState {
   loading: boolean;
@@ -57,6 +63,24 @@ export function ConceptCaseScreen({ state }: { state: ConceptCaseScreenState }) 
           <ConceptHistoryCard data={state.data} />
           <ConceptEvidenceCard data={state.data} />
         </div>
+
+        <div className="grid gap-5 xl:grid-cols-2">
+          <ConceptStrategyPanel blueprint={state.data.strategyBlueprint} />
+          <ConceptTransferPanel
+            transferEvaluation={state.data.transferEvaluation}
+            transferAudit={state.data.transferAudit}
+          />
+        </div>
+
+        <div className="grid gap-5 xl:grid-cols-2">
+          <ConceptDecisionPanel decisionAudit={decisionAudit} />
+          <ConceptRetentionPanel retention={retention} />
+        </div>
+
+        <ConceptReplayPanel
+          replayMetadata={state.data.replayMetadata}
+          conceptKey={history.conceptKey}
+        />
 
         <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.92),rgba(9,14,27,0.86))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
           <div className="grid gap-4 lg:grid-cols-3">
@@ -257,6 +281,337 @@ export function ConceptNextStepCard({ data }: { data: ConceptCaseResponse }) {
   );
 }
 
+export function ConceptStrategyPanel({ blueprint }: { blueprint?: InterventionStrategyBlueprint }) {
+  if (!blueprint) {
+    return (
+      <ConceptPanel tone="neutral" title="Strategy Blueprint" eyebrow="Intervention Strategy">
+        <p className="text-sm leading-6 text-slate-300">No strategy blueprint is available yet. A blueprint is generated once a clear intervention strategy is recommended for this concept.</p>
+      </ConceptPanel>
+    );
+  }
+
+  const drillMix = blueprint.recommendedDrillMix;
+
+  return (
+    <ConceptPanel tone="good" title={blueprint.title} eyebrow="Strategy Blueprint">
+      <div className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <HeaderChip label={blueprint.strategyType.replace(/_/g, " ")} />
+          <HeaderChip label={`${blueprint.intensity} intensity`} subtle />
+          <HeaderChip label={`${blueprint.recommendedAttemptWindow.sessions} sessions`} subtle />
+        </div>
+        <InfoBlock title="Objective" detail={blueprint.objective} />
+        <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Recommended drill mix</p>
+          <div className="mt-3 grid grid-cols-4 gap-2 text-center">
+            {([
+              { label: "Repair", value: drillMix.repair },
+              { label: "Review", value: drillMix.review },
+              { label: "Applied", value: drillMix.applied },
+              { label: "Validation", value: drillMix.validation },
+            ] as const).map(({ label, value }) => (
+              <div key={label} className="rounded-[16px] border border-white/8 bg-white/5 p-2.5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</p>
+                <p className="mt-1.5 text-lg font-semibold text-white">{Math.round(value * 100)}%</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        {blueprint.successCriteriaHints.length > 0 && (
+          <div className="rounded-[22px] border border-emerald-500/16 bg-emerald-500/8 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-200">Success criteria</p>
+            <ul className="mt-2 space-y-1.5 text-sm leading-6 text-emerald-50/92">
+              {blueprint.successCriteriaHints.map((hint, i) => (
+                <li key={i}>• {hint}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {blueprint.escalationTriggerHints.length > 0 && (
+          <div className="rounded-[22px] border border-amber-500/18 bg-amber-500/8 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200">Escalation triggers</p>
+            <ul className="mt-2 space-y-1.5 text-sm leading-6 text-amber-50/88">
+              {blueprint.escalationTriggerHints.map((hint, i) => (
+                <li key={i}>• {hint}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {blueprint.coachNotes.length > 0 && (
+          <InfoBlock title="Coach note" detail={blueprint.coachNotes[0]!} />
+        )}
+      </div>
+    </ConceptPanel>
+  );
+}
+
+export function ConceptTransferPanel({
+  transferEvaluation,
+  transferAudit,
+}: {
+  transferEvaluation: ConceptTransferEvaluation;
+  transferAudit?: TransferAuditSummary;
+}) {
+  const tone = transferEvaluation.status === "transfer_validated"
+    ? "good"
+    : transferEvaluation.status === "transfer_gap" || transferEvaluation.status === "transfer_regressed"
+      ? "warning"
+      : "neutral";
+
+  return (
+    <ConceptPanel tone={tone} title="Transfer Status" eyebrow="Real-Play Transfer">
+      <div className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <HeaderChip label={transferEvaluation.status.replace(/_/g, " ")} />
+          <HeaderChip label={`${transferEvaluation.confidence} confidence`} subtle />
+          <HeaderChip label={`${transferEvaluation.pressure} pressure`} subtle />
+          <HeaderChip label={transferEvaluation.evidenceSufficiency.replace(/_/g, " ")} subtle />
+        </div>
+        <InfoBlock title="Transfer read" detail={transferEvaluation.coachExplanation} />
+        <div className="grid gap-3 md:grid-cols-2">
+          <HistoryStat
+            title="Study performance"
+            detail={transferEvaluation.studyPerformance !== undefined
+              ? `${Math.round(transferEvaluation.studyPerformance * 100)}% study average`
+              : "Study performance not yet available."}
+          />
+          <HistoryStat
+            title="Real-play performance"
+            detail={transferEvaluation.realPlayPerformance !== undefined
+              ? `${Math.round(transferEvaluation.realPlayPerformance * 100)}% real-play average`
+              : "Real-play performance not yet available."}
+          />
+          <HistoryStat
+            title="Study vs real-play gap"
+            detail={transferEvaluation.studyVsRealPlayDelta !== undefined
+              ? `${Math.round(Math.abs(transferEvaluation.studyVsRealPlayDelta) * 100)} point gap${transferEvaluation.studyVsRealPlayDelta > 0 ? " (study ahead)" : " (real-play ahead)"}`
+              : "No gap calculation available yet."}
+          />
+          <HistoryStat
+            title="Real-play evidence"
+            detail={`${transferEvaluation.realPlayEvidence.occurrences} occurrence${transferEvaluation.realPlayEvidence.occurrences === 1 ? "" : "s"}, ${transferEvaluation.realPlayEvidence.reviewSpotCount} review spot${transferEvaluation.realPlayEvidence.reviewSpotCount === 1 ? "" : "s"}.`}
+          />
+        </div>
+        {transferAudit && (
+          <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Transfer audit</p>
+            <p className="mt-2 text-sm leading-6 text-slate-200">
+              {`${transferAudit.stability} stability across ${transferAudit.latestSnapshot ? "recorded" : "no"} transfer history.`}
+              {transferAudit.firstValidatedAt ? ` First validated ${formatDate(transferAudit.firstValidatedAt)}.` : ""}
+              {transferAudit.latestGapOrRegressionAt ? ` Latest gap or regression ${formatDate(transferAudit.latestGapOrRegressionAt)}.` : ""}
+            </p>
+          </div>
+        )}
+        {transferEvaluation.riskFlags.length > 0 && (
+          <div className="rounded-[22px] border border-amber-500/18 bg-amber-500/8 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200">Risk flags</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {transferEvaluation.riskFlags.map((flag) => (
+                <span key={flag} className="rounded-full border border-amber-400/18 bg-black/20 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-100">
+                  {flag.replace(/_/g, " ")}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </ConceptPanel>
+  );
+}
+
+export function ConceptDecisionPanel({ decisionAudit }: { decisionAudit?: InterventionDecisionAuditSummary }) {
+  if (!decisionAudit || !decisionAudit.latestDecision) {
+    return (
+      <ConceptPanel tone="neutral" title="Intervention Decision History" eyebrow="Decision Audit">
+        <p className="text-sm leading-6 text-slate-300">No intervention decision snapshots are stored yet for this concept. Decision history is persisted when coaching recommendations are generated and acted upon.</p>
+      </ConceptPanel>
+    );
+  }
+
+  const { latestDecision, previousDecision, stability, escalationCount, latestDecisionChanged } = decisionAudit;
+
+  return (
+    <ConceptPanel tone="neutral" title="Intervention Decision History" eyebrow="Decision Audit">
+      <div className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <HeaderChip label={stability} />
+          <HeaderChip label={`${escalationCount} escalation${escalationCount === 1 ? "" : "s"}`} subtle />
+          {latestDecisionChanged && <HeaderChip label="decision changed" subtle />}
+        </div>
+        <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Latest decision</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <DecisionField label="Action" value={latestDecision.action.replace(/_/g, " ")} />
+            <DecisionField label="Strategy" value={latestDecision.recommendedStrategy.replace(/_/g, " ")} />
+            <DecisionField label="Confidence" value={latestDecision.confidence} />
+            <DecisionField label="Priority" value={String(latestDecision.priority)} />
+            <DecisionField label="Intensity" value={latestDecision.suggestedIntensity} />
+            <DecisionField label="Acted upon" value={latestDecision.actedUpon ? "yes" : "no"} />
+          </div>
+          {latestDecision.reasonCodes.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {latestDecision.reasonCodes.map((code) => (
+                <span key={code} className="rounded-full border border-white/8 bg-slate-950/70 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
+                  {code.replace(/_/g, " ")}
+                </span>
+              ))}
+            </div>
+          )}
+          <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">Recorded {formatDate(latestDecision.createdAt)}</p>
+        </div>
+        {previousDecision && (
+          <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Previous decision</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <DecisionField label="Action" value={previousDecision.action.replace(/_/g, " ")} />
+              <DecisionField label="Confidence" value={previousDecision.confidence} />
+              <DecisionField label="Priority" value={String(previousDecision.priority)} />
+              <DecisionField label="Acted upon" value={previousDecision.actedUpon ? "yes" : "no"} />
+            </div>
+            <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">Recorded {formatDate(previousDecision.createdAt)}</p>
+          </div>
+        )}
+      </div>
+    </ConceptPanel>
+  );
+}
+
+export function ConceptRetentionPanel({ retention }: { retention: RetentionSummary }) {
+  const latestSchedule = retention.latestSchedule;
+  const tone = latestSchedule?.state === "overdue"
+    ? "warning"
+    : latestSchedule?.result === "pass" || retention.validationState === "validated"
+      ? "good"
+      : "neutral";
+
+  return (
+    <ConceptPanel tone={tone} title="Retention Schedule" eyebrow="Retention Validation">
+      <div className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <HeaderChip label={retention.validationState.replace(/_/g, " ")} />
+          {latestSchedule && <HeaderChip label={latestSchedule.state.replace(/_/g, " ")} subtle />}
+          {retention.dueCount > 0 && <HeaderChip label={`${retention.dueCount} due`} subtle />}
+          {retention.overdueCount > 0 && <HeaderChip label={`${retention.overdueCount} overdue`} subtle />}
+        </div>
+        {latestSchedule ? (
+          <div className="grid gap-3 md:grid-cols-2">
+            <HistoryStat
+              title="Current state"
+              detail={`${latestSchedule.state.replace(/_/g, " ")}. Reason: ${latestSchedule.reason.replace(/_/g, " ")}.`}
+            />
+            <HistoryStat
+              title="Scheduled for"
+              detail={latestSchedule.scheduledFor ? formatDate(latestSchedule.scheduledFor) : "Not yet scheduled."}
+            />
+            <HistoryStat
+              title="Last result"
+              detail={latestSchedule.result ? latestSchedule.result : "No result recorded yet."}
+            />
+            <HistoryStat
+              title="Priority"
+              detail={`Retention priority score: ${latestSchedule.priority}.`}
+            />
+          </div>
+        ) : (
+          <p className="text-sm leading-6 text-slate-300">No retention schedule is attached yet. A schedule is generated after an intervention stabilizes far enough to warrant a validation check.</p>
+        )}
+        {retention.lastResult && (
+          <div className={`rounded-[22px] border p-4 ${retention.lastResult === "pass" ? "border-emerald-500/16 bg-emerald-500/8" : "border-amber-500/18 bg-amber-500/8"}`}>
+            <p className={`text-[11px] font-semibold uppercase tracking-[0.22em] ${retention.lastResult === "pass" ? "text-emerald-200" : "text-amber-200"}`}>
+              Last result
+            </p>
+            <p className={`mt-2 text-sm leading-6 ${retention.lastResult === "pass" ? "text-emerald-50/92" : "text-amber-50/88"}`}>
+              {retention.lastResult === "pass"
+                ? "The most recent retention validation passed. The concept gain is confirmed as holding."
+                : "The most recent retention validation failed. The gain may need to be reopened for repair."}
+            </p>
+          </div>
+        )}
+      </div>
+    </ConceptPanel>
+  );
+}
+
+export function ConceptReplayPanel({
+  replayMetadata,
+  conceptKey,
+}: {
+  replayMetadata: ConceptCaseResponse["replayMetadata"];
+  conceptKey: string;
+}) {
+  const { recommendation, transfer } = replayMetadata;
+
+  return (
+    <ConceptPanel tone="neutral" title="Replayability Summary" eyebrow="Replay Metadata">
+      <div className="space-y-4">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Recommendation replay</p>
+            <p className="mt-2 text-sm leading-6 text-slate-200">{formatReplayInterpretation(recommendation.interpretation)}</p>
+            {recommendation.changedEvidenceFields.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {recommendation.changedEvidenceFields.map((field) => (
+                  <span key={field} className="rounded-full border border-white/8 bg-slate-950/60 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
+                    {field}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Transfer replay</p>
+            <p className="mt-2 text-sm leading-6 text-slate-200">{formatReplayInterpretation(transfer.interpretation)}</p>
+            {transfer.changedEvidenceFields.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {transfer.changedEvidenceFields.map((field) => (
+                  <span key={field} className="rounded-full border border-white/8 bg-slate-950/60 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-300">
+                    {field}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="rounded-[22px] border border-amber-500/14 bg-amber-500/6 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-300">Engine manifest</p>
+          <p className="mt-2 text-sm leading-6 text-slate-200">
+            {recommendation.manifestDrift.matches && transfer.manifestDrift.matches
+              ? "Both recommendation and transfer engines are running under the same manifest versions as when the latest snapshots were recorded."
+              : "Engine manifest drift is present. See the Replay Inspector for the full version-drift breakdown."}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href={`/app/concepts/${encodeURIComponent(conceptKey)}/replay`}
+            className="rounded-[18px] border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100 transition hover:border-amber-300/30 hover:bg-amber-500/16"
+          >
+            Open Replay Inspector
+          </Link>
+        </div>
+      </div>
+    </ConceptPanel>
+  );
+}
+
+function formatReplayInterpretation(interpretation: EngineReplaySummary["interpretation"]): string {
+  switch (interpretation) {
+    case "stable":
+      return "No meaningful change in evidence or output across the latest stored snapshot pair.";
+    case "evidence_changed_output_changed":
+      return "Evidence shifted and the output also changed in the latest comparable pair.";
+    case "evidence_changed_output_stable":
+      return "Evidence shifted but the output held stable across the latest comparable pair.";
+    case "engine_changed":
+      return "Engine manifest changed between the latest two stored snapshots with no evidence shift.";
+    case "evidence_and_engine_changed_output_changed":
+      return "Both evidence and engine manifest changed, and the output also shifted.";
+    case "evidence_and_engine_changed_output_stable":
+      return "Both evidence and engine manifest changed, but the output held stable.";
+    case "output_changed_without_input_delta":
+      return "The output shifted without a detectable evidence or manifest change. Worth reviewing in the inspector.";
+  }
+}
+
 function ConceptPageFrame({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(14,116,67,0.14),rgba(3,7,18,0.98)_30%),linear-gradient(180deg,#020617_0%,#07111f_58%,#040816_100%)] px-4 py-6 sm:px-5 sm:py-8">
@@ -305,6 +660,15 @@ function HistoryStat({ title, detail }: { title: string; detail: string }) {
     <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">{title}</p>
       <p className="mt-2 text-sm leading-6 text-slate-200">{detail}</p>
+    </div>
+  );
+}
+
+function DecisionField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-slate-200">{value}</p>
     </div>
   );
 }
