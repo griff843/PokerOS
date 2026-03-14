@@ -115,6 +115,12 @@ export function ConceptCaseScreen({ state }: { state: ConceptCaseScreenState }) 
               Open Weakness Explorer
             </Link>
             <Link
+              href={`/app/concepts/${encodeURIComponent(history.conceptKey)}/execution`}
+              className="rounded-[18px] border border-blue-400/18 bg-blue-500/10 px-4 py-3 text-sm font-semibold text-blue-100 transition hover:border-blue-300/28 hover:bg-blue-500/16"
+            >
+              Execute Intervention
+            </Link>
+            <Link
               href={`/app/concepts/${encodeURIComponent(history.conceptKey)}/replay`}
               className="rounded-[18px] border border-amber-400/18 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-100 transition hover:border-amber-300/28 hover:bg-amber-500/16"
             >
