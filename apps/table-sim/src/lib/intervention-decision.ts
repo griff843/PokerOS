@@ -8,6 +8,8 @@ import {
   type PlayerIntelligenceSnapshot,
   type RealPlayConceptSignal,
 } from "@poker-coach/core/browser";
+import type { RetentionScheduleRow } from "../../../../packages/db/src/repository";
+import { buildConceptTransferEvaluationMap } from "./transfer-evaluation";
 
 export interface PersistenceReadyInterventionAssignment {
   conceptKey: string;
@@ -22,10 +24,18 @@ export function buildTableSimInterventionRecommendations(args: {
   diagnosisHistory?: PlayerDiagnosisHistoryEntry[];
   interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
+  retentionSchedules?: RetentionScheduleRow[];
 }): InterventionRecommendation[] {
   const diagnosisHistory = args.diagnosisHistory ?? [];
   const interventionHistory = args.interventionHistory ?? [];
   const realPlaySignalMap = new Map((args.realPlaySignals ?? []).map((signal) => [signal.conceptKey, signal]));
+  const transferEvaluations = buildConceptTransferEvaluationMap({
+    playerIntelligence: args.playerIntelligence,
+    diagnosisHistory,
+    interventionHistory,
+    realPlaySignals: args.realPlaySignals,
+    retentionSchedules: args.retentionSchedules,
+  });
 
   const inputs: InterventionRecommendationInput[] = args.playerIntelligence.concepts.map((concept) => {
     const realPlaySignal = realPlaySignalMap.get(concept.conceptKey);
@@ -44,6 +54,7 @@ export function buildTableSimInterventionRecommendations(args: {
       averageScore: concept.averageScore,
       realPlayReviewSpotCount: realPlaySignal?.reviewSpotCount,
       realPlayEvidence: realPlaySignal?.evidence,
+      transferEvaluation: transferEvaluations.get(concept.conceptKey),
     };
   });
 
@@ -55,6 +66,7 @@ export function buildPrimaryInterventionRecommendation(args: {
   diagnosisHistory?: PlayerDiagnosisHistoryEntry[];
   interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
+  retentionSchedules?: RetentionScheduleRow[];
   conceptKey?: string;
 }): InterventionRecommendation | undefined {
   const recommendations = buildTableSimInterventionRecommendations(args);

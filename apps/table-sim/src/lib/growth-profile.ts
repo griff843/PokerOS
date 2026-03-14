@@ -7,15 +7,18 @@ import {
   type InterventionHistoryEntry,
   type InterventionPlan,
   type InterventionRecommendation,
+  type InterventionStrategyBlueprint,
   type PatternAttemptSignal,
   type PlayerDiagnosisHistoryEntry,
   type RealPlayConceptSignal,
   type WeaknessPool,
 } from "@poker-coach/core/browser";
-import type { RetentionScheduleRow } from "../../../../packages/db/src/repository";
+import type { CoachingInputSnapshotRow, InterventionDecisionSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
 import { buildWeaknessExplorerSnapshot, type WeaknessExplorerSnapshot } from "./weakness-explorer";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
 import { buildPrimaryInterventionRecommendation } from "./intervention-decision";
+import { buildConceptCaseMap } from "./concept-case";
+import { buildInterventionStrategyBlueprint } from "./intervention-strategy";
 import { buildPatternBriefs, type PatternBrief } from "./pattern-summaries";
 import { buildConceptRetentionSummary } from "./retention-scheduling";
 
@@ -87,6 +90,32 @@ export interface GrowthProfileSnapshot {
   }>;
   coachingPatterns: PatternBrief[];
   nextInterventionDecision?: InterventionRecommendation;
+  nextInterventionBlueprint?: InterventionStrategyBlueprint;
+  featuredConceptCase?: {
+    conceptKey: string;
+    label: string;
+    statusLabel: string;
+    statusReason: string;
+    transferStatus?: string;
+    transferSummary?: string;
+    transferAudit?: {
+      stability: string;
+      changed: boolean;
+      firstValidatedAt?: string;
+      latestGapOrRegressionAt?: string;
+    };
+    replay?: {
+      recommendationInputSnapshotId?: string;
+      transferInputSnapshotId?: string;
+      recommendationEngineVersion?: string;
+      transferEngineVersion?: string;
+      manifestMatch: boolean;
+      recommendationInterpretation: string;
+      transferInterpretation: string;
+    };
+    nextAction: string;
+    coachNote: string;
+  };
   coachPerspective: {
     encouragingTruth: string;
     limitingFactor: string;
@@ -114,7 +143,10 @@ export function buildGrowthProfileSnapshot(args: {
   interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
   patternAttempts?: PatternAttemptSignal[];
+  decisionSnapshots?: InterventionDecisionSnapshotRow[];
   retentionSchedules?: RetentionScheduleRow[];
+  transferSnapshots?: TransferEvaluationSnapshotRow[];
+  inputSnapshots?: CoachingInputSnapshotRow[];
   now?: Date;
 }): GrowthProfileSnapshot {
   const now = args.now ?? new Date();
@@ -136,8 +168,14 @@ export function buildGrowthProfileSnapshot(args: {
     attemptInsights: args.attemptInsights,
     srs: args.srs,
     activePool: args.activePool,
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory,
+    decisionSnapshots: args.decisionSnapshots,
     realPlaySignals: args.realPlaySignals,
     patternAttempts: args.patternAttempts,
+    retentionSchedules: args.retentionSchedules,
+    transferSnapshots: args.transferSnapshots,
+    inputSnapshots: args.inputSnapshots,
     now,
   });
   const windowSize = Math.max(3, Math.min(12, Math.floor(args.attempts.length / 2)));
@@ -177,7 +215,27 @@ export function buildGrowthProfileSnapshot(args: {
     diagnosisHistory: args.diagnosisHistory,
     interventionHistory,
     realPlaySignals: args.realPlaySignals,
+    retentionSchedules: args.retentionSchedules,
     conceptKey: interventionPlan.rootConceptKey,
+  });
+  const conceptCases = buildConceptCaseMap({
+    playerIntelligence,
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory,
+    decisionSnapshots: args.decisionSnapshots,
+    retentionSchedules: args.retentionSchedules,
+    transferSnapshots: args.transferSnapshots,
+    inputSnapshots: args.inputSnapshots,
+    realPlaySignals: args.realPlaySignals,
+    recommendations: nextInterventionDecision ? [nextInterventionDecision] : [],
+    now,
+  });
+  const featuredConceptCase = conceptCases.get(nextInterventionDecision?.conceptKey ?? interventionPlan.rootConceptKey);
+  const nextInterventionBlueprint = buildInterventionStrategyBlueprint({
+    playerIntelligence,
+    recommendation: nextInterventionDecision,
+    retentionSchedules: args.retentionSchedules,
+    now,
   });
   const primaryTendency = adaptive.tendencies[0];
   const dueReviewCount = args.srs.filter((row) => new Date(row.due_at) <= now).length;
@@ -270,6 +328,33 @@ export function buildGrowthProfileSnapshot(args: {
     retentionValidation: buildRetentionValidation(playerIntelligence.concepts, args.retentionSchedules ?? [], now),
     coachingPatterns: buildPatternBriefs(playerIntelligence.patterns.topPatterns, 3),
     nextInterventionDecision,
+    nextInterventionBlueprint,
+    featuredConceptCase: featuredConceptCase ? {
+      conceptKey: featuredConceptCase.history.conceptKey,
+      label: featuredConceptCase.history.label,
+      statusLabel: featuredConceptCase.explanation.statusLabel,
+      statusReason: featuredConceptCase.explanation.statusReason,
+      transferStatus: featuredConceptCase.transferEvaluation.status,
+      transferSummary: featuredConceptCase.transferEvaluation.summary,
+      transferAudit: featuredConceptCase.transferAudit ? {
+        stability: featuredConceptCase.transferAudit.stability,
+        changed: featuredConceptCase.transferAudit.latestChanged,
+        firstValidatedAt: featuredConceptCase.transferAudit.firstValidatedAt,
+        latestGapOrRegressionAt: featuredConceptCase.transferAudit.latestGapOrRegressionAt,
+      } : undefined,
+      replay: {
+        recommendationInputSnapshotId: featuredConceptCase.replayMetadata.recommendation.latestInputSnapshot?.id,
+        transferInputSnapshotId: featuredConceptCase.replayMetadata.transfer.latestInputSnapshot?.id,
+        recommendationEngineVersion: featuredConceptCase.replayMetadata.recommendation.latestEngineManifest?.engineVersion,
+        transferEngineVersion: featuredConceptCase.replayMetadata.transfer.latestEngineManifest?.engineVersion,
+        manifestMatch: featuredConceptCase.replayMetadata.recommendation.manifestDrift.matches
+          && featuredConceptCase.replayMetadata.transfer.manifestDrift.matches,
+        recommendationInterpretation: featuredConceptCase.replayMetadata.recommendation.interpretation,
+        transferInterpretation: featuredConceptCase.replayMetadata.transfer.interpretation,
+      },
+      nextAction: featuredConceptCase.nextStep.nextAction.replace(/_/g, " "),
+      coachNote: featuredConceptCase.nextStep.coachNote,
+    } : undefined,
     coachPerspective: {
       encouragingTruth: strengthLeaders[0]
         ? `${strengthLeaders[0].label} is becoming a real anchor in your game, which means improvement is not just theoretical.`

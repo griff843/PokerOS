@@ -5,6 +5,7 @@ import {
   buildPlayerIntelligenceSnapshot,
   type CanonicalDrill,
   type GeneratorInputs,
+  type RealPlayConceptSignal,
   generateSessionPlan,
   type SessionRequest,
 } from "@poker-coach/core/browser";
@@ -128,6 +129,7 @@ export function createRecommendedInterventionDecision(args: {
   activePool: SessionRequest["activePool"];
   diagnosisHistory?: ReturnType<typeof toDiagnosisHistoryEntries>;
   interventionHistory?: ReturnType<typeof toInterventionHistoryEntries>;
+  realPlaySignals?: RealPlayConceptSignal[];
   now?: Date;
 }) {
   const hydratedAttempts = hydratePersistedStudyAttempts(args.attempts, args.drills);
@@ -141,6 +143,7 @@ export function createRecommendedInterventionDecision(args: {
     diagnosticInsights: buildDiagnosticInsightsFromAttempts(hydratedAttempts),
     diagnosisHistory: args.diagnosisHistory,
     interventionHistory: args.interventionHistory,
+    realPlaySignals: args.realPlaySignals,
     patternAttempts,
     now: args.now,
   });
@@ -149,6 +152,7 @@ export function createRecommendedInterventionDecision(args: {
     playerIntelligence,
     diagnosisHistory: args.diagnosisHistory,
     interventionHistory: args.interventionHistory,
+    realPlaySignals: args.realPlaySignals,
     conceptKey: playerIntelligence.priorities[0]?.conceptKey,
   });
 }
@@ -160,6 +164,7 @@ export function createRecommendedInterventionPlan(args: {
   activePool: SessionRequest["activePool"];
   diagnosisHistory?: ReturnType<typeof toDiagnosisHistoryEntries>;
   interventionHistory?: ReturnType<typeof toInterventionHistoryEntries>;
+  realPlaySignals?: RealPlayConceptSignal[];
   now?: Date;
 }) {
   const hydratedAttempts = hydratePersistedStudyAttempts(args.attempts, args.drills);
@@ -173,6 +178,7 @@ export function createRecommendedInterventionPlan(args: {
     diagnosticInsights: buildDiagnosticInsightsFromAttempts(hydratedAttempts),
     diagnosisHistory: args.diagnosisHistory,
     interventionHistory: args.interventionHistory,
+    realPlaySignals: args.realPlaySignals,
     patternAttempts,
     now: args.now,
   });

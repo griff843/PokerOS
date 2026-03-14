@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { RecommendedTrainingBlockCard } from "@/components/training/RecommendedTrainingBlockCard";
@@ -76,6 +77,7 @@ export function GrowthProfile() {
           <CoachingPatternsSection loading={loading} items={snapshot?.coachingPatterns ?? []} />
           <InterventionDecisionSection loading={loading} decision={snapshot?.nextInterventionDecision ?? null} />
         </div>
+        <FeaturedConceptCaseSection loading={loading} featured={snapshot?.featuredConceptCase ?? null} />
         <NextActionsSection loading={loading} actions={snapshot?.nextActions ?? []} onNavigate={(href) => router.push(href)} />
       </div>
     </div>
@@ -272,6 +274,40 @@ function CoachingPatternsSection({ loading, items }: { loading: boolean; items: 
       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Coaching Patterns</p>
       <div className="mt-4 space-y-3">
         {loading ? <p className="text-sm text-slate-500">Loading cross-hand patterns.</p> : items.length === 0 ? <p className="text-sm leading-6 text-slate-400">No cross-hand pattern is strong enough yet to be part of the long-horizon coaching read.</p> : items.map((item) => <SignalBlock key={item.type + item.title} label={item.title} detail={`${item.detail} ${item.implication}`.trim()} tone="neutral" />)}
+      </div>
+    </section>
+  );
+}
+
+function FeaturedConceptCaseSection({ loading, featured }: { loading: boolean; featured: GrowthProfileSnapshot["featuredConceptCase"] | null }) {
+  return (
+    <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Featured Concept Case</p>
+          <p className="mt-2 text-sm leading-6 text-slate-400">Open the canonical concept file when you want the full coaching explanation behind the profile read.</p>
+        </div>
+        {featured ? (
+          <Link
+            href={`/app/concepts/${encodeURIComponent(featured.conceptKey)}`}
+            className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/20 hover:bg-white/10"
+          >
+            Open concept case
+          </Link>
+        ) : null}
+      </div>
+      <div className="mt-4">
+        {loading ? (
+          <p className="text-sm text-slate-500">Loading featured concept case.</p>
+        ) : !featured ? (
+          <p className="text-sm leading-6 text-slate-400">A featured concept case will appear once a concept has enough coaching history to support a full case file.</p>
+        ) : (
+          <SignalBlock
+            label={`${featured.label} · ${featured.statusLabel}`}
+            detail={`${featured.statusReason} ${featured.coachNote}`.trim()}
+            tone="neutral"
+          />
+        )}
       </div>
     </section>
   );

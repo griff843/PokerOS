@@ -6,19 +6,23 @@ import {
   type InterventionHistoryEntry,
   type InterventionPlan,
   type InterventionRecommendation,
+  type InterventionStrategyBlueprint,
   type PatternAttemptSignal,
   type PlayerDiagnosisHistoryEntry,
   type RealPlayConceptSignal,
   type SessionPlanningReason,
   type WeaknessPool,
 } from "@poker-coach/core/browser";
-import type { RetentionScheduleRow } from "../../../../packages/db/src/repository";
+import type { CoachingInputSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
 import type { TableSimSessionPlan } from "./session-plan";
 import { formatSessionLabel } from "./study-session-ui";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
-import { buildPrimaryInterventionRecommendation } from "./intervention-decision";
+import { buildPrimaryInterventionRecommendation, buildTableSimInterventionRecommendations } from "./intervention-decision";
+import { buildConceptCaseMap } from "./concept-case";
+import { buildInterventionStrategyBlueprint } from "./intervention-strategy";
 import { buildPatternBriefs, type PatternBrief } from "./pattern-summaries";
 import { buildConceptRetentionSummary } from "./retention-scheduling";
+import type { InterventionDecisionSnapshotRow } from "../../../../packages/db/src/repository";
 
 export interface CommandCenterRecentAttempt {
   drillId: string;
@@ -73,6 +77,32 @@ export interface CommandCenterSnapshot {
   };
   coachingPatterns: PatternBrief[];
   nextInterventionDecision?: InterventionRecommendation;
+  nextInterventionBlueprint?: InterventionStrategyBlueprint;
+  leadConceptCase?: {
+    conceptKey: string;
+    label: string;
+    statusLabel: string;
+    statusReason: string;
+    priorityExplanation: string;
+    transferStatus?: string;
+    transferSummary?: string;
+    transferAudit?: {
+      stability: string;
+      changed: boolean;
+      latestStatus?: string;
+    };
+    replay?: {
+      recommendationInputSnapshotId?: string;
+      transferInputSnapshotId?: string;
+      recommendationEngineVersion?: string;
+      transferEngineVersion?: string;
+      manifestMatch: boolean;
+      transferInterpretation: string;
+      driftSummary: string;
+    };
+    nextAction: string;
+    coachNote: string;
+  };
   recommendedTrainingBlock: {
     plan: InterventionPlan;
     href: string;
@@ -96,7 +126,10 @@ interface BuildCommandCenterSnapshotArgs {
   interventionHistory?: InterventionHistoryEntry[];
   realPlaySignals?: RealPlayConceptSignal[];
   patternAttempts?: PatternAttemptSignal[];
+  decisionSnapshots?: InterventionDecisionSnapshotRow[];
   retentionSchedules?: RetentionScheduleRow[];
+  transferSnapshots?: TransferEvaluationSnapshotRow[];
+  inputSnapshots?: CoachingInputSnapshotRow[];
   now?: Date;
 }
 
@@ -111,7 +144,10 @@ export function buildCommandCenterSnapshot({
   interventionHistory = [],
   realPlaySignals,
   patternAttempts,
+  decisionSnapshots = [],
   retentionSchedules = [],
+  transferSnapshots = [],
+  inputSnapshots = [],
   now = new Date(),
 }: BuildCommandCenterSnapshotArgs): CommandCenterSnapshot {
   const playerIntelligence = buildTableSimPlayerIntelligence({
@@ -122,6 +158,25 @@ export function buildCommandCenterSnapshot({
     interventionHistory,
     realPlaySignals,
     patternAttempts,
+    now,
+  });
+  const interventionRecommendations = buildTableSimInterventionRecommendations({
+    playerIntelligence,
+    diagnosisHistory,
+    interventionHistory,
+    realPlaySignals,
+    retentionSchedules,
+  });
+  const conceptCases = buildConceptCaseMap({
+    playerIntelligence,
+    diagnosisHistory,
+    interventionHistory,
+    decisionSnapshots,
+    retentionSchedules,
+    transferSnapshots,
+    inputSnapshots,
+    realPlaySignals,
+    recommendations: interventionRecommendations,
     now,
   });
   const nextFocusSummary = buildNextFocusSummary({
@@ -142,7 +197,15 @@ export function buildCommandCenterSnapshot({
     diagnosisHistory,
     interventionHistory,
     realPlaySignals,
+    retentionSchedules,
     conceptKey: interventionPlan.rootConceptKey,
+  });
+  const leadCase = conceptCases.get(nextInterventionDecision?.conceptKey ?? interventionPlan.rootConceptKey);
+  const nextInterventionBlueprint = buildInterventionStrategyBlueprint({
+    playerIntelligence,
+    recommendation: nextInterventionDecision,
+    retentionSchedules,
+    now,
   });
 
   return {
@@ -178,6 +241,36 @@ export function buildCommandCenterSnapshot({
     retention: buildRetentionSection(playerIntelligence, retentionSchedules, now),
     coachingPatterns: buildPatternBriefs(playerIntelligence.patterns.topPatterns, 2),
     nextInterventionDecision,
+    nextInterventionBlueprint,
+    leadConceptCase: leadCase ? {
+      conceptKey: leadCase.history.conceptKey,
+      label: leadCase.history.label,
+      statusLabel: leadCase.explanation.statusLabel,
+      statusReason: leadCase.explanation.statusReason,
+      priorityExplanation: leadCase.explanation.priorityExplanation,
+      transferStatus: leadCase.transferEvaluation.status,
+      transferSummary: leadCase.transferEvaluation.summary,
+      transferAudit: leadCase.transferAudit ? {
+        stability: leadCase.transferAudit.stability,
+        changed: leadCase.transferAudit.latestChanged,
+        latestStatus: leadCase.transferAudit.latestSnapshot?.status,
+      } : undefined,
+      replay: {
+        recommendationInputSnapshotId: leadCase.replayMetadata.recommendation.latestInputSnapshot?.id,
+        transferInputSnapshotId: leadCase.replayMetadata.transfer.latestInputSnapshot?.id,
+        recommendationEngineVersion: leadCase.replayMetadata.recommendation.latestEngineManifest?.engineVersion,
+        transferEngineVersion: leadCase.replayMetadata.transfer.latestEngineManifest?.engineVersion,
+        manifestMatch: leadCase.replayMetadata.recommendation.manifestDrift.matches
+          && leadCase.replayMetadata.transfer.manifestDrift.matches,
+        transferInterpretation: leadCase.replayMetadata.transfer.interpretation,
+        driftSummary: summarizeReplayDrift(
+          leadCase.replayMetadata.recommendation.interpretation,
+          leadCase.replayMetadata.transfer.interpretation
+        ),
+      },
+      nextAction: leadCase.nextStep.nextAction.replace(/_/g, " "),
+      coachNote: leadCase.nextStep.coachNote,
+    } : undefined,
     recommendedTrainingBlock: {
       plan: interventionPlan,
       href: `/app/training/session/${interventionPlan.id}`,
@@ -189,6 +282,19 @@ export function buildCommandCenterSnapshot({
       tsLabel: formatRecentDate(attempt.ts),
     })),
   };
+}
+
+function summarizeReplayDrift(
+  recommendationInterpretation: string,
+  transferInterpretation: string
+): string {
+  if (recommendationInterpretation.includes("engine_changed") || transferInterpretation.includes("engine_changed")) {
+    return "Engine-version drift is present in recent replay history.";
+  }
+  if (recommendationInterpretation.includes("evidence_changed") || transferInterpretation.includes("evidence_changed")) {
+    return "Recent replay history shows evidence drift under a stable manifest.";
+  }
+  return "Recent replay history is stable under the latest stored manifests.";
 }
 
 function buildRetentionSection(

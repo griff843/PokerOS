@@ -6,15 +6,18 @@ import {
   selectWeaknessTargetsForPool,
   type AttemptInsight,
   type CanonicalDrill,
+  type InterventionHistoryEntry,
   type InterventionRecommendation,
   type PatternAttemptSignal,
+  type PlayerDiagnosisHistoryEntry,
   type RealPlayConceptSignal,
   type WeaknessPool,
   type WeaknessTarget,
 } from "@poker-coach/core/browser";
-import type { RetentionScheduleRow } from "../../../../packages/db/src/repository";
+import type { CoachingInputSnapshotRow, InterventionDecisionSnapshotRow, RetentionScheduleRow, TransferEvaluationSnapshotRow } from "../../../../packages/db/src/repository";
 import { analyzeWeaknessAnalyticsFromInsights } from "../../../../packages/core/src/weakness-analytics";
 import { formatSessionLabel } from "./study-session-ui";
+import { buildConceptCaseMap, type ConceptCaseBundle } from "./concept-case";
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
 import { buildTableSimInterventionRecommendations } from "./intervention-decision";
 import { buildPatternBriefs } from "./pattern-summaries";
@@ -50,6 +53,17 @@ export interface WeaknessExplorerSnapshot {
     dimensions: string[];
     coachingPattern?: string;
     interventionDecision?: Pick<InterventionRecommendation, "action" | "recommendedStrategy" | "summary">;
+    caseSummary?: {
+      statusLabel: string;
+      priorityExplanation: string;
+      transferStatus: string;
+      transferAudit?: {
+        stability: string;
+        changed: boolean;
+      };
+      nextAction: string;
+      coachNote: string;
+    };
     retention?: {
       state: string;
       validation: "none" | "provisional" | "validated" | "failed";
@@ -88,9 +102,14 @@ export function buildWeaknessExplorerSnapshot(args: {
   attemptInsights: AttemptInsight[];
   srs: Array<{ drill_id: string; due_at: string }>;
   activePool: WeaknessPool;
+  diagnosisHistory?: PlayerDiagnosisHistoryEntry[];
+  interventionHistory?: InterventionHistoryEntry[];
+  decisionSnapshots?: InterventionDecisionSnapshotRow[];
   realPlaySignals?: RealPlayConceptSignal[];
   patternAttempts?: PatternAttemptSignal[];
   retentionSchedules?: RetentionScheduleRow[];
+  transferSnapshots?: TransferEvaluationSnapshotRow[];
+  inputSnapshots?: CoachingInputSnapshotRow[];
   now?: Date;
 }): WeaknessExplorerSnapshot {
   const now = args.now ?? new Date();
@@ -105,11 +124,31 @@ export function buildWeaknessExplorerSnapshot(args: {
     attemptInsights: args.attemptInsights,
     srs: args.srs,
     activePool: args.activePool,
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory: args.interventionHistory,
     realPlaySignals: args.realPlaySignals,
     patternAttempts: args.patternAttempts,
     now,
   });
-  const interventionRecommendations = buildTableSimInterventionRecommendations({ playerIntelligence, realPlaySignals: args.realPlaySignals });
+  const interventionRecommendations = buildTableSimInterventionRecommendations({
+    playerIntelligence,
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory: args.interventionHistory,
+    realPlaySignals: args.realPlaySignals,
+    retentionSchedules: args.retentionSchedules,
+  });
+  const conceptCases = buildConceptCaseMap({
+    playerIntelligence,
+    diagnosisHistory: args.diagnosisHistory,
+    interventionHistory: args.interventionHistory,
+    decisionSnapshots: args.decisionSnapshots,
+    realPlaySignals: args.realPlaySignals,
+    retentionSchedules: args.retentionSchedules,
+    transferSnapshots: args.transferSnapshots,
+    inputSnapshots: args.inputSnapshots,
+    recommendations: interventionRecommendations,
+    now,
+  });
   const weaknessSummary = buildWeaknessSummary({ report, activePool: args.activePool });
   const weaknessCoach = buildFallbackCoachResponse(weaknessSummary);
   const topTargets = selectWeaknessTargetsForPool(report, args.activePool, 5);
@@ -118,7 +157,19 @@ export function buildWeaknessExplorerSnapshot(args: {
     weaknessReport: report,
     playerIntelligence,
   });
-  const weaknessCards = playerIntelligence.priorities.slice(0, 5).map((concept) => buildWeaknessCard(concept, topTargets, args.drills, args.srs, args.activePool, now, playerIntelligence.adaptiveProfile.surfaceSignals.weaknessExplorer, playerIntelligence.patterns.topPatterns, args.retentionSchedules ?? [], interventionRecommendations.find((entry) => entry.conceptKey === concept.conceptKey)));
+  const weaknessCards = playerIntelligence.priorities.slice(0, 5).map((concept) => buildWeaknessCard(
+    concept,
+    topTargets,
+    args.drills,
+    args.srs,
+    args.activePool,
+    now,
+    playerIntelligence.adaptiveProfile.surfaceSignals.weaknessExplorer,
+    playerIntelligence.patterns.topPatterns,
+    args.retentionSchedules ?? [],
+    interventionRecommendations.find((entry) => entry.conceptKey === concept.conceptKey),
+    conceptCases.get(concept.conceptKey)
+  ));
 
   return {
     generatedAt: report.generatedAt,
@@ -152,7 +203,8 @@ function buildWeaknessCard(
   adaptiveSignal: string,
   topPatterns: ReturnType<typeof buildTableSimPlayerIntelligence>["patterns"]["topPatterns"],
   retentionSchedules: RetentionScheduleRow[],
-  interventionDecision?: InterventionRecommendation
+  interventionDecision: InterventionRecommendation | undefined,
+  conceptCase?: ConceptCaseBundle
 ): WeaknessExplorerSnapshot["priorityWeaknesses"][number] {
   const fallbackTarget = fallbackTargets.find((target) => formatSessionLabel(target.key) === concept.label);
   const relatedDrills = concept.relatedDrills.length > 0
@@ -190,6 +242,17 @@ function buildWeaknessCard(
     dimensions: [...concept.evidence.slice(0, 2), ...concept.inferredFrom.slice(0, 1)].slice(0, 3),
     coachingPattern: pattern ? `${pattern.title}: ${pattern.detail}` : undefined,
     interventionDecision: interventionDecision ? { action: interventionDecision.action, recommendedStrategy: interventionDecision.recommendedStrategy, summary: interventionDecision.summary } : undefined,
+    caseSummary: conceptCase ? {
+      statusLabel: conceptCase.explanation.statusLabel,
+      priorityExplanation: conceptCase.explanation.priorityExplanation,
+      transferStatus: conceptCase.transferEvaluation.status,
+      transferAudit: conceptCase.transferAudit ? {
+        stability: conceptCase.transferAudit.stability,
+        changed: conceptCase.transferAudit.latestChanged,
+      } : undefined,
+      nextAction: conceptCase.nextStep.nextAction.replace(/_/g, " "),
+      coachNote: conceptCase.nextStep.coachNote,
+    } : undefined,
     retention: retention.latestSchedule ? { state: retention.latestSchedule.state, validation: retention.validationState } : undefined,
     relatedDrills,
   };

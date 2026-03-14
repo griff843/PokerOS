@@ -75,6 +75,13 @@ const MIGRATIONS: string[] = [
     user_id TEXT NOT NULL,
     concept_key TEXT NOT NULL,
     created_at TEXT NOT NULL,
+    engine_family TEXT NOT NULL DEFAULT 'intervention_recommendation',
+    engine_name TEXT NOT NULL DEFAULT 'unknown',
+    engine_version TEXT NOT NULL DEFAULT 'unknown',
+    engine_schema_version TEXT NOT NULL DEFAULT 'unknown',
+    engine_config_fingerprint TEXT,
+    engine_ruleset_version TEXT,
+    engine_authored_at TEXT,
     recommended_action TEXT NOT NULL,
     recommended_strategy TEXT NOT NULL,
     confidence TEXT NOT NULL,
@@ -111,6 +118,72 @@ const MIGRATIONS: string[] = [
     supersedes_schedule_id TEXT REFERENCES retention_schedules(id),
     superseded_by_schedule_id TEXT REFERENCES retention_schedules(id),
     evidence_json TEXT NOT NULL DEFAULT '[]'
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS transfer_evaluation_snapshots (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    concept_key TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    engine_family TEXT NOT NULL DEFAULT 'transfer_evaluation',
+    engine_name TEXT NOT NULL DEFAULT 'unknown',
+    engine_version TEXT NOT NULL DEFAULT 'unknown',
+    engine_schema_version TEXT NOT NULL DEFAULT 'unknown',
+    engine_config_fingerprint TEXT,
+    engine_ruleset_version TEXT,
+    engine_authored_at TEXT,
+    transfer_status TEXT NOT NULL,
+    transfer_confidence TEXT NOT NULL,
+    evidence_sufficiency TEXT NOT NULL,
+    pressure TEXT NOT NULL,
+    study_sample_size INTEGER NOT NULL DEFAULT 0,
+    study_performance REAL,
+    study_recent_average REAL,
+    study_average REAL,
+    study_failed_count INTEGER NOT NULL DEFAULT 0,
+    real_play_performance REAL,
+    real_play_occurrences INTEGER NOT NULL DEFAULT 0,
+    real_play_review_spot_count INTEGER NOT NULL DEFAULT 0,
+    real_play_latest_hand_at TEXT,
+    study_vs_real_play_delta REAL,
+    recovery_stage TEXT NOT NULL,
+    retention_state TEXT,
+    retention_result TEXT,
+    pattern_types_json TEXT NOT NULL DEFAULT '[]',
+    supporting_evidence_json TEXT NOT NULL DEFAULT '[]',
+    risk_flags_json TEXT NOT NULL DEFAULT '[]',
+    linked_decision_snapshot_id TEXT REFERENCES intervention_decision_snapshots(id),
+    linked_retention_schedule_id TEXT REFERENCES retention_schedules(id),
+    source_context TEXT,
+    supersedes_snapshot_id TEXT REFERENCES transfer_evaluation_snapshots(id)
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS coaching_input_snapshots (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    concept_key TEXT NOT NULL,
+    snapshot_type TEXT NOT NULL,
+    schema_version TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    engine_family TEXT NOT NULL DEFAULT 'intervention_recommendation',
+    engine_name TEXT NOT NULL DEFAULT 'unknown',
+    engine_version TEXT NOT NULL DEFAULT 'unknown',
+    engine_schema_version TEXT NOT NULL DEFAULT 'unknown',
+    engine_config_fingerprint TEXT,
+    engine_ruleset_version TEXT,
+    engine_authored_at TEXT,
+    payload_json TEXT NOT NULL,
+    recovery_stage TEXT NOT NULL,
+    retention_state TEXT,
+    pattern_types_json TEXT NOT NULL DEFAULT '[]',
+    diagnosis_count INTEGER NOT NULL DEFAULT 0,
+    intervention_count INTEGER NOT NULL DEFAULT 0,
+    study_sample_size INTEGER NOT NULL DEFAULT 0,
+    real_play_occurrences INTEGER NOT NULL DEFAULT 0,
+    linked_decision_snapshot_id TEXT REFERENCES intervention_decision_snapshots(id),
+    linked_transfer_snapshot_id TEXT REFERENCES transfer_evaluation_snapshots(id),
+    source_context TEXT,
+    supersedes_snapshot_id TEXT REFERENCES coaching_input_snapshots(id)
   )`,
 
   `CREATE TABLE IF NOT EXISTS intervention_outcomes (
@@ -182,6 +255,10 @@ const MIGRATIONS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_intervention_decisions_created ON intervention_decision_snapshots(user_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_retention_schedules_concept ON retention_schedules(user_id, concept_key, scheduled_for DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_retention_schedules_status ON retention_schedules(user_id, status, scheduled_for ASC)`,
+  `CREATE INDEX IF NOT EXISTS idx_transfer_snapshots_concept ON transfer_evaluation_snapshots(user_id, concept_key, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_transfer_snapshots_created ON transfer_evaluation_snapshots(user_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_coaching_input_snapshots_concept ON coaching_input_snapshots(user_id, concept_key, snapshot_type, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_coaching_input_snapshots_created ON coaching_input_snapshots(user_id, snapshot_type, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_srs_due ON srs(due_at)`,
   `CREATE INDEX IF NOT EXISTS idx_hand_imports_created ON hand_imports(created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_imported_hands_played ON imported_hands(played_at DESC)`,
@@ -234,6 +311,10 @@ export function runMigrations(db: Database.Database): void {
       db.exec("UPDATE coaching_interventions SET status = 'in_progress' WHERE status = 'started'");
     }
 
+    addManifestColumns(db, "intervention_decision_snapshots", "intervention_recommendation");
+    addManifestColumns(db, "transfer_evaluation_snapshots", "transfer_evaluation");
+    addManifestColumns(db, "coaching_input_snapshots", "intervention_recommendation");
+
     if (tableExists(db, "imported_hands")) {
       if (!columnExists(db, "imported_hands", "concept_matches_json")) {
         db.exec("ALTER TABLE imported_hands ADD COLUMN concept_matches_json TEXT NOT NULL DEFAULT '[]'");
@@ -245,5 +326,33 @@ export function runMigrations(db: Database.Database): void {
   });
 
   migrate();
+}
+
+function addManifestColumns(db: Database.Database, tableName: string, defaultFamily: string): void {
+  if (!tableExists(db, tableName)) {
+    return;
+  }
+
+  if (!columnExists(db, tableName, "engine_family")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_family TEXT NOT NULL DEFAULT '${defaultFamily}'`);
+  }
+  if (!columnExists(db, tableName, "engine_name")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_name TEXT NOT NULL DEFAULT 'unknown'`);
+  }
+  if (!columnExists(db, tableName, "engine_version")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_version TEXT NOT NULL DEFAULT 'unknown'`);
+  }
+  if (!columnExists(db, tableName, "engine_schema_version")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_schema_version TEXT NOT NULL DEFAULT 'unknown'`);
+  }
+  if (!columnExists(db, tableName, "engine_config_fingerprint")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_config_fingerprint TEXT`);
+  }
+  if (!columnExists(db, tableName, "engine_ruleset_version")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_ruleset_version TEXT`);
+  }
+  if (!columnExists(db, tableName, "engine_authored_at")) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN engine_authored_at TEXT`);
+  }
 }
 

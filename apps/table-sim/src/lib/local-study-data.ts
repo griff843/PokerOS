@@ -8,9 +8,11 @@ import {
   getAllSrs,
   getRecentHandImports,
   getUserDiagnosisHistory,
+  getUserCoachingInputSnapshots,
   getUserInterventionDecisionSnapshots,
   getUserInterventions,
   getUserRetentionSchedules,
+  getUserTransferEvaluationSnapshots,
 } from "../../../../packages/db/src/repository";
 import { ImportedHandSchema, type ImportedHand } from "@poker-coach/core/browser";
 import { getLocalCoachingUserId } from "./coaching-memory";
@@ -54,6 +56,8 @@ export function loadLocalStudyData() {
       interventions: [],
       decisionSnapshots: [],
       retentionSchedules: [],
+      transferSnapshots: [],
+      inputSnapshots: [],
     };
   }
 
@@ -83,6 +87,8 @@ export function loadLocalStudyData() {
       interventions: getUserInterventions(db, userId),
       decisionSnapshots: getUserInterventionDecisionSnapshots(db, userId),
       retentionSchedules: getUserRetentionSchedules(db, userId),
+      transferSnapshots: getUserTransferEvaluationSnapshots(db, userId),
+      inputSnapshots: getUserCoachingInputSnapshots(db, userId),
     };
   } finally {
     db.close();

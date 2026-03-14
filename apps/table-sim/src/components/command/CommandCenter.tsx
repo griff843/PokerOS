@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/session-context";
@@ -250,6 +251,8 @@ export function CommandCenter() {
           <CoachBriefingCard loading={snapshotLoading} snapshot={snapshot} />
         </div>
 
+        <LeadConceptCaseCard snapshot={snapshot} />
+
         <div className="grid gap-5 xl:grid-cols-3">
           <InterventionsCard snapshot={snapshot} />
           <CoachingPatternsCard snapshot={snapshot} />
@@ -473,6 +476,49 @@ function CoachBriefingCard({ loading, snapshot }: { loading: boolean; snapshot: 
             {snapshot?.coachBriefing.recommendation ?? "Run another balanced block and let the next set of reps sharpen the live target."}
           </p>
         </div>
+      </div>
+    </section>
+  );
+}
+
+function LeadConceptCaseCard({ snapshot }: { snapshot: CommandCenterSnapshot | null }) {
+  const lead = snapshot?.leadConceptCase;
+
+  return (
+    <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Lead Concept Case</p>
+          <p className="mt-2 text-sm leading-6 text-slate-400">The canonical concept file behind the lead coaching thread.</p>
+        </div>
+        {lead ? (
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href={`/app/concepts/${encodeURIComponent(lead.conceptKey)}`}
+              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/20 hover:bg-white/10"
+            >
+              Open concept case
+            </Link>
+            <Link
+              href={`/app/concepts/${encodeURIComponent(lead.conceptKey)}/replay`}
+              className="rounded-full border border-amber-400/20 bg-amber-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-amber-100 transition hover:border-amber-300/30 hover:bg-amber-500/16"
+            >
+              Open replay
+            </Link>
+          </div>
+        ) : null}
+      </div>
+      <div className="mt-4 rounded-[24px] border border-white/8 bg-black/20 p-4">
+        {!lead ? (
+          <p className="text-sm leading-6 text-slate-400">A lead concept case will appear once the current priority concept has enough canonical case history.</p>
+        ) : (
+          <>
+            <p className="text-base font-semibold text-white">{lead.label} · {lead.statusLabel}</p>
+            <p className="mt-3 text-sm leading-6 text-slate-300">{lead.statusReason}</p>
+            <p className="mt-3 text-sm leading-6 text-emerald-50/90">{lead.priorityExplanation}</p>
+            <p className="mt-3 text-xs uppercase tracking-[0.18em] text-emerald-200">Next move: {lead.nextAction}</p>
+          </>
+        )}
       </div>
     </section>
   );
