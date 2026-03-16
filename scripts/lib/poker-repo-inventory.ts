@@ -24,7 +24,7 @@ const REPO_SURFACES: Array<{ label: string; relativePath: string }> = [
   { label: "Table Sim", relativePath: "apps/table-sim/src" },
   { label: "Core package", relativePath: "packages/core/src" },
   { label: "DB package", relativePath: "packages/db/src" },
-  { label: "Drills content", relativePath: "apps/table-sim/public/content/drills.json" },
+  { label: "Drills API route", relativePath: "apps/table-sim/src/app/api/drills/route.ts" },
   { label: "Drill schema doc", relativePath: "docs/content/DRILL_SCHEMA.md" },
   { label: "Architecture map", relativePath: "docs/poker-coach-os/ARCHITECTURE_MAP.md" },
   { label: "Status doc", relativePath: "docs/poker-coach-os/status/CURRENT_SYSTEM_STATUS.md" },
