@@ -6,6 +6,7 @@ import { toDiagnosisHistoryEntries, toInterventionHistoryEntries } from "../../.
 import { buildConceptCaseMap } from "../../../../lib/concept-case";
 import { buildTableSimInterventionRecommendations } from "../../../../lib/intervention-decision";
 import { buildDiagnosticInsightsFromAttempts, buildPatternAttemptSignals, hydratePersistedStudyAttempts } from "../../../../lib/intervention-support";
+import { buildConceptAuditFeed } from "../../../../lib/concept-audit-feed";
 import { buildInterventionExecutionBundle } from "../../../../lib/intervention-execution";
 import { loadLocalStudyData } from "../../../../lib/local-study-data";
 import { buildTableSimPlayerIntelligence } from "../../../../lib/player-intelligence";
@@ -75,8 +76,16 @@ export async function GET(
       );
     }
 
+    const auditFeed = buildConceptAuditFeed({
+      conceptKey,
+      diagnoses,
+      decisionSnapshots,
+      transferSnapshots,
+      retentionSchedules,
+    });
+
     return NextResponse.json(
-      buildInterventionExecutionBundle(conceptCase, conceptKey)
+      buildInterventionExecutionBundle(conceptCase, conceptKey, auditFeed)
     );
   } catch (error) {
     console.error("Failed to build intervention execution bundle:", error);

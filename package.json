@@ -14,7 +14,8 @@
     "lint": "eslint . --ext .ts,.tsx",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "pnpm exec tsc --noEmit && pnpm test && pnpm --filter @poker-coach/table-sim build"
+    "verify": "pnpm exec tsc --noEmit && pnpm test && pnpm --filter @poker-coach/table-sim build",
+    "poker:ai:refresh": "tsx scripts/poker-ai-refresh.ts"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.8",

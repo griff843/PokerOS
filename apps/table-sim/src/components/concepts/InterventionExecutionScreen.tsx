@@ -1,12 +1,15 @@
 import React, { type ReactNode } from "react";
 import Link from "next/link";
 import type {
+  ConceptRecentFeedSummary,
   InterventionActionSummary,
   InterventionEvidenceSummary,
   InterventionExecutionBundle,
   InterventionHistoryContext,
+  InterventionProgressContext,
 } from "@/lib/intervention-execution";
 import type { InterventionStrategyBlueprint } from "@poker-coach/core/browser";
+import type { ConceptAuditEvent } from "@/lib/concept-audit-feed";
 
 export interface InterventionExecutionScreenState {
   loading: boolean;
@@ -53,7 +56,7 @@ export function InterventionExecutionScreen({
     );
   }
 
-  const { actionSummary, evidenceSummary, strategyBlueprint, historyContext, nextStep } =
+  const { actionSummary, evidenceSummary, strategyBlueprint, historyContext, nextStep, recentFeed, progressContext } =
     state.data;
 
   if (state.data.executionStatus === "no_intervention") {
@@ -61,17 +64,28 @@ export function InterventionExecutionScreen({
       <ExecutionPageFrame>
         <div className="space-y-6">
           <InterventionExecutionHeader data={state.data} />
-          <ExecutionPanel tone="neutral" title="No active intervention" eyebrow="Execution Status">
-            <p className="text-sm leading-6 text-slate-300">
-              No intervention is currently active or recommended for this concept. The coaching engine
-              has not flagged it as requiring immediate action.
-            </p>
-            <p className="mt-3 text-sm leading-6 text-slate-400">
-              Recovery stage: <span className="text-slate-200">{historyContext.recoveryStage.replace(/_/g, " ")}</span>.
-              {" "}Diagnosis count: <span className="text-slate-200">{historyContext.diagnosisCount}</span>.
-            </p>
-            <ExecutionNavFooter conceptKey={state.data.conceptKey} executionStatus={state.data.executionStatus} />
-          </ExecutionPanel>
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
+            <ExecutionPanel tone="neutral" title="No active intervention" eyebrow="Execution Status">
+              <p className="text-sm leading-6 text-slate-300">
+                No intervention is currently active or recommended for this concept. The coaching engine
+                has not flagged it as requiring immediate action.
+              </p>
+              <p className="mt-3 text-sm leading-6 text-slate-400">
+                Recovery stage:{" "}
+                <span className="text-slate-200">{historyContext.recoveryStage.replace(/_/g, " ")}</span>.{" "}
+                Diagnosis count:{" "}
+                <span className="text-slate-200">{historyContext.diagnosisCount}</span>.
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                Next step:{" "}
+                <span className="text-slate-200">{nextStep.nextAction.replace(/_/g, " ")}</span> — {nextStep.nextActionReason}
+              </p>
+            </ExecutionPanel>
+            {recentFeed && recentFeed.recentEvents.length > 0 && (
+              <ConceptAuditTimelineStrip recentFeed={recentFeed} />
+            )}
+          </div>
+          <ExecutionNavFooter conceptKey={state.data.conceptKey} />
         </div>
       </ExecutionPageFrame>
     );
@@ -82,20 +96,28 @@ export function InterventionExecutionScreen({
       <div className="space-y-6">
         <InterventionExecutionHeader data={state.data} />
 
+        {progressContext && (
+          <ExecutionProgressBanner progressContext={progressContext} />
+        )}
+
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
           <BlueprintExecutionPanel blueprint={strategyBlueprint} />
           <ExecutionActionPanel actionSummary={actionSummary!} />
         </div>
 
         <div className="grid gap-5 xl:grid-cols-2">
-          <SuccessCriteriaPanel blueprint={strategyBlueprint} />
-          <EscalationPanel blueprint={strategyBlueprint} />
+          <SuccessCriteriaPanel blueprint={strategyBlueprint} progressContext={progressContext} />
+          <EscalationPanel blueprint={strategyBlueprint} progressContext={progressContext} />
         </div>
 
         <ExecutionEvidencePanel
           evidenceSummary={evidenceSummary!}
           historyContext={historyContext}
         />
+
+        {recentFeed && (
+          <ConceptAuditTimelineStrip recentFeed={recentFeed} />
+        )}
 
         <ExecutionFooterSection data={state.data} />
       </div>
@@ -106,26 +128,46 @@ export function InterventionExecutionScreen({
 // ─── Header ──────────────────────────────────────────────────────────────────
 
 export function InterventionExecutionHeader({ data }: { data: InterventionExecutionBundle }) {
-  const { actionSummary, executionStatus, label, conceptKey, nextStep } = data;
+  const { actionSummary, executionStatus, label, conceptKey, nextStep, historyContext } = data;
 
   const statusLabel =
     executionStatus === "active"
       ? "Active Intervention"
       : executionStatus === "recommended"
         ? "Recommended Intervention"
-        : "No Intervention";
+        : "No Active Intervention";
+
+  const statusGradient =
+    executionStatus === "active"
+      ? "radial-gradient(circle_at_top_left,rgba(59,130,246,0.18),rgba(15,23,42,0.96)_48%,rgba(2,6,23,0.98)_100%)"
+      : executionStatus === "recommended"
+        ? "radial-gradient(circle_at_top_left,rgba(234,179,8,0.14),rgba(15,23,42,0.96)_48%,rgba(2,6,23,0.98)_100%)"
+        : "radial-gradient(circle_at_top_left,rgba(100,116,139,0.12),rgba(15,23,42,0.96)_48%,rgba(2,6,23,0.98)_100%)";
 
   return (
-    <section className="rounded-[34px] border border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.14),rgba(15,23,42,0.96)_48%,rgba(2,6,23,0.98)_100%)] px-6 py-6 shadow-[0_30px_100px_rgba(0,0,0,0.38)] sm:px-7 sm:py-7">
+    <section
+      className="rounded-[34px] border border-white/8 px-6 py-6 shadow-[0_30px_100px_rgba(0,0,0,0.38)] sm:px-7 sm:py-7"
+      style={{ backgroundImage: statusGradient }}
+    >
       <div className="space-y-5">
         <div className="flex flex-wrap gap-2">
           <ExecChip label="Intervention Execution" />
-          <ExecChip label={statusLabel} subtle={false} />
+          <ExecChip
+            label={statusLabel}
+            subtle={false}
+            tone={executionStatus === "active" ? "blue" : executionStatus === "recommended" ? "amber" : "neutral"}
+          />
           {actionSummary && (
             <>
               <ExecChip label={`${actionSummary.intensity} intensity`} subtle />
               <ExecChip label={`${actionSummary.confidence} confidence`} subtle />
             </>
+          )}
+          {executionStatus === "recommended" && actionSummary?.requiresNewAssignment && (
+            <ExecChip label="new assignment required" subtle />
+          )}
+          {executionStatus === "recommended" && actionSummary?.requiresStrategyChange && (
+            <ExecChip label="strategy change required" subtle />
           )}
         </div>
         <div className="space-y-3">
@@ -139,7 +181,8 @@ export function InterventionExecutionHeader({ data }: { data: InterventionExecut
             </p>
           ) : (
             <p className="max-w-3xl text-sm leading-7 text-slate-300 sm:text-base">
-              No active or recommended intervention for this concept right now.
+              No active or recommended intervention. Recovery stage:{" "}
+              <span className="text-slate-200">{historyContext.recoveryStage.replace(/_/g, " ")}</span>.
             </p>
           )}
         </div>
@@ -151,8 +194,55 @@ export function InterventionExecutionHeader({ data }: { data: InterventionExecut
             <ExecMetric label="Next move" value={nextStep.nextAction.replace(/_/g, " ")} />
           </div>
         )}
+        {executionStatus === "active" && actionSummary?.currentInterventionStatus && (
+          <p className="text-xs text-slate-400">
+            Current intervention status:{" "}
+            <span className="font-semibold text-slate-200">
+              {actionSummary.currentInterventionStatus.replace(/_/g, " ")}
+            </span>
+          </p>
+        )}
       </div>
     </section>
+  );
+}
+
+// ─── Progress Banner ──────────────────────────────────────────────────────────
+
+export function ExecutionProgressBanner({ progressContext }: { progressContext: InterventionProgressContext }) {
+  if (progressContext.progressSummary === "no_history" || progressContext.progressSummary === "stable") {
+    return null;
+  }
+
+  const isSuccess = progressContext.progressSummary === "approaching_success";
+  const signals = isSuccess
+    ? progressContext.recentSuccessSignals
+    : progressContext.recentEscalationSignals;
+  const bannerClass = isSuccess
+    ? "border-emerald-500/18 bg-emerald-500/8"
+    : "border-amber-500/18 bg-amber-500/10";
+  const labelClass = isSuccess ? "text-emerald-200" : "text-amber-200";
+  const textClass = isSuccess ? "text-emerald-50/88" : "text-amber-50/80";
+  const title = isSuccess ? "Approaching success" : "Escalation signals present";
+
+  return (
+    <div className={`rounded-[28px] border px-5 py-4 ${bannerClass}`}>
+      <div className="flex flex-wrap items-start gap-4">
+        <div className="flex-1">
+          <p className={`text-[11px] font-semibold uppercase tracking-[0.24em] ${labelClass}`}>
+            {isSuccess ? "Execution Progress" : "Risk Signal"}
+          </p>
+          <p className={`mt-1 text-sm font-semibold ${isSuccess ? "text-emerald-100" : "text-amber-100"}`}>
+            {title}
+          </p>
+        </div>
+        <ul className={`flex-[2] space-y-1 text-sm leading-6 ${textClass}`}>
+          {signals.map((signal, i) => (
+            <li key={i}>• {signal}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 
@@ -253,9 +343,24 @@ export function ExecutionActionPanel({ actionSummary }: { actionSummary: Interve
             Assignment flags
           </p>
           <div className="mt-3 space-y-1.5 text-sm text-slate-200">
-            <p>Requires new assignment: <span className={actionSummary.requiresNewAssignment ? "text-amber-200" : "text-slate-400"}>{actionSummary.requiresNewAssignment ? "yes" : "no"}</span></p>
-            <p>Requires strategy change: <span className={actionSummary.requiresStrategyChange ? "text-amber-200" : "text-slate-400"}>{actionSummary.requiresStrategyChange ? "yes" : "no"}</span></p>
-            <p>Transfer focus: <span className={actionSummary.transferFocus ? "text-blue-200" : "text-slate-400"}>{actionSummary.transferFocus ? "yes" : "no"}</span></p>
+            <p>
+              Requires new assignment:{" "}
+              <span className={actionSummary.requiresNewAssignment ? "text-amber-200" : "text-slate-400"}>
+                {actionSummary.requiresNewAssignment ? "yes" : "no"}
+              </span>
+            </p>
+            <p>
+              Requires strategy change:{" "}
+              <span className={actionSummary.requiresStrategyChange ? "text-amber-200" : "text-slate-400"}>
+                {actionSummary.requiresStrategyChange ? "yes" : "no"}
+              </span>
+            </p>
+            <p>
+              Transfer focus:{" "}
+              <span className={actionSummary.transferFocus ? "text-blue-200" : "text-slate-400"}>
+                {actionSummary.transferFocus ? "yes" : "no"}
+              </span>
+            </p>
           </div>
         </div>
         {actionSummary.currentInterventionId && (
@@ -264,11 +369,15 @@ export function ExecutionActionPanel({ actionSummary }: { actionSummary: Interve
               Active intervention
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-200">
-              ID: <span className="font-mono text-slate-300">{actionSummary.currentInterventionId}</span>
+              ID:{" "}
+              <span className="font-mono text-slate-300">{actionSummary.currentInterventionId}</span>
             </p>
             {actionSummary.currentInterventionStatus && (
               <p className="mt-1 text-sm text-slate-300">
-                Status: <span className="text-slate-200">{actionSummary.currentInterventionStatus.replace(/_/g, " ")}</span>
+                Status:{" "}
+                <span className="text-slate-200">
+                  {actionSummary.currentInterventionStatus.replace(/_/g, " ")}
+                </span>
               </p>
             )}
           </div>
@@ -280,7 +389,13 @@ export function ExecutionActionPanel({ actionSummary }: { actionSummary: Interve
 
 // ─── Success Criteria Panel ───────────────────────────────────────────────────
 
-export function SuccessCriteriaPanel({ blueprint }: { blueprint?: InterventionStrategyBlueprint }) {
+export function SuccessCriteriaPanel({
+  blueprint,
+  progressContext,
+}: {
+  blueprint?: InterventionStrategyBlueprint;
+  progressContext?: InterventionProgressContext;
+}) {
   if (!blueprint) {
     return (
       <ExecutionPanel tone="neutral" title="Success Criteria" eyebrow="Exit Conditions">
@@ -291,13 +406,28 @@ export function SuccessCriteriaPanel({ blueprint }: { blueprint?: InterventionSt
     );
   }
 
+  const hasRecentSuccess =
+    progressContext && progressContext.progressSummary === "approaching_success";
+
   return (
     <ExecutionPanel tone="good" title="Success Criteria" eyebrow="Exit Conditions">
       <div className="space-y-4">
+        {hasRecentSuccess && progressContext.recentSuccessSignals.length > 0 && (
+          <div className="rounded-[22px] border border-emerald-400/22 bg-emerald-500/12 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-200">
+              Recent progress signals
+            </p>
+            <ul className="mt-2 space-y-1.5 text-sm leading-6 text-emerald-50/92">
+              {progressContext.recentSuccessSignals.map((signal, i) => (
+                <li key={i}>✓ {signal}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         {blueprint.successCriteriaHints.length > 0 ? (
           <div className="rounded-[22px] border border-emerald-500/16 bg-emerald-500/8 p-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-emerald-200">
-              Success signals
+              What success looks like
             </p>
             <ul className="mt-3 space-y-2 text-sm leading-6 text-emerald-50/92">
               {blueprint.successCriteriaHints.map((hint, i) => (
@@ -332,7 +462,13 @@ export function SuccessCriteriaPanel({ blueprint }: { blueprint?: InterventionSt
 
 // ─── Escalation Panel ─────────────────────────────────────────────────────────
 
-export function EscalationPanel({ blueprint }: { blueprint?: InterventionStrategyBlueprint }) {
+export function EscalationPanel({
+  blueprint,
+  progressContext,
+}: {
+  blueprint?: InterventionStrategyBlueprint;
+  progressContext?: InterventionProgressContext;
+}) {
   if (!blueprint) {
     return (
       <ExecutionPanel tone="neutral" title="Escalation Triggers" eyebrow="Risk Signals">
@@ -343,9 +479,24 @@ export function EscalationPanel({ blueprint }: { blueprint?: InterventionStrateg
     );
   }
 
+  const hasEscalation =
+    progressContext && progressContext.progressSummary === "approaching_escalation";
+
   return (
     <ExecutionPanel tone="warning" title="Escalation Triggers" eyebrow="Risk Signals">
       <div className="space-y-4">
+        {hasEscalation && progressContext.recentEscalationSignals.length > 0 && (
+          <div className="rounded-[22px] border border-amber-400/28 bg-amber-500/14 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200">
+              Active escalation signals
+            </p>
+            <ul className="mt-2 space-y-1.5 text-sm leading-6 text-amber-50/88">
+              {progressContext.recentEscalationSignals.map((signal, i) => (
+                <li key={i}>⚠ {signal}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         {blueprint.escalationTriggerHints.length > 0 ? (
           <div className="rounded-[22px] border border-amber-500/18 bg-amber-500/8 p-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200">
@@ -397,9 +548,18 @@ export function ExecutionEvidencePanel({
     <ExecutionPanel tone="neutral" title="Why This Intervention" eyebrow="Supporting Evidence">
       <div className="space-y-4">
         <div className="grid gap-3 md:grid-cols-3">
-          <ExecStat title="Diagnosis count" detail={`${historyContext.diagnosisCount} persisted diagnosis ${historyContext.diagnosisCount === 1 ? "entry" : "entries"}.`} />
-          <ExecStat title="Recurrence" detail={`${historyContext.recurrenceCount} recurrence${historyContext.recurrenceCount === 1 ? "" : "s"} flagged.${historyContext.recurringLeak ? " Classified as recurring leak." : ""}`} />
-          <ExecStat title="Recovery stage" detail={historyContext.recoveryStage.replace(/_/g, " ")} />
+          <ExecStat
+            title="Diagnosis count"
+            detail={`${historyContext.diagnosisCount} persisted diagnosis ${historyContext.diagnosisCount === 1 ? "entry" : "entries"}.`}
+          />
+          <ExecStat
+            title="Recurrence"
+            detail={`${historyContext.recurrenceCount} recurrence${historyContext.recurrenceCount === 1 ? "" : "s"} flagged.${historyContext.recurringLeak ? " Classified as recurring leak." : ""}`}
+          />
+          <ExecStat
+            title="Recovery stage"
+            detail={historyContext.recoveryStage.replace(/_/g, " ")}
+          />
         </div>
 
         {evidenceSummary.evidence.length > 0 && (
@@ -486,6 +646,82 @@ export function ExecutionEvidencePanel({
   );
 }
 
+// ─── Audit Timeline Strip ─────────────────────────────────────────────────────
+
+export function ConceptAuditTimelineStrip({ recentFeed }: { recentFeed: ConceptRecentFeedSummary }) {
+  if (recentFeed.state === "no_history" || recentFeed.recentEvents.length === 0) {
+    return (
+      <ExecutionPanel tone="neutral" title="Recent Activity" eyebrow="Concept Timeline">
+        <p className="text-sm leading-6 text-slate-300">
+          No coaching events are recorded yet for this concept. Events are logged as diagnoses,
+          intervention decisions, transfer evaluations, and retention checks are performed.
+        </p>
+      </ExecutionPanel>
+    );
+  }
+
+  return (
+    <ExecutionPanel tone="neutral" title="Recent Activity" eyebrow="Concept Timeline">
+      <div className="space-y-1">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-[11px] text-slate-500">
+            {recentFeed.eventCount} total event{recentFeed.eventCount === 1 ? "" : "s"} recorded
+          </p>
+          <div className="flex gap-2">
+            {recentFeed.hasEscalations && (
+              <span className="rounded-full border border-amber-400/18 bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-amber-200">
+                escalations present
+              </span>
+            )}
+            {recentFeed.hasRecentSuccess && (
+              <span className="rounded-full border border-emerald-400/18 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-emerald-200">
+                success signals
+              </span>
+            )}
+          </div>
+        </div>
+        <ul className="space-y-1.5">
+          {recentFeed.recentEvents.map((event) => (
+            <AuditEventRow key={event.id} event={event} />
+          ))}
+        </ul>
+      </div>
+    </ExecutionPanel>
+  );
+}
+
+function AuditEventRow({ event }: { event: ConceptAuditEvent }) {
+  const familyDot: Record<string, string> = {
+    diagnosis: "bg-purple-400",
+    intervention: "bg-blue-400",
+    transfer: "bg-amber-400",
+    retention: "bg-emerald-400",
+  };
+  const severityBadge: Record<string, string | undefined> = {
+    info: undefined,
+    notable: "border-blue-400/18 bg-blue-500/10 text-blue-200",
+    important: "border-amber-400/18 bg-amber-500/10 text-amber-200",
+    critical: "border-red-400/18 bg-red-500/10 text-red-200",
+  };
+  const dot = familyDot[event.sourceFamily] ?? "bg-slate-400";
+  const badge = severityBadge[event.severity];
+
+  return (
+    <li className="flex items-start gap-3 rounded-[16px] border border-white/6 bg-black/20 px-3.5 py-3">
+      <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dot}`} />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm leading-5 text-slate-200">{event.label}</p>
+        <p className="mt-0.5 text-[11px] text-slate-500">{formatEventDate(event.timestamp)}</p>
+      </div>
+      {badge && (
+        <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${badge}`}>
+          {event.severity}
+        </span>
+      )}
+    </li>
+  );
+}
+
 // ─── Footer ───────────────────────────────────────────────────────────────────
 
 function ExecutionFooterSection({ data }: { data: InterventionExecutionBundle }) {
@@ -510,18 +746,12 @@ function ExecutionFooterSection({ data }: { data: InterventionExecutionBundle })
           detail={nextStep.nextActionReason}
         />
       </div>
-      <ExecutionNavFooter conceptKey={data.conceptKey} executionStatus={data.executionStatus} />
+      <ExecutionNavFooter conceptKey={data.conceptKey} />
     </section>
   );
 }
 
-function ExecutionNavFooter({
-  conceptKey,
-  executionStatus,
-}: {
-  conceptKey: string;
-  executionStatus: string;
-}) {
+function ExecutionNavFooter({ conceptKey }: { conceptKey: string }) {
   return (
     <div className="mt-5 flex flex-wrap gap-3">
       <Link
@@ -631,16 +861,39 @@ function ExecMiniMetric({ label, value, detail }: { label: string; value: string
   );
 }
 
-function ExecChip({ label, subtle = false }: { label: string; subtle?: boolean }) {
+function ExecChip({
+  label,
+  subtle = false,
+  tone = "blue",
+}: {
+  label: string;
+  subtle?: boolean;
+  tone?: "blue" | "amber" | "neutral";
+}) {
+  if (subtle) {
+    return (
+      <span className="rounded-full border border-white/8 bg-white/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
+        {label}
+      </span>
+    );
+  }
+  const toneClass =
+    tone === "amber"
+      ? "border-amber-400/25 bg-amber-500/10 text-amber-100"
+      : tone === "neutral"
+        ? "border-slate-400/18 bg-slate-500/10 text-slate-300"
+        : "border-blue-400/25 bg-blue-500/10 text-blue-100";
   return (
-    <span
-      className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] ${
-        subtle
-          ? "border-white/8 bg-white/5 text-slate-300"
-          : "border-blue-400/25 bg-blue-500/10 text-blue-100"
-      }`}
-    >
+    <span className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] ${toneClass}`}>
       {label}
     </span>
   );
+}
+
+function formatEventDate(timestamp: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(timestamp));
 }
