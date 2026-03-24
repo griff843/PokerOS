@@ -1,0 +1,13 @@
+{
+  "node_id": "srp_05",
+  "name": "SRP River Bluff-Catch OOP",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "OOP",
+    "street": "river",
+    "pot_type": "SRP"
+  },
+  "triggers": ["overbluff_punish", "underfold_exploit", "blocker_effect"],
+  "defaults": { "population_toggle": "B" }
+}

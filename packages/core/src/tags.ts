@@ -1,4 +1,4 @@
-/** All valid rule tags for v1 + v1.1 reserved */
+/** All valid rule tags for v1 + v1.1 */
 export const VALID_TAGS = [
   "paired_top_river",
   "scare_river_ace",
@@ -17,7 +17,11 @@ export const VALID_TAGS = [
   "overbluff_punish",
   "underfold_exploit",
   "thin_value_deep",
-  "multiway_context", // reserved for v1.1
+  "multiway_context",
+  "probe_bet_turn",
+  "3bet_pot_cbet",
+  "preflop_3bet",
+  "turn_give_up",
 ] as const;
 
 export type RuleTag = (typeof VALID_TAGS)[number];
@@ -46,7 +50,11 @@ export function tagLabel(tag: RuleTag): string {
     overbluff_punish: "Punish over-bluffing populations",
     underfold_exploit: "Exploit under-folding populations",
     thin_value_deep: "Thin value at deep stacks",
-    multiway_context: "Multiway context (v1.1)",
+    multiway_context: "Multiway context",
+    probe_bet_turn: "OOP probe bet on turn",
+    "3bet_pot_cbet": "C-bet in 3-bet pot",
+    preflop_3bet: "Preflop 3-bet decision",
+    turn_give_up: "Turn give-up as aggressor",
   };
   return labels[tag];
 }

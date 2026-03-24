@@ -1,0 +1,13 @@
+{
+  "node_id": "srp_03",
+  "name": "SRP Turn Barrel IP",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP",
+    "street": "turn",
+    "pot_type": "SRP"
+  },
+  "triggers": ["polar_turn_big_bet", "turn_give_up", "equity_denial"],
+  "defaults": { "population_toggle": "B" }
+}

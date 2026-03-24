@@ -1,0 +1,3973 @@
+[
+  {
+    "drill_id": "lc_pf01_01",
+    "node_id": "pf_01",
+    "version": "1.0.0",
+    "title": "BTN vs BB 3-Bet — Premium Flat or 4-Bet?",
+    "prompt": "You open BTN to 2.5bb. BB 3-bets to 9bb. You hold AJo (100bb eff). What is your standard action vs a live rec pool that 3-bets mostly for value and rarely barrels post?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "3BP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "hero_hand": [
+        "Ah",
+        "Jd"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "3bet",
+          "size_bb": 9
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "3bet",
+        "size_bb": 9
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "4-Bet"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [
+        "RAISE"
+      ],
+      "required_tags": [
+        "preflop_3bet"
+      ],
+      "explanation": "AJo has strong equity IP in a 3-bet pot but not enough blockers to 4-bet/fold profitably vs a value-heavy live pool. Calling and playing post-flop IP is the default. vs Pool C (ultra-tight 3-bettors) folding becomes reasonable."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "explanation": "Pool A 3-bets wide including many bluffs — calling or 4-betting thin are both fine. AJo has strong post-flop equity IP.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool B 3-bets a merged value range. Call and realize equity in position.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool C 3-bets only premiums (KK+, AK). AJo is dominated far too often — fold is best, call is a modest mistake.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:3bp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "decision:3bet_defense",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Over-folding AJo vs wide live 3-bet ranges",
+        "Auto-4-betting without blockers"
+      ],
+      "live_pool_notes": "Live rec players often 3-bet only JJ+/AK making folding AJo correct vs tightest profiles. Identify their range before calling off stacks."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_pf01_02",
+    "node_id": "pf_01",
+    "version": "1.0.0",
+    "title": "BTN vs BB 3-Bet — KQs Decision",
+    "prompt": "You open BTN to 2.5bb. BB 3-bets to 9bb. You hold KQs (100bb eff). Do you call, 4-bet, or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "3BP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "hero_hand": [
+        "Ks",
+        "Qs"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "3bet",
+          "size_bb": 9
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "3bet",
+        "size_bb": 9
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "4-Bet"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [
+        "RAISE"
+      ],
+      "required_tags": [
+        "preflop_3bet"
+      ],
+      "explanation": "KQs plays great IP in a 3-bet pot — strong post-flop equity, top pair value, backdoor nut flushes. A small 4-bet bluff is viable with blockers to KK/QQ. Folding is a significant mistake vs non-value-only 3-bet ranges."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool A 3-bets wide — KQs is a strong 4-bet candidate that denies equity to dominated holdings and builds a pot IP.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "explanation": "Standard call IP. KQs realizes equity well and flops well.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool C's tight 3-bet range makes KQs a dominated call. Prefer folding.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:3bp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "decision:3bet_defense",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Folding KQs IP vs any 3-bet",
+        "Never 4-bet bluffing with suited connectors/broadway blockers"
+      ],
+      "live_pool_notes": "Note whether villain is protecting a strong range. In very tight live games KQs call can be thin."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_pf01_03",
+    "node_id": "pf_01",
+    "version": "1.0.0",
+    "title": "BTN vs BB 3-Bet — 66 Cold Call or Fold?",
+    "prompt": "You open BTN to 2.5bb. BB 3-bets to 9bb. You hold 66 (100bb eff). Call or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "3BP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "hero_hand": [
+        "6h",
+        "6d"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "3bet",
+          "size_bb": 9
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "3bet",
+        "size_bb": 9
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "4-Bet"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [
+        "FOLD"
+      ],
+      "required_tags": [
+        "preflop_3bet"
+      ],
+      "explanation": "66 IP can set-mine profitably at 100bb — you need to flop a set (~12% of the time) and stack villain. Against a live pool that over-values one-pair hands post, the implied odds justify calling. Folding is also fine if villain is clearly tight (JJ+ only)."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool A 3-bets wide. 66 has set-mine equity and occasional equity on low boards.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [
+          "FOLD"
+        ],
+        "explanation": "Close spot. Set-mine call is standard. Fold is acceptable if villain is tight.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool C only 3-bets premiums — you're dominated too often and set odds don't compensate.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:3bp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "decision:set_mine",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Auto-folding all pocket pairs to 3-bets",
+        "Calling off deep with pairs vs tight live 3-bettors"
+      ],
+      "live_pool_notes": "Implied odds improve significantly against live players who stack off with overpairs on connected boards."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_pf02_01",
+    "node_id": "pf_02",
+    "version": "1.0.0",
+    "title": "CO vs BTN 3-Bet — ATo Defense",
+    "prompt": "You open CO to 2.5bb. BTN 3-bets to 8bb. You hold ATo (100bb eff). Call, fold, or 4-bet?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "3BP",
+      "players_to_flop": 2,
+      "hero_position": "CO",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "Ah",
+        "Td"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "3bet",
+          "size_bb": 8
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "3bet",
+        "size_bb": 8
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "4-Bet"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "preflop_3bet"
+      ],
+      "explanation": "ATo OOP vs IP 3-bet is a classic leak. You're dominated by AJ+, out of position throughout, and the top-pair hand doesn't realize its equity well OOP. Fold is the default. vs Pool A (wide 3-bets) calling is reasonable."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "FOLD"
+        ],
+        "explanation": "Pool A 3-bets liberally from BTN. ATo has enough equity to call and look for single-pair value OOP.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Standard fold. OOP vs a ranged 3-bet, ATo doesn't realize equity.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool C's tight BTN 3-bet range dominates ATo heavily.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:3bp",
+      "position:oop",
+      "spot:co_vs_btn",
+      "decision:3bet_defense",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Defending ATo OOP vs all 3-bets due to ace strength illusion",
+        "Calling off wide OOP and losing equity realization"
+      ],
+      "live_pool_notes": "Live BTN 3-bets are often more linear than solver solutions — factor in whether opponent is 3-betting only nutted hands or a wider range."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_pf02_02",
+    "node_id": "pf_02",
+    "version": "1.0.0",
+    "title": "CO vs BTN 3-Bet — QJo Marginal Spot",
+    "prompt": "You open CO to 2.5bb. BTN 3-bets to 8bb. You hold QJo (100bb eff). What is your action?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "3BP",
+      "players_to_flop": 2,
+      "hero_position": "CO",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "Qh",
+        "Jd"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "3bet",
+          "size_bb": 8
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "3bet",
+        "size_bb": 8
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "4-Bet"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "preflop_3bet"
+      ],
+      "explanation": "QJo is a clear fold OOP vs BTN 3-bet. Dominated by QQ/JJ, AQ, KQ, and plays multiway streets poorly OOP. This is one of the most common preflop leaks in live cash."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Even vs wide 3-bet ranges, QJo OOP doesn't realize equity well enough. Fold.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Clear fold. OOP equity realization with QJo is poor.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Fold by a wide margin vs tight 3-bet range.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:3bp",
+      "position:oop",
+      "spot:co_vs_btn",
+      "decision:3bet_defense",
+      "pool:baseline"
+    ],
+    "difficulty": 1,
+    "coaching_context": {
+      "common_mistakes": [
+        "Calling QJo/KJo OOP vs 3-bets due to connectedness",
+        "Overvaluing suited-connector-style hands in 3-bet pots OOP"
+      ],
+      "live_pool_notes": "One of the most common live leaks: defending dominated OOPbroadway hands. Folding quickly protects your post-flop session-wide edge."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_pf02_03",
+    "node_id": "pf_02",
+    "version": "1.0.0",
+    "title": "CO vs BTN 3-Bet — TT Flat or 4-Bet?",
+    "prompt": "You open CO to 2.5bb. BTN 3-bets to 8bb. You hold TT (100bb eff). Flat or 4-bet?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "3BP",
+      "players_to_flop": 2,
+      "hero_position": "CO",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "Th",
+        "Tc"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "3bet",
+          "size_bb": 8
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "3bet",
+        "size_bb": 8
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "4-Bet"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [
+        "RAISE"
+      ],
+      "required_tags": [
+        "preflop_3bet"
+      ],
+      "explanation": "TT can call or 4-bet depending on pool read. OOP flat lets you setmine and play a high-equity pair. 4-betting for value is viable if villain's range skews AA/KK/AK (blocking those hands matters less). Flat is the safer default OOP."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "explanation": "Pool A 3-bets wide — TT plays well as a flat OOP or a small 4-bet bluff candidate.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "explanation": "Standard call. If villain 3-bets JJ+ only, 4-betting as a bluff is thin. Flat and play post-flop.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool C holds JJ+ heavily — TT is crushed by their value range. Leaning toward fold.",
+        "required_tags": [
+          "preflop_3bet"
+        ]
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:3bp",
+      "position:oop",
+      "spot:co_vs_btn",
+      "decision:3bet_defense",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Auto-folding TT to BTN 3-bet",
+        "Always 4-betting TT and getting it in bad vs nutted ranges"
+      ],
+      "live_pool_notes": "Read the 3-bettor. A tight older player holding TT 3-bet from BTN is rare — adjust accordingly."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp01_01",
+    "node_id": "srp_01",
+    "version": "1.0.0",
+    "title": "SRP Flop C-Bet IP — Dry Board Size",
+    "prompt": "BTN opens 2.5bb, BB calls. Flop K72r. BB checks. You're BTN with AhKd. What is your c-bet sizing?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Kd",
+          "7c",
+          "2h"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Ah",
+        "Kd"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 33% pot"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 75%+ pot"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "cbet_dry_flop",
+        "range_advantage_ip"
+      ],
+      "explanation": "K72r with TPTK is a classic small c-bet board. You have range advantage on king-high disconnected dry boards. Bet small (25-33%) with your entire range — value and air. A large sizing is unnecessary and burns EV."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool A calls small bets and over-folds large ones on static boards. Small sizing extracts more total value.",
+        "required_tags": [
+          "cbet_dry_flop",
+          "range_advantage_ip"
+        ]
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Standard small c-bet. BB calls flop and gives up on king-high turns frequently.",
+        "required_tags": [
+          "cbet_dry_flop",
+          "range_advantage_ip"
+        ]
+      },
+      "C": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool C over-defends OOP — larger sizing extracts more vs sticky calling stations.",
+        "required_tags": [
+          "cbet_dry_flop",
+          "range_advantage_ip"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "board:dry",
+      "decision:cbet_size",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Over-sizing c-bets on dry low-SPR boards",
+        "Checking back top pair on boards where you have clear range advantage"
+      ],
+      "live_pool_notes": "Live players often call small bets light and fold to large bets with weak made hands. Small sizing keeps their calling range wide."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp01_02",
+    "node_id": "srp_01",
+    "version": "1.0.0",
+    "title": "SRP Flop C-Bet IP — Dry Board with Air",
+    "prompt": "BTN opens 2.5bb, BB calls. Flop K72r. BB checks. You're BTN with Jh9h (total air). Do you c-bet?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Kd",
+          "7c",
+          "2h"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Jh",
+        "9h"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet small (33%)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet large (75%+)"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "cbet_dry_flop",
+        "equity_denial"
+      ],
+      "explanation": "JJ9h has backdoor potential and two overcards. On K72r you have range advantage — bet small with your entire range including this as a cheap bluff. J9h particularly benefits: two backdoor equity draws, can barrel turns if suited overcards arrive."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool A calls frequently — small bluffs with backdoor equity are +EV.",
+        "required_tags": [
+          "cbet_dry_flop",
+          "equity_denial"
+        ]
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [
+          "FOLD"
+        ],
+        "explanation": "Bet small or check back. Both are fine — betting is slightly better to deny equity and build pot for turns.",
+        "required_tags": [
+          "cbet_dry_flop",
+          "equity_denial"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool C doesn't fold to small bets and doesn't bluff enough — check and go to turn for free.",
+        "required_tags": [
+          "cbet_dry_flop",
+          "equity_denial"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "board:dry",
+      "decision:cbet_bluff",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Only c-betting made hands on dry boards",
+        "Checking back all air and losing future bluff turns"
+      ],
+      "live_pool_notes": "Small c-bets with backdoor hands keep your bluffing range functional on later streets."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp01_03",
+    "node_id": "srp_01",
+    "version": "1.0.0",
+    "title": "SRP Flop C-Bet IP — Range Advantage Check Back",
+    "prompt": "BTN opens 2.5bb, BB calls. Flop 654r. BB checks. You're BTN with AhQd. What do you do?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "6d",
+          "5c",
+          "4h"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Ah",
+        "Qd"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 33%"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 67%+"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "cbet_dry_flop"
+      ],
+      "explanation": "654r is a BB-favored board — BB defends wide and retains many straights and two-pairs. BTN c-bet frequency drops significantly on low connected boards. AQo with two backdoor overs has some equity but checking back to protect your range and go to turn for free is strong."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "FOLD"
+        ],
+        "explanation": "Pool A folds too much — thin c-bet with overs is fine.",
+        "required_tags": [
+          "cbet_dry_flop"
+        ]
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Check back is better here. BB has strong range equity on 654r.",
+        "required_tags": [
+          "cbet_dry_flop"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool C calls too often — don't burn money c-betting AQ on a BB-favored board.",
+        "required_tags": [
+          "cbet_dry_flop"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "board:connected",
+      "decision:check_back",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Auto-betting every flop as BTN PFA",
+        "Not recognizing BB-favored low connected boards"
+      ],
+      "live_pool_notes": "Live players rarely fold two pair / straight combos on 654 — save your barrel for better texture turns."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp02_01",
+    "node_id": "srp_02",
+    "version": "1.0.0",
+    "title": "SRP Flop C-Bet IP — Wet Board Nut Advantage",
+    "prompt": "BTN opens 2.5bb, BB calls. Flop Qh Th 8d. BB checks. You're BTN with AhKh. What sizing?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Qh",
+          "Th",
+          "8d"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Ah",
+        "Kh"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 50-67% pot"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 100%+ pot"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "cbet_wet_flop",
+        "nut_advantage"
+      ],
+      "explanation": "QTh8d is wet and connected, but BTN holds the nut flush draw + two overcards — absolute nut advantage here. Bet large (75-100%) to protect your equity and deny the many equity draws in BB's range. Smaller sizing lets BB profitably float with worse draws."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool A chases draws — large sizing extracts from calling stations and protects equity.",
+        "required_tags": [
+          "cbet_wet_flop",
+          "nut_advantage"
+        ]
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "explanation": "Medium sizing (50-67%) is standard. Large is fine with nut draw.",
+        "required_tags": [
+          "cbet_wet_flop",
+          "nut_advantage"
+        ]
+      },
+      "C": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool C folds too much to overbets — medium sizing keeps them in with worse.",
+        "required_tags": [
+          "cbet_wet_flop",
+          "nut_advantage"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "board:wet",
+      "decision:cbet_size",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Betting too small on wet boards with nut draws",
+        "Checking nut flush draws to 'keep pot small' — this wastes equity"
+      ],
+      "live_pool_notes": "Live players often call off with dominated flush draws. Large bets extract from them while protecting your equity."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp02_02",
+    "node_id": "srp_02",
+    "version": "1.0.0",
+    "title": "SRP Wet Board — Marginal Hand Check Back",
+    "prompt": "BTN opens 2.5bb, BB calls. Flop Jc 9c 6h. BB checks. You're BTN with Kd4d. C-bet or check?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Jc",
+          "9c",
+          "6h"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Kd",
+        "4d"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 33%"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 67%+"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "cbet_wet_flop"
+      ],
+      "explanation": "K4o with no flush draw or pair on Jc9c6h is almost pure air. Wet boards with no equity should generally be checked back IP — you have nothing to protect, BB has many connected hands, and you'll face tough turns if called. Preserve your check-back range and realign on favorable turns."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool A calls wide on wet boards — thin bluff with K4o loses money.",
+        "required_tags": [
+          "cbet_wet_flop"
+        ]
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Check back. No equity, no draws, bad bluff candidate on a connected board.",
+        "required_tags": [
+          "cbet_wet_flop"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool C calls or raises — avoid bluffing here.",
+        "required_tags": [
+          "cbet_wet_flop"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "board:wet",
+      "decision:check_back",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Bluffing wet boards with pure air",
+        "Over-bluffing connected boards where BB has strong equity"
+      ],
+      "live_pool_notes": "Live players call down with pair+draw combos. Don't waste chips bluffing total air on coordinated boards."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp02_03",
+    "node_id": "srp_02",
+    "version": "1.0.0",
+    "title": "SRP Wet Board — Two-Pair C-Bet Size",
+    "prompt": "BTN opens 2.5bb, BB calls. Flop Jc 9c 6h. BB checks. You're BTN with Jh9h (top two). What sizing?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Jc",
+          "9c",
+          "6h"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Jh",
+        "9h"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 50-67%"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 100%+"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "cbet_wet_flop",
+        "equity_denial"
+      ],
+      "explanation": "Top two on a wet board demands protection. A large sizing (75-100%+) denies equity from straight and flush draws while building a big pot with your strong hand. Smaller sizings let BB profitably float with any draw or pair."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "explanation": "Pool A calls large bets with draws. 75% extracts value while denying equity.",
+        "required_tags": [
+          "cbet_wet_flop",
+          "equity_denial"
+        ]
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pot-size or close to it. Protect your equity vs flush/straight draws.",
+        "required_tags": [
+          "cbet_wet_flop",
+          "equity_denial"
+        ]
+      },
+      "C": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool C over-folds large bets — medium sizing keeps them in and extracts more.",
+        "required_tags": [
+          "cbet_wet_flop",
+          "equity_denial"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "board:wet",
+      "decision:cbet_size",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Betting too small with top two on wet boards and getting outdrawn",
+        "Slow-playing strong made hands on boards with many draws"
+      ],
+      "live_pool_notes": "Live draw-chasers pay off large bets on the flop — protect your equity and build the pot."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp03_01",
+    "node_id": "srp_03",
+    "version": "1.0.0",
+    "title": "SRP Turn Barrel — Double Barrel or Give Up?",
+    "prompt": "BTN c-bet flop K72r (33%). BB called. Turn brings 3c. BB checks. You're BTN with Ah5h (backdoor flush missed). Do you fire the turn?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Kd",
+          "7c",
+          "2h"
+        ],
+        "turn": "3c",
+        "river": null
+      },
+      "hero_hand": [
+        "Ah",
+        "5h"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 33
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 50-67%"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 100%+"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "turn_give_up"
+      ],
+      "explanation": "A5h on K723 with no equity improvement is a give-up. The 3c improved BB's 4x combos (A4, 56) and your backdoor flush missed. You have no pair, no draw, and the board is now more connected — this is a check-back to see the river for free."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool A calls too light on turns — thin bluff with ace-high is losing here. Check back.",
+        "required_tags": [
+          "turn_give_up"
+        ]
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Give up. No equity, connected turn, BB has calling range.",
+        "required_tags": [
+          "turn_give_up"
+        ]
+      },
+      "C": {
+        "correct": "CALL",
+        "accepted": [
+          "FOLD"
+        ],
+        "explanation": "Pool C folds too much to pressure — small turn barrel can work but is still marginal.",
+        "required_tags": [
+          "turn_give_up"
+        ]
+      }
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "board:dry",
+      "decision:give_up",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Auto-barreling turns without equity improvement",
+        "Turning missed backdoors into bluffs on connected boards"
+      ],
+      "live_pool_notes": "Live players call down wide on turns. Recognize brick turns and save your chips for better bluff turns."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp03_02",
+    "node_id": "srp_03",
+    "version": "1.0.0",
+    "title": "SRP Turn Barrel — Good Equity Turn Fire",
+    "prompt": "BTN c-bet flop K72r (33%). BB called. Turn brings Qh. BB checks. You're BTN with AhJh (picked up NFD + oesd). Do you barrel?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Kd",
+          "7c",
+          "2h"
+        ],
+        "turn": "Qh",
+        "river": null
+      },
+      "hero_hand": [
+        "Ah",
+        "Jh"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 33
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 50-67%"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 100%+"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "polar_turn_big_bet",
+        "equity_denial"
+      ],
+      "explanation": "AhJh on KQ7 with NFD + gutshot to the nuts is a premium barrel hand. You have ~12 clean equity outs and can deny BB's equity on a Q-high board you have range advantage on. Bet large (75%+) to maximize fold equity and build a pot you can win via showdown or fold."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool A calls light — large barrel extracts fold equity and builds pot with strong equity.",
+        "required_tags": [
+          "polar_turn_big_bet",
+          "equity_denial"
+        ]
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Strong barrel candidate. Fire large on the turn.",
+        "required_tags": [
+          "polar_turn_big_bet",
+          "equity_denial"
+        ]
+      },
+      "C": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool C folds to anything — medium sizing keeps them calling and doesn't over-rep.",
+        "required_tags": [
+          "polar_turn_big_bet",
+          "equity_denial"
+        ]
+      }
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "board:connected",
+      "decision:barrel",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Checking back strong equity draws on turns",
+        "Under-barreling when you improve to a big draw"
+      ],
+      "live_pool_notes": "Live players call draws to the turn then give up on rivers — extract on the turn when your equity is highest."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp03_03",
+    "node_id": "srp_03",
+    "version": "1.0.0",
+    "title": "SRP Turn — Polarize Value Overbet",
+    "prompt": "BTN c-bet flop K72r (33%). BB called. Turn 2c (paired). BB checks. You're BTN with KsQs (TPTK). What is your line?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Kd",
+          "7c",
+          "2h"
+        ],
+        "turn": "2c",
+        "river": null
+      },
+      "hero_hand": [
+        "Ks",
+        "Qs"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 33
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 50-67%"
+      },
+      {
+        "key": "RAISE",
+        "label": "Overbet 125%+"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "polar_turn_big_bet",
+        "overbet_opportunity"
+      ],
+      "explanation": "K722 pairs the board and heavily reduces BB's ability to have trips. BTN holds most K-x combos. This is a classic overbet spot — polarize with big hands (KQ, KJ) and select bluffs (missed flush draws). TPTK can overbet for value and make BB's 7x/Kx decisions difficult."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "explanation": "Pool A calls and folds rivers predictably — extract value with medium turns and larger rivers.",
+        "required_tags": [
+          "polar_turn_big_bet",
+          "overbet_opportunity"
+        ]
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Overbet spot. You have most of the nut combos on K722.",
+        "required_tags": [
+          "polar_turn_big_bet",
+          "overbet_opportunity"
+        ]
+      },
+      "C": {
+        "correct": "RAISE",
+        "accepted": [],
+        "explanation": "Pool C over-folds to overbets — polarize for maximum pressure.",
+        "required_tags": [
+          "polar_turn_big_bet",
+          "overbet_opportunity"
+        ]
+      }
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "board:paired",
+      "decision:overbet",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Missing overbet opportunities when board pairs and reduces BB's nut range",
+        "Betting too small with top pair on turn overbet boards"
+      ],
+      "live_pool_notes": "Live players frequently call one street overbets with 7x — structure your range so you can follow through on rivers."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp04_01",
+    "node_id": "srp_04",
+    "version": "1.0.0",
+    "title": "SRP OOP Turn Probe — Lead or Check?",
+    "prompt": "BB calls BTN open. BTN checks back flop K82r. Turn Jh. You're BB with Jd6d. Lead or check?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Kd",
+          "8c",
+          "2h"
+        ],
+        "turn": "Jh",
+        "river": null
+      },
+      "hero_hand": [
+        "Jd",
+        "6d"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 50% pot"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 100%+"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "probe_bet_turn"
+      ],
+      "explanation": "BTN checked back the flop — their range is capped (no premium hands). J6d turned middle pair. A turn probe here is strong: BTN's range is weak and OOP BB now has many strong hands (J-x, two pair). Lead 50% pot to extract from BTN's pair + weak hands and protect against free cards."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool A calls probes with weak pairs. Extract value from J-x worse and Kx hands that won't fold to one probe.",
+        "required_tags": [
+          "probe_bet_turn"
+        ]
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [
+          "FOLD"
+        ],
+        "explanation": "Probe is strong. Check is also fine if BTN rarely folds — build pot with J6 on J-high turn.",
+        "required_tags": [
+          "probe_bet_turn"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool C folds to probes too often — consider checking to induce their weak bets instead.",
+        "required_tags": [
+          "probe_bet_turn"
+        ]
+      }
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dry",
+      "decision:probe_bet",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Always checking turns OOP even when BTN's flop check-back caps their range",
+        "Not probing when you have clear equity advantage after a check-through"
+      ],
+      "live_pool_notes": "Probing with middle pair after a check-through is underutilized in live cash. Live BTNs who check back strong hands are rare — their range is weak."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp04_02",
+    "node_id": "srp_04",
+    "version": "1.0.0",
+    "title": "SRP OOP Turn Probe — No Equity, Check",
+    "prompt": "BB calls BTN open. BTN checks back flop K82r. Turn 4h. You're BB with Ah7s. Lead or check?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Kd",
+          "8c",
+          "2h"
+        ],
+        "turn": "4h",
+        "river": null
+      },
+      "hero_hand": [
+        "Ah",
+        "7s"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 50% pot"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 100%+"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "probe_bet_turn"
+      ],
+      "explanation": "Ah7s on K824 picked up a backdoor flush draw but has no pair and no real equity. A7 bluffing as a probe here gives up too much vs BTN's weak but wide calling range (including K-x, 8-x). Check to see the river for free — your ace can win in showdown and your hand doesn't benefit from folding better hands."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool A calls too often — thin probe with A-high loses money.",
+        "required_tags": [
+          "probe_bet_turn"
+        ]
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Check. A7 has no equity to build a pot with.",
+        "required_tags": [
+          "probe_bet_turn"
+        ]
+      },
+      "C": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool C folds to any aggression — probe works but is still a marginal exploit.",
+        "required_tags": [
+          "probe_bet_turn"
+        ]
+      }
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dry",
+      "decision:check",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Over-probing OOP with air after check-backs",
+        "Bluffing with hands that have no path to the best hand"
+      ],
+      "live_pool_notes": "Probe only when you improve to a hand with equity or when the turn dramatically shifts range advantage."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp04_03",
+    "node_id": "srp_04",
+    "version": "1.0.0",
+    "title": "SRP OOP Turn Probe — Two-Pair Lead",
+    "prompt": "BB calls BTN open. BTN checks back flop K82r. Turn 8h. You're BB with Kh8c (turned two pair). Lead or check?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Kd",
+          "8c",
+          "2h"
+        ],
+        "turn": "8h",
+        "river": null
+      },
+      "hero_hand": [
+        "Kh",
+        "8c"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 50-67%"
+      },
+      {
+        "key": "RAISE",
+        "label": "Overbet 125%+"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "probe_bet_turn"
+      ],
+      "explanation": "K88 gives you the nuts essentially (top full house). BTN's range is capped after checking back — they likely have K-x, middle pairs, or missed draws. Overbet probe to extract maximum value. BTN cannot have 88 here (they'd have bet the flop). Your full house crushes their range."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "explanation": "Pool A calls often but folds to extreme sizes — 67% extracts the most over multiple streets.",
+        "required_tags": [
+          "probe_bet_turn"
+        ]
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Overbet for max value. BTN's capped range cannot fight back.",
+        "required_tags": [
+          "probe_bet_turn"
+        ]
+      },
+      "C": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool C folds to overbets — extract with medium sizing instead.",
+        "required_tags": [
+          "probe_bet_turn"
+        ]
+      }
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:paired",
+      "decision:probe_value",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Slow-playing the nuts on a capped range",
+        "Checking back to 'trap' when BTN has no strong hands to trap"
+      ],
+      "live_pool_notes": "Live BTNs who check back flops are rarely trapping — extract as much as possible from their made hands."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp05_01",
+    "node_id": "srp_05",
+    "version": "1.0.0",
+    "title": "SRP River Bluff-Catch — Top Pair vs Large Bet",
+    "prompt": "BB called BTN's flop/turn bets. River 5d completes flush. BTN bets 85% pot. You're BB with Kd9c on Kh8s4s5d. Call or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Kh",
+          "8s",
+          "4s"
+        ],
+        "turn": "5d",
+        "river": "5d"
+      },
+      "hero_hand": [
+        "Kd",
+        "9c"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 67
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 85
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 85
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "overbluff_punish"
+      ],
+      "explanation": "BTN bet three streets in a SRP and faces a flush-completing river. KQ9 trips is a strong hand, but BTN's three-street range is weighted toward flushes and strong made hands. Unless you have a clear read this villain over-bluffs, the call is thin. vs Pool B (under-bluffs), fold is correct."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "FOLD"
+        ],
+        "explanation": "Pool A over-bluffs rivers. K9 top pair is a profitable bluff-catcher. Call.",
+        "required_tags": [
+          "overbluff_punish"
+        ]
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool B under-bluffs three streets. Fold top pair to a flush-completing river.",
+        "required_tags": [
+          "overbluff_punish"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool C is value-heavy three streets. Fold is clear.",
+        "required_tags": [
+          "overbluff_punish"
+        ]
+      }
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:flush_complete",
+      "decision:bluff_catch",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Calling down with top pair vs three-street barreling ranges",
+        "Not adjusting river call frequency based on pool bluffing tendencies"
+      ],
+      "live_pool_notes": "Most live players under-bluff rivers. Calling three-street barrels with non-nut hands is a common live leak."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp05_02",
+    "node_id": "srp_05",
+    "version": "1.0.0",
+    "title": "SRP River Bluff-Catch — Thin Call vs Rec Over-Bluffer",
+    "prompt": "You've observed BTN bluffing rivers with air 4 times in the last hour. River completes a flush, BTN bets 80% pot. You're BB with 9h9d on Kh8d3s4c7s. Call or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Kh",
+          "8d",
+          "3s"
+        ],
+        "turn": "4c",
+        "river": "7s"
+      },
+      "hero_hand": [
+        "9h",
+        "9d"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 33
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 80
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 80
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "overbluff_punish",
+        "underfold_exploit"
+      ],
+      "explanation": "99 is well below the top of your range but you have live reads: BTN over-bluffs rivers. BTN checked back the turn (capping their range) and then bet the river. Their range is thin for value. Exploitatively call with your live read data — this is a profitable adjustment."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool A fits this profile — over-bluffs, checks back turns with medium hands, fires rivers with air. Call.",
+        "required_tags": [
+          "overbluff_punish",
+          "underfold_exploit"
+        ]
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool B wouldn't fire rivers with air consistently — fold without additional reads.",
+        "required_tags": [
+          "overbluff_punish",
+          "underfold_exploit"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool C never over-bluffs — fold.",
+        "required_tags": [
+          "overbluff_punish",
+          "underfold_exploit"
+        ]
+      }
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:connected",
+      "decision:exploit_call",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Ignoring live read data and defaulting to GTO folds",
+        "Not tracking bluffing patterns and adjusting call frequency"
+      ],
+      "live_pool_notes": "Live reads are valuable currency. When you identify an over-bluffer, widen your river calls — even with weaker made hands."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_srp05_03",
+    "node_id": "srp_05",
+    "version": "1.0.0",
+    "title": "SRP River — Blocker-Informed Bluff-Catch",
+    "prompt": "BBcalled BTN's flop c-bet and turn barrel. River pairs the board (7h). BTN jams. You're BB with As5s on 7c5h3d7h. Blocker analysis: you have trips+ blocked. Call or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "7c",
+          "5h",
+          "3d"
+        ],
+        "turn": "2h",
+        "river": "7h"
+      },
+      "hero_hand": [
+        "As",
+        "5s"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 75
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 120
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 120
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "blocker_effect",
+        "overbluff_punish"
+      ],
+      "explanation": "As5s: you hold two pair (5s5h + board). The 7 pairing reduces BTN's full house combos — BTN can't hold as many 77 (only 1 combo left) and 57 requires 5c/5d (you hold 5s). A5 has good blockers to BTN's value range. At 120% sizing you need 37% fold equity — this is a call with the blocker-informed read."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool A over-bluffs large river sizings. Blocker-informed call vs pool A over-bluffer.",
+        "required_tags": [
+          "blocker_effect",
+          "overbluff_punish"
+        ]
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool B under-bluffs river jams. Blockers don't change the underlying frequency issue.",
+        "required_tags": [
+          "blocker_effect",
+          "overbluff_punish"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool C is value-heavy — fold.",
+        "required_tags": [
+          "blocker_effect",
+          "overbluff_punish"
+        ]
+      }
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:paired",
+      "decision:bluff_catch",
+      "pool:baseline"
+    ],
+    "difficulty": 4,
+    "coaching_context": {
+      "common_mistakes": [
+        "Folding blockers to nut combos",
+        "Not thinking about which value combos are reduced when board pairs"
+      ],
+      "live_pool_notes": "Blocker analysis is rarely performed in live games — if you've developed this skill you have a significant edge on live pools."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_3bp01_01",
+    "node_id": "3bp_01",
+    "version": "1.0.0",
+    "title": "3-Bet Pot C-Bet IP — Dry Flop Small or Skip?",
+    "prompt": "BTN 4-bets, BB calls. Flop K72r. BB checks. You're BTN with AhAs (overpair). What sizing?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "3BP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Kd",
+          "7c",
+          "2h"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Ah",
+        "As"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "3bet",
+          "size_bb": 9
+        },
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 25-33% pot"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 67%+ pot"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [
+        "RAISE"
+      ],
+      "required_tags": [
+        "3bet_pot_cbet"
+      ],
+      "explanation": "In 3-bet pots, SPR is low (~3-4). AA on K72r wants to bet small and often. You have range advantage as 3-bet caller IP. Small sizing (25-33%) builds pot for a manageable SPR and puts immediate pressure on BB's K-x hands which can't raise comfortably. Large sizing can also work but may price out bluffs."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "explanation": "Pool A calls small bets and over-folds large 3-bet pot c-bets. Small sizing is optimal.",
+        "required_tags": [
+          "3bet_pot_cbet"
+        ]
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Small c-bet is standard. Low SPR means you're going all-in by turn in most lines.",
+        "required_tags": [
+          "3bet_pot_cbet"
+        ]
+      },
+      "C": {
+        "correct": "RAISE",
+        "accepted": [],
+        "explanation": "Pool C over-defends K-x — larger sizing extracts more per call.",
+        "required_tags": [
+          "3bet_pot_cbet"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:3bp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "board:dry",
+      "decision:cbet_size",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Betting too large in 3-bet pots and driving out BB's calling range prematurely",
+        "Checking back strong hands in 3-bet pots and allowing free cards"
+      ],
+      "live_pool_notes": "Live 3-bet pots are often played at low SPR — prioritize getting stacks in efficiently over single-street sizing."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_3bp01_02",
+    "node_id": "3bp_01",
+    "version": "1.0.0",
+    "title": "3-Bet Pot IP — Continuation on Wet Board",
+    "prompt": "You called a BB 3-bet on BTN. Flop Jh9h6d. BB checks. You hold KhKd. C-bet or check?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "3BP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Jh",
+          "9h",
+          "6d"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Kh",
+        "Kd"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "3bet",
+          "size_bb": 9
+        },
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 33-50%"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 80%+"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "3bet_pot_cbet",
+        "equity_denial"
+      ],
+      "explanation": "KK on Jh9h6d in a 3-bet pot faces a dangerous connected wet board. Bet large (70-80%) to deny equity to flush/straight draws and protect against overcards. At low SPR, going all-in here is your objective. Don't slow-play on boards where BB can draw out and you'll face tough turns."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool A calls large bets with draws. Extract and deny equity.",
+        "required_tags": [
+          "3bet_pot_cbet",
+          "equity_denial"
+        ]
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [],
+        "explanation": "Large c-bet. Protect KK on a wet board in a 3-bet pot.",
+        "required_tags": [
+          "3bet_pot_cbet",
+          "equity_denial"
+        ]
+      },
+      "C": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool C over-folds wet board c-bets. Medium sizing keeps them in.",
+        "required_tags": [
+          "3bet_pot_cbet",
+          "equity_denial"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:3bp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "board:wet",
+      "decision:cbet_protect",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Slow-playing overpairs on wet boards in 3-bet pots",
+        "Betting too small in 3-bet pot where SPR demands commitment"
+      ],
+      "live_pool_notes": "3-bet pots with low SPR demand immediate pressure on draw-heavy boards. Checking KK on Jh9h6d is a common mistake."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_3bp01_03",
+    "node_id": "3bp_01",
+    "version": "1.0.0",
+    "title": "3-Bet Pot IP — Check Back Marginal Hand",
+    "prompt": "You called BB's 3-bet. Flop Jh9h6d. BB checks. You hold Ac8c (total air). C-bet or check back?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "3BP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Jh",
+          "9h",
+          "6d"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Ac",
+        "8c"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "3bet",
+          "size_bb": 9
+        },
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 33%"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 75%+"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "3bet_pot_cbet"
+      ],
+      "explanation": "A8o on Jh9h6d is pure air. In 3-bet pots your bluffing hands should have equity — draws or backdoor nut draws. A8 with no flush draw and no pair doesn't benefit from turning into a bluff here. Check back to see a free card; your ace has showdown value vs some missed bluffs."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool A is connected — marginal bluff with A8o loses money on Jh9h6d.",
+        "required_tags": [
+          "3bet_pot_cbet"
+        ]
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Check back pure air in 3-bet pots. Save your bluffs for hands with equity.",
+        "required_tags": [
+          "3bet_pot_cbet"
+        ]
+      },
+      "C": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool C over-folds even air — small c-bet can generate folds but is still thin.",
+        "required_tags": [
+          "3bet_pot_cbet"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:3bp",
+      "position:ip",
+      "spot:btn_vs_bb",
+      "board:wet",
+      "decision:check_back",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Over-bluffing 3-bet pots with pure air",
+        "Not selecting bluff candidates based on equity in the hand"
+      ],
+      "live_pool_notes": "In 3-bet pots the cost of bluffing with pure air is high — stack-to-pot ratio demands commitment on turns and rivers."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_3bp02_01",
+    "node_id": "3bp_02",
+    "version": "1.0.0",
+    "title": "3-Bet Pot OOP — Check-Raise vs IP C-Bet",
+    "prompt": "You 3-bet BB, BTN calls. Flop Kh9d3s. You check. BTN bets 33%. You hold QhQd. Check-raise or call?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "3BP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Kh",
+          "9d",
+          "3s"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Qh",
+        "Qd"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "3bet",
+          "size_bb": 9
+        },
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 33
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 33
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Check-raise"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [
+        "RAISE"
+      ],
+      "required_tags": [
+        "3bet_pot_cbet"
+      ],
+      "explanation": "QQ on Kh9d3s in a 3-bet pot OOP: you're behind BTN's K-x hands. Calling is standard — you can peel and re-evaluate. Check-raising is viable if you want to put BTN in a tough spot with air, but QQ has enough showdown value to call and see turns. Don't fold — QQ is under-represented as a bluff-catcher here."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "explanation": "Pool A c-bets wide on K-high boards. QQ has enough equity to call and see turns.",
+        "required_tags": [
+          "3bet_pot_cbet"
+        ]
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Call and re-evaluate. QQ isn't strong enough to check-raise for value.",
+        "required_tags": [
+          "3bet_pot_cbet"
+        ]
+      },
+      "C": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool C never semi-bluffs check-raises — QQ check-raise will fold them out too often. Call.",
+        "required_tags": [
+          "3bet_pot_cbet"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:3bp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dry",
+      "decision:check_raise_defense",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Folding QQ OOP in 3-bet pots on king-high boards",
+        "Check-raising QQ for thin value when you're behind Kx range"
+      ],
+      "live_pool_notes": "OOP in 3-bet pots, the default is to check-call your medium pairs and wait for K-x to bet again or give up on turns."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_3bp02_02",
+    "node_id": "3bp_02",
+    "version": "1.0.0",
+    "title": "3-Bet Pot OOP — Check-Raise Nuts",
+    "prompt": "You 3-bet BB, BTN calls. Flop Kh9d3s. You check. BTN bets 33%. You hold Kc9c (top two in 3bp). Action?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "3BP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Kh",
+          "9d",
+          "3s"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Kc",
+        "9c"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "3bet",
+          "size_bb": 9
+        },
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 33
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 33
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Check-raise"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "3bet_pot_cbet",
+        "equity_denial"
+      ],
+      "explanation": "K9 top two in a 3-bet pot is an excellent check-raise hand: you have the near-nuts, BTN can continue with KQ/KJ/overpairs, and the low SPR means building the pot now is critical. Check-raise to 2.5-3x and plan to jam turns. Calling is fine but misses value on this SPR."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool A continues with KQ/overpairs. Check-raise extracts maximum value.",
+        "required_tags": [
+          "3bet_pot_cbet",
+          "equity_denial"
+        ]
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Check-raise is best. At low SPR, jam the money in fast with the near-nuts.",
+        "required_tags": [
+          "3bet_pot_cbet",
+          "equity_denial"
+        ]
+      },
+      "C": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool C folds to check-raises too often with dominated hands. Call and extract on turns.",
+        "required_tags": [
+          "3bet_pot_cbet",
+          "equity_denial"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:3bp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dry",
+      "decision:check_raise_value",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Under-raising top two in 3-bet pots",
+        "Slow-playing strong hands in low-SPR pots"
+      ],
+      "live_pool_notes": "Check-raising the nuts for value in 3-bet pots is essential. Live players often call check-raises with KQ and commit stacks by turn."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_3bp02_03",
+    "node_id": "3bp_02",
+    "version": "1.0.0",
+    "title": "3-Bet Pot OOP — Fold to Large C-Bet",
+    "prompt": "You 3-bet, BTN calls. Flop Kh9d3s. You check. BTN bets 85% pot. You hold Ah7h. Fold or call?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "3BP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "board": {
+        "flop": [
+          "Kh",
+          "9d",
+          "3s"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Ah",
+        "7h"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "3bet",
+          "size_bb": 9
+        },
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 85
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 85
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Check-raise"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "3bet_pot_cbet"
+      ],
+      "explanation": "A7h with backdoor flush draw in a 3-bet pot OOP facing an 85% c-bet: fold. At this SPR you're nearly committed if you call. A7 doesn't have enough equity vs BTN's range to call off a large fraction of your stack with ace-high backdoor draw in a 3-bet pot. Disciplined fold."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Even Pool A doesn't fire this large without strong hands. Fold.",
+        "required_tags": [
+          "3bet_pot_cbet"
+        ]
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Clear fold. A7 is not a 3-bet pot calling hand for 85% c-bets.",
+        "required_tags": [
+          "3bet_pot_cbet"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool C is value-only with this sizing. Fold all draws.",
+        "required_tags": [
+          "3bet_pot_cbet"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:3bp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "board:dry",
+      "decision:fold",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Calling large c-bets OOP in 3-bet pots with weak draws",
+        "Getting pot-committed in 3-bet pots with marginal equity"
+      ],
+      "live_pool_notes": "3-bet pot discipline requires folding more OOP. Large c-bets in 3-bet pots almost always represent significant strength."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_mw01_01",
+    "node_id": "mw_01",
+    "version": "1.0.0",
+    "title": "Multiway Flop C-Bet — Dry Board, Check or Bet?",
+    "prompt": "BTN opens 2.5bb, CO calls, BB calls. Flop K83r (3 players). BB checks, CO checks. You're BTN with AhKs. C-bet or check?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 3,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Kd",
+          "8c",
+          "3h"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Ah",
+        "Ks"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "call"
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "CO",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 33%"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 67%+"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "multiway_context",
+        "cbet_dry_flop"
+      ],
+      "explanation": "AK top pair in a 3-way pot: bet small (33%) to build pot and protect your hand vs draws. Multiway pots increase the probability of someone holding 8x or a pair — don't check back top pair and give free cards. A small bet prices out backdoor draws and generates value from K-x hands."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Pool A calls wide in multiway pots — small c-bet maximizes calling range.",
+        "required_tags": [
+          "multiway_context",
+          "cbet_dry_flop"
+        ]
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [],
+        "explanation": "Bet small. AK in a 3-way pot needs to protect vs draws from two players.",
+        "required_tags": [
+          "multiway_context",
+          "cbet_dry_flop"
+        ]
+      },
+      "C": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "explanation": "Pool C calls top pair even vs large bets. Medium sizing is fine here.",
+        "required_tags": [
+          "multiway_context",
+          "cbet_dry_flop"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:btn_multiway",
+      "board:dry",
+      "decision:cbet_mw",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Checking back top pair multiway to 'avoid bloating pot'",
+        "Betting too large multiway and isolating only strong hands"
+      ],
+      "live_pool_notes": "Multiway pots require smaller c-bets — you're charging two players for draws and building pot efficiently with top pair."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_mw01_02",
+    "node_id": "mw_01",
+    "version": "1.0.0",
+    "title": "Multiway Flop C-Bet — Weak Hand, Check Back",
+    "prompt": "BTN opens 2.5bb, CO calls, BB calls. Flop K83r. BB checks, CO checks. You're BTN with QhJd (two overcards, no pair). C-bet or check?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 3,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Kd",
+          "8c",
+          "3h"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Qh",
+        "Jd"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "call"
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "CO",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 33%"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 67%+"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "multiway_context"
+      ],
+      "explanation": "QJo with no pair or draw on K83r multiway: check back. Bluffing two players with pure air on a king-high board is very expensive — both can call with K-x or 8x. QJ has decent turn equity (overcard outs) but burning chips multiway is -EV. Get to the turn for free."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool A calls in multiway pots — bluffing two players with QJo is a losing proposition.",
+        "required_tags": [
+          "multiway_context"
+        ]
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Check back. Multiway bluffing with air is unprofitable against two calling ranges.",
+        "required_tags": [
+          "multiway_context"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Clear check-back. Save chips for when you have equity.",
+        "required_tags": [
+          "multiway_context"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:btn_multiway",
+      "board:dry",
+      "decision:check_back_mw",
+      "pool:baseline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Auto-c-betting two-player checked-to boards even with air",
+        "Not adjusting bluffing frequency for multiway situations"
+      ],
+      "live_pool_notes": "Multiway bluffing with pure air is a common live cash leak. Two calling ranges dramatically reduce fold equity."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc_mw01_03",
+    "node_id": "mw_01",
+    "version": "1.0.0",
+    "title": "Multiway Flop — Disciplined Check-Raise Threshold",
+    "prompt": "BTN opens, CO calls, BB calls. Flop K83r. BB check-raises CO's small c-bet. You're BTN with KhQd. Call, fold, or 3-bet?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 3,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "board": {
+        "flop": [
+          "Kd",
+          "8c",
+          "3h"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "hero_hand": [
+        "Kh",
+        "Qd"
+      ],
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "call"
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "CO",
+          "action": "bet",
+          "size_pct_pot": 33
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "raise",
+          "size_pct_pot": 100
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "raise",
+        "size_pct_pot": 100
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "3-Bet"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "multiway_context"
+      ],
+      "explanation": "KQ top pair (second kicker) in a multiway pot vs a BB check-raise: fold. BB's multiway check-raise range is extremely strong — sets, two pair, strong K-x. With three players in the pot, BB's check-raise almost never contains bluffs. KQ is dominated by KK, K8s, and 83s. This is a common multiway discipline spot."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool A rarely bluff-raises multiway. KQ is beat too often to continue.",
+        "required_tags": [
+          "multiway_context"
+        ]
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Clear fold. BB's multiway flop check-raise range is value-heavy.",
+        "required_tags": [
+          "multiway_context"
+        ]
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "explanation": "Pool C only raises monsters here. Fold KQ.",
+        "required_tags": [
+          "multiway_context"
+        ]
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:btn_multiway",
+      "board:dry",
+      "decision:discipline_fold_mw",
+      "pool:baseline"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Calling multiway flop check-raises with top pair (non-nut kicker)",
+        "Not distinguizing HU check-raise ranges from multiway check-raise ranges"
+      ],
+      "live_pool_notes": "Multiway flop check-raises from live players are almost exclusively value. KQ on K83 facing a multiway c/r is a common discipline test."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  }
+]
