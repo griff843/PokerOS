@@ -1,5 +1,6 @@
 import type { PlayerIntelligenceSnapshot } from "@poker-coach/core/browser";
-import type { RealHandBridgeBundle, RealHandBridgeCandidate } from "./real-hand-bridge";
+import type { RealHandBridgeBundle } from "./real-hand-bridge";
+import { buildDailyPlanBridgeIntegration, findDailyPlanBridgeContext, type DailyPlanBridgeIntegration } from "./daily-plan-bridge-integration";
 
 export type DailyPlanState = "ready" | "sparse_history" | "no_history";
 export type DailySessionLength = 20 | 45 | 90;
@@ -78,34 +79,10 @@ function derivePlanState(input: DailyStudyPlanInput): DailyPlanState {
   return "ready";
 }
 
-// v3: derive a destination URL from a bridge candidate's suggested action + conceptKey
-function deriveBridgeCandidateDestination(candidate: RealHandBridgeCandidate): string | null {
-  const key = candidate.conceptKey;
-  switch (candidate.suggestedNextAction.type) {
-    case "open_intervention_execution":
-      return key ? `/app/concepts/${encodeURIComponent(key)}/execution` : null;
-    case "review_concept_detail":
-      return key ? `/app/concepts/${encodeURIComponent(key)}` : null;
-    case "schedule_transfer_review_block":
-      return key ? `/app/concepts/${encodeURIComponent(key)}/replay` : "/app/hands";
-    case "review_recent_hand":
-      return "/app/hands";
-  }
-}
-
-// v3: format realPlaySummary object into a concise human-readable sentence
-function formatRealPlaySummary(candidate: RealHandBridgeCandidate): string {
-  const { occurrences, reviewSpotCount } = candidate.realPlaySummary;
-  const spotSuffix =
-    reviewSpotCount > 0
-      ? ` across ${reviewSpotCount} review spot${reviewSpotCount !== 1 ? "s" : ""}`
-      : "";
-  return `${occurrences} real-play occurrence${occurrences !== 1 ? "s" : ""}${spotSuffix} identified in recent hands.`;
-}
-
 function buildCandidateBlocks(
   input: DailyStudyPlanInput,
   state: DailyPlanState,
+  bridgeIntegration: DailyPlanBridgeIntegration,
 ): DailyPlanBlock[] {
   if (state === "no_history") {
     return [
@@ -176,17 +153,17 @@ function buildCandidateBlocks(
   const blocks: DailyPlanBlock[] = [];
   const conceptMap = new Map(input.playerIntelligence.concepts.map((c) => [c.conceptKey, c]));
   const recommendations = input.playerIntelligence.recommendations;
-  const bridge = input.bridgeBundle?.state === "linked_candidates" ? input.bridgeBundle : null;
 
   // Active intervention block (highest priority)
   // v3: enriched with real-hand evidence when bridge has a matching candidate
   if (input.activeInterventionConceptKey) {
     const label = input.activeInterventionConceptLabel ?? input.activeInterventionConceptKey;
-    const bridgeContext = bridge?.candidates.find(
-      (c) => c.conceptKey === input.activeInterventionConceptKey,
+    const bridgeContext = findDailyPlanBridgeContext(
+      bridgeIntegration,
+      input.activeInterventionConceptKey,
     );
     const reason = bridgeContext
-      ? `${formatRealPlaySummary(bridgeContext)} Running intervention reps converts this table pattern into lasting improvement.`
+      ? bridgeContext.executeInterventionReason
       : "You have an active intervention in progress. Running intervention reps is your most impactful daily activity.";
     blocks.push({
       kind: "execute_intervention",
@@ -254,30 +231,24 @@ function buildCandidateBlocks(
   // Real hands review — v3: enriched from bridge candidate when available
   if (input.importedHandCount > 0) {
     const handWord = input.importedHandCount === 1 ? "hand" : "hands";
-    const bridgeCandidate = bridge?.candidates[0] ?? null;
+    const bridgeContext = bridgeIntegration.topCandidate;
 
-    const title = bridgeCandidate?.conceptLabel
-      ? `Review Hands: ${bridgeCandidate.conceptLabel}`
-      : "Review Real Hands";
+    const title = bridgeContext?.reviewBlock.title ?? "Review Real Hands";
 
-    const reason = bridgeCandidate
-      ? `${formatRealPlaySummary(bridgeCandidate)} ${bridgeCandidate.bridgeReason}`
+    const reason = bridgeContext
+      ? bridgeContext.reviewBlock.reason
       : `You have ${input.importedHandCount} imported ${handWord} available. Real play review closes the gap between drills and the table.`;
 
-    const destination = bridgeCandidate
-      ? (deriveBridgeCandidateDestination(bridgeCandidate) ?? "/app/hands")
-      : "/app/hands";
-
-    // Boost priority to 7 when bridge urgency is high (ties with due retention check)
-    const priority = bridgeCandidate?.urgency === "high" ? 7 : 6;
+    const destination = bridgeContext?.reviewBlock.destination ?? "/app/hands";
+    const priority = bridgeContext?.reviewBlock.priority ?? 6;
 
     blocks.push({
       kind: "review_real_hands",
       title,
       estimatedMinutes: 15,
       reason,
-      conceptKey: bridgeCandidate?.conceptKey ?? null,
-      conceptLabel: bridgeCandidate?.conceptLabel ?? null,
+      conceptKey: bridgeContext?.reviewBlock.conceptKey ?? null,
+      conceptLabel: bridgeContext?.reviewBlock.conceptLabel ?? null,
       destination,
       priority,
     });
@@ -306,9 +277,9 @@ function buildCandidateBlocks(
     recurringLeakKey !== secondaryRec?.conceptKey
   ) {
     const concept = conceptMap.get(recurringLeakKey);
-    const bridgeContext = bridge?.candidates.find((c) => c.conceptKey === recurringLeakKey);
+    const bridgeContext = findDailyPlanBridgeContext(bridgeIntegration, recurringLeakKey);
     const reason = bridgeContext
-      ? `${bridgeContext.bridgeReason} The replay inspector can reveal why this table pattern persists.`
+      ? bridgeContext.replayInspectionReason
       : "This concept has recurred across multiple sessions. The replay inspector can reveal why the pattern persists.";
     blocks.push({
       kind: "inspect_replay_drift",
@@ -464,7 +435,7 @@ function buildWhyThisPlan(
   blocks: DailyPlanBlock[],
   urgencySignals: string[],
   state: DailyPlanState,
-  bridgeBundle?: RealHandBridgeBundle | null,
+  bridgeIntegration?: DailyPlanBridgeIntegration,
 ): string {
   if (state === "no_history") {
     return "No drill history exists yet. Starting your first session gives the coaching engine the data it needs to personalize your plan.";
@@ -491,11 +462,8 @@ function buildWhyThisPlan(
       : `Plan driven by: ${urgencyPart}.`;
   }
 
-  // v3: enrich with real-play evidence when bridge has linked candidates
-  if (bridgeBundle?.state === "linked_candidates" && bridgeBundle.candidates.length > 0) {
-    const top = bridgeBundle.candidates[0];
-    const occurrences = top.realPlaySummary.occurrences;
-    return `${basePart} Real hands confirm: ${occurrences} occurrence${occurrences !== 1 ? "s" : ""} of ${top.conceptLabel} identified in recent play.`;
+  if (bridgeIntegration?.whyThisPlanEvidence) {
+    return `${basePart} ${bridgeIntegration.whyThisPlanEvidence}`;
   }
 
   return basePart;
@@ -623,7 +591,7 @@ function buildPlanForLength(
   sessionLength: DailySessionLength,
   urgencySignals: string[],
   state: DailyPlanState,
-  bridgeBundle?: RealHandBridgeBundle | null,
+  bridgeIntegration?: DailyPlanBridgeIntegration,
 ): DailyStudyPlan {
   const blocks = selectBlocksForLength(candidates, sessionLength);
   const totalEstimatedMinutes = blocks.reduce((sum, b) => sum + b.estimatedMinutes, 0);
@@ -631,7 +599,7 @@ function buildPlanForLength(
   return {
     sessionLength,
     planSummary: buildPlanSummary(blocks, state, sessionLength),
-    whyThisPlan: buildWhyThisPlan(blocks, urgencySignals, state, bridgeBundle),
+    whyThisPlan: buildWhyThisPlan(blocks, urgencySignals, state, bridgeIntegration),
     blocks,
     urgencySignals,
     expectedOutcome: buildExpectedOutcome(blocks, state),
@@ -645,11 +613,12 @@ function buildPlanForLength(
 export function buildDailyStudyPlanBundle(input: DailyStudyPlanInput): DailyStudyPlanBundle {
   const state = derivePlanState(input);
   const urgencySignals = buildUrgencySignals(input, state);
-  const candidateBlocks = buildCandidateBlocks(input, state);
+  const bridgeIntegration = buildDailyPlanBridgeIntegration(input.bridgeBundle);
+  const candidateBlocks = buildCandidateBlocks(input, state, bridgeIntegration);
 
-  const plan20 = buildPlanForLength(candidateBlocks, 20, urgencySignals, state, input.bridgeBundle);
-  const plan45 = buildPlanForLength(candidateBlocks, 45, urgencySignals, state, input.bridgeBundle);
-  const plan90 = buildPlanForLength(candidateBlocks, 90, urgencySignals, state, input.bridgeBundle);
+  const plan20 = buildPlanForLength(candidateBlocks, 20, urgencySignals, state, bridgeIntegration);
+  const plan45 = buildPlanForLength(candidateBlocks, 45, urgencySignals, state, bridgeIntegration);
+  const plan90 = buildPlanForLength(candidateBlocks, 90, urgencySignals, state, bridgeIntegration);
 
   const primaryRec = input.playerIntelligence.recommendations[0];
   const defaultSessionLength: DailySessionLength = state === "no_history" ? 20 : 45;
