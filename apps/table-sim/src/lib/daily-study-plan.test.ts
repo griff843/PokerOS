@@ -310,7 +310,9 @@ describe("buildDailyStudyPlanBundle — ready state block selection", () => {
     );
   });
 
-  it("selects overdue retention_check as top-2 priority", () => {
+  it("selects both overdue retention_check and focus_concept (arc-ordered: focus first)", () => {
+    // v3: selection is priority-based (both are included); display order follows session arc
+    // Arc: focus_concept (pos 2) leads; retention_check (pos 3) validates after
     const result = buildDailyStudyPlanBundle(
       makeInput({
         totalAttempts: 30,
@@ -319,8 +321,11 @@ describe("buildDailyStudyPlanBundle — ready state block selection", () => {
       }),
     );
     const kinds = result.plan45.blocks.map((b) => b.kind);
-    expect(kinds[0]).toBe("retention_check");
-    expect(kinds[1]).toBe("focus_concept");
+    expect(kinds).toContain("focus_concept");
+    expect(kinds).toContain("retention_check");
+    // Arc order: focus concept work first, then validate retention
+    expect(kinds[0]).toBe("focus_concept");
+    expect(kinds[1]).toBe("retention_check");
   });
 
   it("includes focus_concept block linking to concept detail", () => {
@@ -570,7 +575,9 @@ describe("buildDailyStudyPlanBundle — v2: mainFocus", () => {
     expect(result.plan45.mainFocus).toContain("Concept 0");
   });
 
-  it("returns retention-focused mainFocus when overdue retention is primary block", () => {
+  it("returns concept-focused mainFocus even when overdue retention is selected (arc: focus leads)", () => {
+    // v3: arc ordering puts focus_concept (pos 2) before retention_check (pos 3)
+    // so mainFocus reflects the arc-first block, not the highest-priority candidate
     const result = buildDailyStudyPlanBundle(
       makeInput({
         totalAttempts: 30,
@@ -578,7 +585,19 @@ describe("buildDailyStudyPlanBundle — v2: mainFocus", () => {
         overdueRetentionConceptKeys: ["concept_0"],
       }),
     );
-    // retention_check (priority 9) is top block when no intervention
+    expect(result.plan45.mainFocus).toContain("Concept focus");
+    expect(result.plan45.mainFocus).toContain("Concept 0");
+  });
+
+  it("returns retention-focused mainFocus when retention_check is the only candidate (no recommendations)", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence({ recommendations: [] }),
+        overdueRetentionConceptKeys: ["concept_0"],
+      }),
+    );
+    // No focus_concept candidate (no recommendations), retention_check leads
     expect(result.plan45.mainFocus).toContain("Validate retention");
   });
 
@@ -793,5 +812,257 @@ describe("buildDailyStudyPlanBundle — v2: sparse_history improvements", () => 
       }),
     );
     expect(result.plan20.mainFocus).toContain("Concept 0");
+  });
+});
+
+// ─── v3 tests ─────────────────────────────────────────────────────────────────
+
+function makeBridgeBundle(
+  overrides: Partial<import("./real-hand-bridge").RealHandBridgeBundle> = {},
+): import("./real-hand-bridge").RealHandBridgeBundle {
+  return {
+    generatedAt: "2026-03-24T10:00:00.000Z",
+    state: "linked_candidates",
+    summary: {
+      headline: "Bridge candidates found",
+      detail: "1 linked candidate",
+      candidateCount: 1,
+      linkedCandidateCount: 1,
+      weakCandidateCount: 0,
+    },
+    candidates: [
+      {
+        conceptKey: "concept_0",
+        conceptLabel: "Concept 0",
+        linkageStrength: "strong",
+        bridgeReason: "River defense pattern matches drill weakness.",
+        urgency: "high",
+        realPlaySummary: { occurrences: 3, reviewSpotCount: 5, latestHandAt: "2026-03-22" },
+        supportingHands: [],
+        recommendedReviewTarget: {
+          type: "concept_review",
+          label: "Review Concept 0",
+          conceptKey: "concept_0",
+        },
+        suggestedNextAction: {
+          type: "review_concept_detail",
+          label: "Open concept detail",
+          detail: "Review real hands in context of this weakness",
+        },
+      },
+    ],
+    ...overrides,
+  };
+}
+
+describe("buildDailyStudyPlanBundle — v3: session arc ordering", () => {
+  it("execute_intervention always leads the session arc (arc position 1)", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        activeInterventionConceptKey: "concept_0",
+        activeInterventionConceptLabel: "Concept 0",
+        overdueRetentionConceptKeys: ["concept_2"],
+      }),
+    );
+    expect(result.plan45.blocks[0].kind).toBe("execute_intervention");
+  });
+
+  it("focus_concept precedes retention_check in session arc", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        overdueRetentionConceptKeys: ["concept_2"],
+      }),
+    );
+    const idx = (kind: string) => result.plan45.blocks.findIndex((b) => b.kind === kind);
+    expect(idx("focus_concept")).toBeLessThan(idx("retention_check"));
+  });
+
+  it("review_real_hands follows focus_concept in arc", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        importedHandCount: 3,
+      }),
+    );
+    const idx = (kind: string) => result.plan90.blocks.findIndex((b) => b.kind === kind);
+    expect(idx("focus_concept")).toBeLessThan(idx("review_real_hands"));
+  });
+
+  it("inspect_replay_drift is last in arc when multiple blocks present", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence({
+          memory: {
+            diagnosisCount: 0,
+            activeInterventions: 0,
+            completedInterventions: 0,
+            interventionSuccessRate: null,
+            recurringLeakConcepts: ["concept_3"],
+            recoveredConcepts: [],
+            regressedConcepts: [],
+            stabilizingConcepts: [],
+          },
+        }),
+        importedHandCount: 3,
+      }),
+    );
+    const blocks = result.plan90.blocks;
+    const lastKind = blocks[blocks.length - 1].kind;
+    expect(lastKind).toBe("inspect_replay_drift");
+  });
+});
+
+describe("buildDailyStudyPlanBundle — v3: bridge integration", () => {
+  it("review_real_hands block title references bridge candidate label when bridge is linked", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        importedHandCount: 3,
+        bridgeBundle: makeBridgeBundle(),
+      }),
+    );
+    const handsBlock = result.plan90.blocks.find((b) => b.kind === "review_real_hands");
+    expect(handsBlock).toBeDefined();
+    expect(handsBlock?.title).toContain("Concept 0");
+    expect(handsBlock?.conceptKey).toBe("concept_0");
+  });
+
+  it("review_real_hands reason references bridge reason when bridge is linked", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        importedHandCount: 3,
+        bridgeBundle: makeBridgeBundle(),
+      }),
+    );
+    const handsBlock = result.plan90.blocks.find((b) => b.kind === "review_real_hands");
+    expect(handsBlock?.reason).toContain("River defense pattern matches drill weakness.");
+  });
+
+  it("high-urgency bridge candidate boosts review_real_hands priority (included in plan45)", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        importedHandCount: 3,
+        bridgeBundle: makeBridgeBundle(), // urgency: "high"
+      }),
+    );
+    // High-urgency bridge bumps priority to 7 (ties with due retention check)
+    const hasHandsBlock = result.plan45.blocks.some((b) => b.kind === "review_real_hands");
+    // With focus_concept (pri 9) + review_real_hands (pri 7, high bridge urgency) in 45 min plan
+    expect(hasHandsBlock).toBe(true);
+  });
+
+  it("whyThisPlan references real-play occurrence count when bridge has linked candidates", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        bridgeBundle: makeBridgeBundle(),
+      }),
+    );
+    expect(result.plan45.whyThisPlan).toContain("Real hands confirm");
+    expect(result.plan45.whyThisPlan).toContain("3"); // occurrences from bridge candidate
+  });
+
+  it("bridge with no_recent_evidence state does not enrich blocks", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        importedHandCount: 3,
+        bridgeBundle: makeBridgeBundle({ state: "no_recent_evidence", candidates: [] }),
+      }),
+    );
+    const handsBlock = result.plan90.blocks.find((b) => b.kind === "review_real_hands");
+    // Falls back to generic block when bridge state is not linked_candidates
+    expect(handsBlock?.title).toBe("Review Real Hands");
+    expect(handsBlock?.conceptKey).toBeNull();
+  });
+
+  it("execute_intervention reason references real-play evidence when bridge has matching candidate", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        activeInterventionConceptKey: "concept_0",
+        activeInterventionConceptLabel: "Concept 0",
+        bridgeBundle: makeBridgeBundle(), // candidate for concept_0
+      }),
+    );
+    expect(result.plan45.blocks[0].kind).toBe("execute_intervention");
+    expect(result.plan45.blocks[0].reason).toContain("real-play occurrence");
+  });
+
+  it("inspect_replay_drift reason references bridge reason when recurring leak has bridge candidate", () => {
+    const bridgeForLeak = makeBridgeBundle({
+      candidates: [
+        {
+          conceptKey: "concept_3",
+          conceptLabel: "Concept 3",
+          linkageStrength: "strong",
+          bridgeReason: "Concept 3 appears in 4 river spots.",
+          urgency: "medium",
+          realPlaySummary: { occurrences: 4, reviewSpotCount: 2 },
+          supportingHands: [],
+          recommendedReviewTarget: {
+            type: "concept_review",
+            label: "Review Concept 3",
+            conceptKey: "concept_3",
+          },
+          suggestedNextAction: {
+            type: "review_concept_detail",
+            label: "Open concept detail",
+            detail: "",
+          },
+        },
+      ],
+    });
+
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence({
+          memory: {
+            diagnosisCount: 0,
+            activeInterventions: 0,
+            completedInterventions: 0,
+            interventionSuccessRate: null,
+            recurringLeakConcepts: ["concept_3"],
+            recoveredConcepts: [],
+            regressedConcepts: [],
+            stabilizingConcepts: [],
+          },
+        }),
+        bridgeBundle: bridgeForLeak,
+      }),
+    );
+
+    const replayBlock = result.plan90.blocks.find((b) => b.kind === "inspect_replay_drift");
+    expect(replayBlock).toBeDefined();
+    expect(replayBlock?.reason).toContain("Concept 3 appears in 4 river spots.");
+  });
+
+  it("omitting bridgeBundle produces same generic blocks as before (no regression)", () => {
+    const withoutBridge = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        importedHandCount: 5,
+      }),
+    );
+    const handsBlock = withoutBridge.plan90.blocks.find((b) => b.kind === "review_real_hands");
+    expect(handsBlock?.title).toBe("Review Real Hands");
+    expect(handsBlock?.reason).toContain("5 imported hands");
+    expect(handsBlock?.destination).toBe("/app/hands");
   });
 });

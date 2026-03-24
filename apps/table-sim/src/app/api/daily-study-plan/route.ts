@@ -7,6 +7,7 @@ import { loadLocalStudyData } from "../../../lib/local-study-data";
 import { buildTableSimPlayerIntelligence } from "../../../lib/player-intelligence";
 import { buildPatternAttemptSignals, hydratePersistedStudyAttempts } from "../../../lib/intervention-support";
 import { buildDailyStudyPlanBundle } from "../../../lib/daily-study-plan";
+import { buildPersistedRealHandInterventionBridgeBundle } from "../../../lib/real-hand-bridge";
 
 const ACTIVE_INTERVENTION_STATUSES = new Set(["assigned", "in_progress", "stabilizing"]);
 
@@ -62,6 +63,22 @@ export async function GET() {
       .filter((s) => s.status === "due")
       .map((s) => s.concept_key);
 
+    // v3: build real-hand bridge bundle when imported hands are present
+    const bridgeBundle =
+      importedHands.length > 0
+        ? buildPersistedRealHandInterventionBridgeBundle({
+            drills,
+            attempts,
+            srs,
+            importedHands,
+            diagnoses,
+            interventions,
+            retentionSchedules,
+            activePool,
+            now,
+          })
+        : null;
+
     const bundle = buildDailyStudyPlanBundle({
       playerIntelligence,
       totalAttempts: attempts.length,
@@ -71,6 +88,7 @@ export async function GET() {
       activeInterventionConceptKey,
       activeInterventionConceptLabel: activeInterventionConcept?.label ?? null,
       now,
+      bridgeBundle,
     });
 
     return NextResponse.json(bundle);

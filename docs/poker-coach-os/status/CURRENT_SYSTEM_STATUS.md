@@ -1,8 +1,8 @@
 # Current System Status — Poker Coach OS
 
-> **Last updated:** 2026-03-24 (post daily-study-plan-v2 sprint)
+> **Last updated:** 2026-03-24 (post daily-study-plan-v3 sprint)
 > **Active phase:** Phase 1 — Coaching Surface Activation
-> **Status tier:** Operational (Daily Study Plan v2 complete)
+> **Status tier:** Operational (Daily Study Plan v3 complete)
 
 ---
 
@@ -69,7 +69,7 @@
 - Committed: 194b8e0
 - Proof: out/poker/sprints/concept-audit-feed-ui-adapter/20260316/ (local only — out/ is gitignored)
 
-### Daily Study Plan v2 (2026-03-24, COMPLETE)
+### Daily Study Plan v3 (2026-03-24, COMPLETE)
 - `apps/table-sim/src/lib/daily-study-plan.ts` — pure adapter (buildDailyStudyPlanBundle)
 - `apps/table-sim/src/app/api/daily-study-plan/route.ts` — GET /api/daily-study-plan
 - `apps/table-sim/src/components/daily/DailyStudyPlan.tsx` — client component with session-length selector + MainFocusCard
@@ -80,7 +80,10 @@
 - Block kinds: focus_concept, execute_intervention, retention_check, review_real_hands, secondary_concept, inspect_replay_drift
 - v2 additions: mainFocus, successCriteria, firstAction — surfaces on /app/daily via MainFocusCard
 - Sparse state: now generates 2 blocks (drill + review recent session as default support)
-- 299/299 tests pass, typecheck clean, build passes
+- v3 additions: real-hand bridge integration, session arc ordering, enriched block reasons
+- v3: route calls bridge builder; bridgeBundle enriches review_real_hands/execute_intervention/inspect_replay_drift/whyThisPlan
+- v3: session arc enforced post-selection (execute_intervention→focus_concept→retention_check→review_real_hands→secondary_concept→inspect_replay_drift)
+- 307/307 tests pass, typecheck clean, build passes
 
 ---
 
