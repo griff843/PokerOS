@@ -547,3 +547,251 @@ describe("buildDailyStudyPlanBundle — plan explanations", () => {
     expect(result.plan45.expectedOutcome).toContain("primary weakness");
   });
 });
+
+describe("buildDailyStudyPlanBundle — v2: mainFocus", () => {
+  it("returns intervention-focused mainFocus when execute_intervention is primary block", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        activeInterventionConceptKey: "concept_0",
+        activeInterventionConceptLabel: "Concept 0",
+      }),
+    );
+    expect(result.plan45.mainFocus).toContain("Execute intervention");
+    expect(result.plan45.mainFocus).toContain("Concept 0");
+  });
+
+  it("returns concept-focused mainFocus when focus_concept is primary block", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({ totalAttempts: 30, playerIntelligence: makeReadyIntelligence() }),
+    );
+    expect(result.plan45.mainFocus).toContain("Concept focus");
+    expect(result.plan45.mainFocus).toContain("Concept 0");
+  });
+
+  it("returns retention-focused mainFocus when overdue retention is primary block", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        overdueRetentionConceptKeys: ["concept_0"],
+      }),
+    );
+    // retention_check (priority 9) is top block when no intervention
+    expect(result.plan45.mainFocus).toContain("Validate retention");
+  });
+
+  it("returns no_history mainFocus for no_history state", () => {
+    const result = buildDailyStudyPlanBundle(makeInput({ totalAttempts: 0 }));
+    expect(result.plan20.mainFocus).toBe("Start your first session");
+  });
+
+  it("returns non-empty mainFocus for all session lengths", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({ totalAttempts: 30, playerIntelligence: makeReadyIntelligence() }),
+    );
+    expect(result.plan20.mainFocus.length).toBeGreaterThan(0);
+    expect(result.plan45.mainFocus.length).toBeGreaterThan(0);
+    expect(result.plan90.mainFocus.length).toBeGreaterThan(0);
+  });
+});
+
+describe("buildDailyStudyPlanBundle — v2: successCriteria", () => {
+  it("returns drill-specific successCriteria for focus_concept with label", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({ totalAttempts: 30, playerIntelligence: makeReadyIntelligence() }),
+    );
+    expect(result.plan45.successCriteria).toContain("Concept 0");
+    expect(result.plan45.successCriteria).toContain("5+");
+  });
+
+  it("returns intervention-specific successCriteria for execute_intervention", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        activeInterventionConceptKey: "concept_0",
+        activeInterventionConceptLabel: "Concept 0",
+      }),
+    );
+    expect(result.plan45.successCriteria).toContain("10+");
+    expect(result.plan45.successCriteria).toContain("Concept 0");
+  });
+
+  it("returns no_history successCriteria for no_history state", () => {
+    const result = buildDailyStudyPlanBundle(makeInput({ totalAttempts: 0 }));
+    expect(result.plan20.successCriteria).toContain("10-drill");
+  });
+
+  it("returns sparse successCriteria for sparse_history state", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({ totalAttempts: 5, playerIntelligence: makeReadyIntelligence() }),
+    );
+    expect(result.plan20.successCriteria).toContain("20 total attempts");
+  });
+});
+
+describe("buildDailyStudyPlanBundle — v2: firstAction", () => {
+  it("firstAction has label and destination for focus_concept", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({ totalAttempts: 30, playerIntelligence: makeReadyIntelligence() }),
+    );
+    expect(result.plan45.firstAction.label).toBeTruthy();
+    expect(result.plan45.firstAction.destination).toBe("/app/concepts/concept_0");
+  });
+
+  it("firstAction destination matches intervention execution path", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        activeInterventionConceptKey: "concept_0",
+        activeInterventionConceptLabel: "Concept 0",
+      }),
+    );
+    expect(result.plan45.firstAction.destination).toBe("/app/concepts/concept_0/execution");
+    expect(result.plan45.firstAction.label).toContain("Intervention");
+  });
+
+  it("firstAction destination is /app/session for no_history", () => {
+    const result = buildDailyStudyPlanBundle(makeInput({ totalAttempts: 0 }));
+    expect(result.plan20.firstAction.destination).toBe("/app/session");
+  });
+
+  it("firstAction is non-null for all states", () => {
+    const noHistory = buildDailyStudyPlanBundle(makeInput({ totalAttempts: 0 }));
+    expect(noHistory.plan20.firstAction).toBeDefined();
+
+    const sparse = buildDailyStudyPlanBundle(
+      makeInput({ totalAttempts: 5, playerIntelligence: makeReadyIntelligence() }),
+    );
+    expect(sparse.plan20.firstAction).toBeDefined();
+
+    const ready = buildDailyStudyPlanBundle(
+      makeInput({ totalAttempts: 30, playerIntelligence: makeReadyIntelligence() }),
+    );
+    expect(ready.plan45.firstAction).toBeDefined();
+  });
+});
+
+describe("buildDailyStudyPlanBundle — v2: 20-min block shaping", () => {
+  it("20-min plan has at most 2 blocks when candidates exist", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence({
+          memory: {
+            diagnosisCount: 0,
+            activeInterventions: 1,
+            completedInterventions: 0,
+            interventionSuccessRate: null,
+            recurringLeakConcepts: ["concept_3"],
+            recoveredConcepts: [],
+            regressedConcepts: [],
+            stabilizingConcepts: [],
+          },
+        }),
+        importedHandCount: 3,
+        overdueRetentionConceptKeys: ["concept_2"],
+      }),
+    );
+    expect(result.plan20.blocks.length).toBeLessThanOrEqual(2);
+  });
+
+  it("20-min plan block times are each capped at 10 min", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        activeInterventionConceptKey: "concept_0",
+        activeInterventionConceptLabel: "Concept 0",
+      }),
+    );
+    for (const block of result.plan20.blocks) {
+      expect(block.estimatedMinutes).toBeLessThanOrEqual(10);
+    }
+  });
+
+  it("20-min plan includes top 2 priority blocks (not just time-greedy)", () => {
+    // With overdue retention (priority 9) and focus_concept (priority 9),
+    // both should appear in the 20-min plan despite total being 20 min
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        overdueRetentionConceptKeys: ["concept_2"],
+      }),
+    );
+    const kinds = result.plan20.blocks.map((b) => b.kind);
+    expect(kinds).toContain("retention_check");
+    expect(kinds).toContain("focus_concept");
+  });
+});
+
+describe("buildDailyStudyPlanBundle — v2: 45-min block shaping", () => {
+  it("45-min plan has at most 3 blocks", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence({
+          memory: {
+            diagnosisCount: 0,
+            activeInterventions: 1,
+            completedInterventions: 0,
+            interventionSuccessRate: null,
+            recurringLeakConcepts: ["concept_3"],
+            recoveredConcepts: [],
+            regressedConcepts: [],
+            stabilizingConcepts: [],
+          },
+        }),
+        importedHandCount: 3,
+        overdueRetentionConceptKeys: ["concept_2"],
+        dueRetentionConceptKeys: ["concept_3"],
+        activeInterventionConceptKey: "concept_0",
+        activeInterventionConceptLabel: "Concept 0",
+      }),
+    );
+    expect(result.plan45.blocks.length).toBeLessThanOrEqual(3);
+  });
+});
+
+describe("buildDailyStudyPlanBundle — v2: sparse_history improvements", () => {
+  it("sparse plan without overdue retention has a review block as support", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 5,
+        playerIntelligence: makeReadyIntelligence(),
+      }),
+    );
+    // 20-min plan should have 2 blocks: focus_concept + retention_check (review)
+    expect(result.plan20.blocks.length).toBe(2);
+    expect(result.plan20.blocks[0].kind).toBe("focus_concept");
+    expect(result.plan20.blocks[1].kind).toBe("retention_check");
+  });
+
+  it("sparse plan with overdue retention replaces generic review with overdue check", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 5,
+        playerIntelligence: makeReadyIntelligence(),
+        overdueRetentionConceptKeys: ["concept_0"],
+      }),
+    );
+    const retentionBlocks = result.plan20.blocks.filter((b) => b.kind === "retention_check");
+    expect(retentionBlocks.length).toBeGreaterThan(0);
+    // Should reference the overdue concept
+    expect(retentionBlocks.some((b) => b.conceptKey === "concept_0")).toBe(true);
+  });
+
+  it("sparse plan mainFocus references top recommendation label", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 5,
+        playerIntelligence: makeReadyIntelligence(),
+      }),
+    );
+    expect(result.plan20.mainFocus).toContain("Concept 0");
+  });
+});

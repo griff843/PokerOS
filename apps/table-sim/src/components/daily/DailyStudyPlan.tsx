@@ -64,6 +64,7 @@ export function DailyStudyPlan() {
               bundle={bundle}
               onSelect={setSelectedLength}
             />
+            <MainFocusCard loading={loading} plan={plan} />
             <PlanSummarySection loading={loading} plan={plan} bundle={bundle} />
             <BlockList loading={loading} plan={plan} />
             <WhyThisPlan loading={loading} plan={plan} />
@@ -161,6 +162,45 @@ function SessionLengthSelector({
   );
 }
 
+function MainFocusCard({
+  loading,
+  plan,
+}: {
+  loading: boolean;
+  plan: DailyStudyPlan | null;
+}) {
+  if (loading) {
+    return <div className="h-16 animate-pulse rounded-xl border border-white/10 bg-white/5" />;
+  }
+  if (!plan) return null;
+
+  const firstAction = plan.firstAction;
+
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-xl border border-emerald-500/30 bg-emerald-950/30 px-5 py-4">
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400/60">
+          Today&apos;s Focus
+        </p>
+        <p className="mt-1 text-base font-semibold text-white">{plan.mainFocus}</p>
+        <p className="mt-0.5 text-xs text-white/40">{plan.successCriteria}</p>
+      </div>
+      {firstAction.destination ? (
+        <Link
+          href={firstAction.destination}
+          className="shrink-0 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500"
+        >
+          {firstAction.label}
+        </Link>
+      ) : (
+        <span className="shrink-0 rounded-lg bg-emerald-600/40 px-4 py-2 text-sm font-medium text-white/60">
+          {firstAction.label}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function PlanSummarySection({
   loading,
   plan,
@@ -176,11 +216,11 @@ function PlanSummarySection({
   if (!plan) return null;
 
   return (
-    <div className="rounded-xl border border-emerald-500/20 bg-emerald-900/10 px-5 py-4">
+    <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
       <p className="text-xs font-semibold uppercase tracking-widest text-white/40">
         Plan Summary
       </p>
-      <p className="mt-2 text-base font-medium text-white">{plan.planSummary}</p>
+      <p className="mt-2 text-sm text-white/70">{plan.planSummary}</p>
       {plan.urgencySignals.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {plan.urgencySignals.map((signal) => (

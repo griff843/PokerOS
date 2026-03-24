@@ -1,8 +1,8 @@
 # Current System Status — Poker Coach OS
 
-> **Last updated:** 2026-03-24 (post daily-study-plan-v1 sprint)
+> **Last updated:** 2026-03-24 (post daily-study-plan-v2 sprint)
 > **Active phase:** Phase 1 — Coaching Surface Activation
-> **Status tier:** Operational (Daily Study Plan v1 complete)
+> **Status tier:** Operational (Daily Study Plan v2 complete)
 
 ---
 
@@ -69,31 +69,33 @@
 - Committed: 194b8e0
 - Proof: out/poker/sprints/concept-audit-feed-ui-adapter/20260316/ (local only — out/ is gitignored)
 
-### Daily Study Plan v1 (2026-03-24, COMPLETE)
+### Daily Study Plan v2 (2026-03-24, COMPLETE)
 - `apps/table-sim/src/lib/daily-study-plan.ts` — pure adapter (buildDailyStudyPlanBundle)
 - `apps/table-sim/src/app/api/daily-study-plan/route.ts` — GET /api/daily-study-plan
-- `apps/table-sim/src/components/daily/DailyStudyPlan.tsx` — client component with session-length selector
+- `apps/table-sim/src/components/daily/DailyStudyPlan.tsx` — client component with session-length selector + MainFocusCard
 - `apps/table-sim/src/app/app/daily/page.tsx` — /app/daily route
-- `apps/table-sim/src/lib/daily-study-plan.test.ts` — 29 tests (all states, all lengths, all block types)
+- `apps/table-sim/src/lib/daily-study-plan.test.ts` — 55 tests (all states, all lengths, all block types, v2 fields)
 - States: no_history, sparse_history, ready
-- Session lengths: 20 / 45 / 90 min (shapes block selection by time budget)
+- Session lengths: 20 (top-2 blocks, capped 10 min each) / 45 (max 3, greedy) / 90 (max 5, greedy)
 - Block kinds: focus_concept, execute_intervention, retention_check, review_real_hands, secondary_concept, inspect_replay_drift
-- 279/279 tests pass, typecheck clean, build passes
+- v2 additions: mainFocus, successCriteria, firstAction — surfaces on /app/daily via MainFocusCard
+- Sparse state: now generates 2 blocks (drill + review recent session as default support)
+- 299/299 tests pass, typecheck clean, build passes
 
 ---
 
 ## What is in progress
 
-Working tree: new files unstaged. Branch: `codex/concept-audit-feed-ui-adapter-v1`
+Working tree: modified files unstaged. Branch: `codex/concept-audit-feed-ui-adapter-v1`
 
-Daily Study Plan v1 is complete. Ready to commit.
+Daily Study Plan v2 is complete. Ready to commit.
 
 ---
 
 ## What is next
 
 ### Immediate
-1. Commit Daily Study Plan v1 and open PR
+1. Commit Daily Study Plan v2 and open PR
 2. Wire DailyStudyPlan link into the app navigation (layout.tsx or coaching surface)
 
 ### Near-term

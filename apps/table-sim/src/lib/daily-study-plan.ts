@@ -32,6 +32,12 @@ export interface DailyStudyPlan {
   urgencySignals: string[];
   expectedOutcome: string;
   totalEstimatedMinutes: number;
+  /** v2: one-line statement of today's primary focus */
+  mainFocus: string;
+  /** v2: what success looks like for this session */
+  successCriteria: string;
+  /** v2: the single first action the user should take */
+  firstAction: { label: string; destination: string | null };
 }
 
 export interface DailyStudyPlanBundle {
@@ -78,8 +84,9 @@ function buildCandidateBlocks(
       {
         kind: "focus_concept",
         title: "Start Your First Session",
-        estimatedMinutes: 20,
-        reason: "Complete your first drill session to build a coaching baseline.",
+        estimatedMinutes: 15,
+        reason:
+          "Complete your first drill session to establish a coaching baseline. The engine needs at least 10 attempts to personalize your plan.",
         conceptKey: null,
         conceptLabel: null,
         destination: "/app/session",
@@ -96,23 +103,37 @@ function buildCandidateBlocks(
         title: topRec ? `Drill: ${topRec.label}` : "Continue Drilling",
         estimatedMinutes: 15,
         reason: topRec
-          ? `${topRec.label} is your highest-priority concept. Keep building evidence.`
+          ? `${topRec.label} is your highest-priority concept right now. Keep building reps to sharpen your coaching baseline.`
           : "Continue drilling to generate enough data for personalized coaching.",
         conceptKey: topRec?.conceptKey ?? null,
         conceptLabel: topRec?.label ?? null,
         destination: "/app/session",
         priority: 10,
       },
+      // Default: review recent session to reinforce retention while history is sparse
+      {
+        kind: "retention_check",
+        title: "Review Recent Session",
+        estimatedMinutes: 10,
+        reason:
+          "Reviewing your recent attempts while history is sparse accelerates baseline formation.",
+        conceptKey: null,
+        conceptLabel: null,
+        destination: "/app/review",
+        priority: 6,
+      },
     ];
 
     if (input.overdueRetentionConceptKeys.length > 0) {
       const key = input.overdueRetentionConceptKeys[0];
       const concept = input.playerIntelligence.concepts.find((c) => c.conceptKey === key);
-      blocks.push({
+      // Replace the generic review block with the overdue check (higher priority)
+      blocks.splice(1, 1, {
         kind: "retention_check",
-        title: "Retention Check",
+        title: `Retention Check: ${concept?.label ?? key}`,
         estimatedMinutes: 10,
-        reason: "A retention check is overdue. Run a short verification session.",
+        reason:
+          "A retention check is overdue. Run a short verification session before moving forward.",
         conceptKey: key,
         conceptLabel: concept?.label ?? key,
         destination: "/app/session",
@@ -195,7 +216,7 @@ function buildCandidateBlocks(
     });
   }
 
-  // Real hands review
+  // Real hands review — bridge between drills and live play
   if (input.importedHandCount > 0) {
     const handWord = input.importedHandCount === 1 ? "hand" : "hands";
     blocks.push({
@@ -249,27 +270,56 @@ function buildCandidateBlocks(
   return blocks.sort((a, b) => b.priority - a.priority);
 }
 
-function selectBlocksForBudget(
-  candidates: DailyPlanBlock[],
-  budgetMinutes: DailySessionLength,
-): DailyPlanBlock[] {
-  const selected: DailyPlanBlock[] = [];
-  let remaining = budgetMinutes;
+// 20-min: one high-EV action + one supporting action.
+// Pick top 2 by priority; cap each block at 10 min so the pair always fits.
+function selectBlocksFor20(candidates: DailyPlanBlock[]): DailyPlanBlock[] {
+  if (candidates.length === 0) return [];
+  return candidates
+    .slice(0, 2)
+    .map((b) => ({ ...b, estimatedMinutes: Math.min(b.estimatedMinutes, 10) }));
+}
 
+// 45-min: execution + validation/review.
+// Greedy up to 45 min, max 3 blocks.
+function selectBlocksFor45(candidates: DailyPlanBlock[]): DailyPlanBlock[] {
+  const selected: DailyPlanBlock[] = [];
+  let remaining = 45;
   for (const block of candidates) {
+    if (selected.length >= 3) break;
     if (block.estimatedMinutes <= remaining) {
       selected.push(block);
       remaining -= block.estimatedMinutes;
     }
     if (remaining < 5) break;
   }
-
-  // Always include at least 1 block
-  if (selected.length === 0 && candidates.length > 0) {
-    selected.push(candidates[0]);
-  }
-
+  if (selected.length === 0 && candidates.length > 0) selected.push(candidates[0]);
   return selected;
+}
+
+// 90-min: deeper concept + transfer/replay + retention mix.
+// Greedy up to 90 min, max 5 blocks.
+function selectBlocksFor90(candidates: DailyPlanBlock[]): DailyPlanBlock[] {
+  const selected: DailyPlanBlock[] = [];
+  let remaining = 90;
+  for (const block of candidates) {
+    if (selected.length >= 5) break;
+    if (block.estimatedMinutes <= remaining) {
+      selected.push(block);
+      remaining -= block.estimatedMinutes;
+    }
+    if (remaining < 5) break;
+  }
+  if (selected.length === 0 && candidates.length > 0) selected.push(candidates[0]);
+  return selected;
+}
+
+function selectBlocksForLength(
+  candidates: DailyPlanBlock[],
+  sessionLength: DailySessionLength,
+): DailyPlanBlock[] {
+  if (sessionLength === 20) return selectBlocksFor20(candidates);
+  if (sessionLength === 45) return selectBlocksFor45(candidates);
+  return selectBlocksFor90(candidates);
 }
 
 function buildUrgencySignals(input: DailyStudyPlanInput, state: DailyPlanState): string[] {
@@ -319,35 +369,49 @@ function buildPlanSummary(
     return "No history yet — start your first session.";
   }
   if (state === "sparse_history") {
-    return `Lightweight ${sessionLength}-min session to build your coaching baseline.`;
+    return `${sessionLength}-min session to build your coaching baseline.`;
   }
 
   const primaryBlock = blocks[0];
   if (!primaryBlock) return `${sessionLength}-min study session`;
 
-  const primary = BLOCK_KIND_LABELS[primaryBlock.kind] ?? primaryBlock.kind;
+  const focusLabel = primaryBlock.conceptLabel ?? BLOCK_KIND_LABELS[primaryBlock.kind];
   const additionalCount = blocks.length - 1;
 
   if (additionalCount === 0) {
-    return `${sessionLength}-min session — ${primary}`;
+    return `${sessionLength} min — ${focusLabel}`;
   }
-  return `${sessionLength}-min session — ${primary} + ${additionalCount} more block${additionalCount === 1 ? "" : "s"}`;
+  return `${sessionLength} min — ${focusLabel} + ${additionalCount} more`;
 }
 
 function buildWhyThisPlan(
+  blocks: DailyPlanBlock[],
   urgencySignals: string[],
   state: DailyPlanState,
 ): string {
   if (state === "no_history") {
-    return "No drill history exists yet. Starting your first session will give the coaching engine the data it needs to plan for you.";
+    return "No drill history exists yet. Starting your first session gives the coaching engine the data it needs to personalize your plan.";
   }
   if (state === "sparse_history") {
     return "Your history is still sparse. This plan focuses on building reps across your identified weaknesses before shifting to specialized work.";
   }
-  if (urgencySignals.length === 0) {
-    return "This plan was selected based on your current weakness profile and recommendation engine output.";
+
+  const primaryBlock = blocks[0];
+  if (!primaryBlock) {
+    return "This plan was selected based on your current weakness profile.";
   }
-  return `Plan driven by: ${urgencySignals.join("; ")}.`;
+
+  const conceptLabel = primaryBlock.conceptLabel;
+  if (urgencySignals.length === 0) {
+    return conceptLabel
+      ? `Plan centers on ${conceptLabel}, your highest-priority weakness based on recent performance.`
+      : "This plan was selected based on your current weakness profile and recommendation engine output.";
+  }
+
+  const urgencyPart = urgencySignals.slice(0, 2).join("; ");
+  return conceptLabel
+    ? `${urgencyPart}. Primary focus: ${conceptLabel}.`
+    : `Plan driven by: ${urgencyPart}.`;
 }
 
 function buildExpectedOutcome(blocks: DailyPlanBlock[], state: DailyPlanState): string {
@@ -371,23 +435,122 @@ function buildExpectedOutcome(blocks: DailyPlanBlock[], state: DailyPlanState): 
   return `${outcomes.join(", ")}.`;
 }
 
+function buildMainFocus(blocks: DailyPlanBlock[], state: DailyPlanState): string {
+  if (state === "no_history") return "Start your first session";
+  if (state === "sparse_history") {
+    const primary = blocks[0];
+    return primary?.conceptLabel ? `Drill: ${primary.conceptLabel}` : "Build your baseline";
+  }
+
+  const primary = blocks[0];
+  if (!primary) return "Study session";
+
+  switch (primary.kind) {
+    case "execute_intervention":
+      return `Execute intervention: ${primary.conceptLabel ?? "active concept"}`;
+    case "retention_check":
+      return `Validate retention: ${primary.conceptLabel ?? "recent concept"}`;
+    case "focus_concept":
+      return `Concept focus: ${primary.conceptLabel ?? "top weakness"}`;
+    case "review_real_hands":
+      return "Review real hands";
+    case "secondary_concept":
+      return `Explore: ${primary.conceptLabel ?? "secondary concept"}`;
+    case "inspect_replay_drift":
+      return `Inspect replay: ${primary.conceptLabel ?? "recurring leak"}`;
+  }
+}
+
+function buildSuccessCriteria(blocks: DailyPlanBlock[], state: DailyPlanState): string {
+  if (state === "no_history") {
+    return "Complete your first 10-drill session.";
+  }
+  if (state === "sparse_history") {
+    return "Reach 20 total attempts across your primary concepts.";
+  }
+
+  const primary = blocks[0];
+  if (!primary) return "Complete this session's study blocks.";
+
+  const label = primary.conceptLabel;
+  switch (primary.kind) {
+    case "execute_intervention":
+      return label
+        ? `Complete 10+ intervention reps on ${label}.`
+        : "Complete 10+ intervention reps.";
+    case "retention_check":
+      return label ? `Score ≥70% on ${label} drills.` : "Score ≥70% on retention drills.";
+    case "focus_concept":
+      return label
+        ? `Attempt 5+ drills on ${label} and identify your error pattern.`
+        : "Attempt 5+ drills and identify your error pattern.";
+    case "review_real_hands":
+      return "Tag at least 3 hands with concept-level notes.";
+    case "secondary_concept":
+      return label ? `Complete 3+ drills on ${label}.` : "Complete 3+ drills on the secondary concept.";
+    case "inspect_replay_drift":
+      return "Identify the decision pattern that keeps recurring.";
+  }
+}
+
+function buildFirstAction(
+  blocks: DailyPlanBlock[],
+  state: DailyPlanState,
+): { label: string; destination: string | null } {
+  if (state === "no_history") {
+    return { label: "Start First Session", destination: "/app/session" };
+  }
+  if (state === "sparse_history") {
+    return { label: "Start Session", destination: "/app/session" };
+  }
+
+  const primary = blocks[0];
+  if (!primary) {
+    return { label: "Start Session", destination: "/app/session" };
+  }
+
+  switch (primary.kind) {
+    case "execute_intervention":
+      return { label: "Start Intervention Reps", destination: primary.destination };
+    case "retention_check":
+      return { label: "Run Retention Check", destination: primary.destination };
+    case "focus_concept":
+      return {
+        label: `Open ${primary.conceptLabel ?? "Concept"}`,
+        destination: primary.destination,
+      };
+    case "review_real_hands":
+      return { label: "Review Hands", destination: primary.destination };
+    case "secondary_concept":
+      return {
+        label: `Open ${primary.conceptLabel ?? "Concept"}`,
+        destination: primary.destination,
+      };
+    case "inspect_replay_drift":
+      return { label: "Open Replay Inspector", destination: primary.destination };
+  }
+}
+
 function buildPlanForLength(
   candidates: DailyPlanBlock[],
   sessionLength: DailySessionLength,
   urgencySignals: string[],
   state: DailyPlanState,
 ): DailyStudyPlan {
-  const blocks = selectBlocksForBudget(candidates, sessionLength);
+  const blocks = selectBlocksForLength(candidates, sessionLength);
   const totalEstimatedMinutes = blocks.reduce((sum, b) => sum + b.estimatedMinutes, 0);
 
   return {
     sessionLength,
     planSummary: buildPlanSummary(blocks, state, sessionLength),
-    whyThisPlan: buildWhyThisPlan(urgencySignals, state),
+    whyThisPlan: buildWhyThisPlan(blocks, urgencySignals, state),
     blocks,
     urgencySignals,
     expectedOutcome: buildExpectedOutcome(blocks, state),
     totalEstimatedMinutes,
+    mainFocus: buildMainFocus(blocks, state),
+    successCriteria: buildSuccessCriteria(blocks, state),
+    firstAction: buildFirstAction(blocks, state),
   };
 }
 
