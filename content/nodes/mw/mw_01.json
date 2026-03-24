@@ -1,0 +1,13 @@
+{
+  "node_id": "mw_01",
+  "name": "Multiway Flop C-Bet (Squeeze Pot)",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 3,
+    "position": "IP",
+    "street": "flop",
+    "pot_type": "SRP"
+  },
+  "triggers": ["multiway_context", "cbet_dry_flop", "equity_denial"],
+  "defaults": { "population_toggle": "B" }
+}
