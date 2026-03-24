@@ -163,6 +163,10 @@ const RULE_TAG_TO_CONCEPTS: Record<RuleTag, string[]> = {
   underfold_exploit: ["population_pressure", "value_targeting"],
   thin_value_deep: ["value_targeting", "leverage"],
   multiway_context: ["multiway_awareness"],
+  probe_bet_turn: ["turn_aggression", "range_advantage"],
+  "3bet_pot_cbet": ["cbetting", "3bet_pot_play"],
+  preflop_3bet: ["preflop_decision", "range_advantage"],
+  turn_give_up: ["turn_aggression", "equity_denial"],
 };
 
 export function buildConceptGraph(drills: CanonicalDrill[] = []): ConceptGraph {

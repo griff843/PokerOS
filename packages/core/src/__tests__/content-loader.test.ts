@@ -21,12 +21,12 @@ describe("content-loader", () => {
   it("loads nodes from content/nodes idempotently", () => {
     const nodesDir = path.join(CONTENT_DIR, "nodes");
     const count1 = loadNodes(db, nodesDir);
-    expect(count1).toBe(10);
-    expect(getAllNodes(db)).toHaveLength(10);
+    expect(count1).toBe(20);
+    expect(getAllNodes(db)).toHaveLength(20);
 
     const count2 = loadNodes(db, nodesDir);
-    expect(count2).toBe(10);
-    expect(getAllNodes(db)).toHaveLength(10);
+    expect(count2).toBe(20);
+    expect(getAllNodes(db)).toHaveLength(20);
   });
 
   it("loads canonical drills from content/drills idempotently", () => {
@@ -34,13 +34,13 @@ describe("content-loader", () => {
 
     const drillsDir = path.join(CONTENT_DIR, "drills");
     const count1 = loadDrills(db, drillsDir);
-    expect(count1).toBe(30);
-    expect(getAllDrills(db)).toHaveLength(30);
+    expect(count1).toBe(60);
+    expect(getAllDrills(db)).toHaveLength(60);
     expect(CanonicalDrillSchema.parse(JSON.parse(getAllDrills(db)[0].content_json)).drill_id).toBeTruthy();
 
     const count2 = loadDrills(db, drillsDir);
-    expect(count2).toBe(30);
-    expect(getAllDrills(db)).toHaveLength(30);
+    expect(count2).toBe(60);
+    expect(getAllDrills(db)).toHaveLength(60);
   });
 
   it("loads truth-rich exemplar drills with authored history, steps, and pool contrast", () => {
@@ -72,8 +72,8 @@ describe("content-loader", () => {
 
   it("loads all content with loadAllContent", () => {
     const result = loadAllContent(db, CONTENT_DIR);
-    expect(result.nodes).toBe(10);
-    expect(result.drills).toBe(30);
+    expect(result.nodes).toBe(20);
+    expect(result.drills).toBe(60);
   });
 
   it("returns 0 for non-existent directories", () => {

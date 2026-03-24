@@ -1,0 +1,13 @@
+{
+  "node_id": "pf_01",
+  "name": "BTN Facing 3-Bet (BB)",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "BTN",
+    "street": "preflop",
+    "pot_type": "3BP"
+  },
+  "triggers": ["preflop_3bet"],
+  "defaults": { "population_toggle": "B" }
+}

@@ -1,0 +1,13 @@
+{
+  "node_id": "srp_02",
+  "name": "SRP Flop C-Bet IP (Wet Board)",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP",
+    "street": "flop",
+    "pot_type": "SRP"
+  },
+  "triggers": ["cbet_wet_flop", "nut_advantage", "equity_denial"],
+  "defaults": { "population_toggle": "B" }
+}
