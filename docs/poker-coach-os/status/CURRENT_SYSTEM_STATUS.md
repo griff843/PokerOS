@@ -1,8 +1,8 @@
 # Current System Status — Poker Coach OS
 
-> **Last updated:** 2026-03-16 (post SPRINT-POKER-AI-TRUTH-CLI-FOUNDATION closeout)
+> **Last updated:** 2026-03-24 (post daily-study-plan-v1 sprint)
 > **Active phase:** Phase 1 — Coaching Surface Activation
-> **Status tier:** Operational (v1.3.1 complete)
+> **Status tier:** Operational (Daily Study Plan v1 complete)
 
 ---
 
@@ -46,6 +46,13 @@
 - Rules: 00-workflow, 01-safety-and-proof, 04-testing-and-verification, 05-output-formats
 - Verification: `pnpm typecheck` (not `pnpm type-check`)
 
+### AI OS Install Lock (2026-03-16, COMPLETE)
+- All AI OS install files tracked: `.claude/`, `docs/ai-core/`, `docs/ai/`, `docs/poker-coach-os/`
+- Created: `docs/poker-coach-os/ARCHITECTURE_MAP.md` (canonical architecture stub)
+- Fixed: drills.json surface path in truth compiler (→ drills API route)
+- `pnpm poker:ai:refresh` now reports READY with all 9 surfaces present
+- Committed: 4d45adf
+
 ### AI Truth CLI — poker:ai:refresh (2026-03-16, COMPLETE)
 - Command: `pnpm poker:ai:refresh`
 - Source: `scripts/poker-ai-refresh.ts` + `scripts/lib/` (poker-doc-collector, poker-repo-inventory, poker-artifact-writer)
@@ -62,23 +69,35 @@
 - Committed: 194b8e0
 - Proof: out/poker/sprints/concept-audit-feed-ui-adapter/20260316/ (local only — out/ is gitignored)
 
+### Daily Study Plan v1 (2026-03-24, COMPLETE)
+- `apps/table-sim/src/lib/daily-study-plan.ts` — pure adapter (buildDailyStudyPlanBundle)
+- `apps/table-sim/src/app/api/daily-study-plan/route.ts` — GET /api/daily-study-plan
+- `apps/table-sim/src/components/daily/DailyStudyPlan.tsx` — client component with session-length selector
+- `apps/table-sim/src/app/app/daily/page.tsx` — /app/daily route
+- `apps/table-sim/src/lib/daily-study-plan.test.ts` — 29 tests (all states, all lengths, all block types)
+- States: no_history, sparse_history, ready
+- Session lengths: 20 / 45 / 90 min (shapes block selection by time budget)
+- Block kinds: focus_concept, execute_intervention, retention_check, review_real_hands, secondary_concept, inspect_replay_drift
+- 279/279 tests pass, typecheck clean, build passes
+
 ---
 
 ## What is in progress
 
-### Current branch
-`codex/concept-audit-feed-ui-adapter-v1`
+Working tree: new files unstaged. Branch: `codex/concept-audit-feed-ui-adapter-v1`
 
-**Pending commit:** AI OS install files (`.claude/`, `docs/ai-core/`, `docs/ai/`, `docs/poker-coach-os/`) are untracked. Commit as a dedicated AI OS layer commit.
+Daily Study Plan v1 is complete. Ready to commit.
 
 ---
 
 ## What is next
 
 ### Immediate
-1. Commit AI OS install files in a dedicated commit
-2. Build concept audit feed UI component — wire `buildConceptAuditFeedPreview()` into a React component on the coaching surface (next sprint: `concept-audit-feed-ui-component`)
-3. Update `poker:ai:refresh` to fix `apps/table-sim/public/content/drills.json` path (surface reports missing — path may differ)
+1. Commit Daily Study Plan v1 and open PR
+2. Wire DailyStudyPlan link into the app navigation (layout.tsx or coaching surface)
+
+### Near-term
+3. Build concept audit feed UI component — wire `buildConceptAuditFeedPreview()` into a React component on the coaching surface
 
 ### Near-term
 - Canonical drill schema migration (merge CLI + Table Sim formats)
@@ -123,3 +142,6 @@
 | Context bundle (auto) | `out/ai/context/context_bundle.md` — regenerate with `pnpm poker:ai:refresh` |
 | AI snapshots | `out/ai/snapshots/` (doc_inventory, repo_snapshot, ai_readiness) |
 | AI refresh CLI | `scripts/poker-ai-refresh.ts` |
+| Daily Study Plan adapter | `apps/table-sim/src/lib/daily-study-plan.ts` |
+| Daily Study Plan API | `apps/table-sim/src/app/api/daily-study-plan/route.ts` |
+| Daily Study Plan page | `apps/table-sim/src/app/app/daily/page.tsx` |
