@@ -1,0 +1,13 @@
+{
+  "node_id": "bluff_catch_02",
+  "name": "Live Bluff Folding — Tightening vs Under-Bluffing Passive Pools",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "OOP",
+    "street": "river",
+    "pot_type": "SRP"
+  },
+  "triggers": ["bluff_catch_live", "underfold_exploit", "merge_vs_passive"],
+  "defaults": { "population_toggle": "B" }
+}

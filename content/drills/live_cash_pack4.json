@@ -1,0 +1,4007 @@
+[
+  {
+    "drill_id": "lc4_tn01_01",
+    "node_id": "turn_01",
+    "version": "1.0.0",
+    "title": "AK IP — Turn Overbet on Dry Board After Flop Check",
+    "prompt": "$2/$5 live. BTN vs BB SRP. Board K♥8♦2♠, both check flop. Turn A♦ — BB checks. You have A♣K♦ (top two pair, 95bb eff). Fire overbet or standard bet?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "hero_hand": [
+        "Ac",
+        "Kd"
+      ],
+      "effective_stack_bb": 95,
+      "board": {
+        "flop": [
+          "Kh",
+          "8d",
+          "2s"
+        ],
+        "turn": "Ad",
+        "river": null
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 60% pot"
+      },
+      {
+        "key": "RAISE",
+        "label": "Overbet 130% pot"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "turn_overbet_ip"
+      ],
+      "explanation": "Top two pair on K-8-2-A — BB checked twice. Your range dominates this runout; BB can't have AK. Overbet 130% to extract maximum from Ax, Kx holdings BB can't fold, and deny free cards to backdoor equity."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "turn_overbet_ip"
+        ],
+        "explanation": "Competent regs understand this runout. Medium sizing (60-75% pot) extracts more total value — overbetting forces folds from medium pairs that would otherwise call two streets."
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "turn_overbet_ip"
+        ],
+        "explanation": "Passive recs check-call Kx, Ax-worse, even 88 on this board. Overbet — they don't adjust for sizing. Extract as much as possible while they're sticky."
+      },
+      "C": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "turn_overbet_ip"
+        ],
+        "explanation": "Nits still have some Ax and Kx in their BB defending range. Overbet to fold out marginal pairs and build value from the Kx they won't fold."
+      }
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:overbet_construction"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Checking back top two pair 'for pot control' when opponent shows weakness twice",
+        "Betting standard sizing and leaving value on the table vs sticky passive pools"
+      ],
+      "live_pool_notes": "Live Pool B players call down with worse Ax and Kx regardless of sizing. When BB shows weakness twice, overbet with top two — they won't fold."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_tn01_02",
+    "node_id": "turn_01",
+    "version": "1.0.0",
+    "title": "AhJh IP — Semi-Bluff Overbet on Flush Draw Turn",
+    "prompt": "$2/$5 live. BTN vs BB SRP. Flop K♥9♦4♥ — BB checks, BTN checks back. Turn 2♣ (blank). BB checks. You have A♥J♥ (nut flush draw, 100bb eff). Fire overbet as semi-bluff?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "hero_hand": [
+        "Ah",
+        "Jh"
+      ],
+      "effective_stack_bb": 100,
+      "board": {
+        "flop": [
+          "Kh",
+          "9d",
+          "4h"
+        ],
+        "turn": "2c",
+        "river": null
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 50% pot"
+      },
+      {
+        "key": "RAISE",
+        "label": "Overbet 120% pot"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "turn_overbet_ip",
+        "equity_denial"
+      ],
+      "explanation": "Nut flush draw after two checks — BB's range is capped. Overbet semi-bluff: deny equity to pair+draw combos, build a pot for when you hit, and fold out weak pairs that have 3–4 outs on you."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "turn_overbet_ip"
+        ],
+        "explanation": "Regs may call down with K9/K4 two pair that beats us. Standard sizing preserves better implied odds when flush hits — overbet forces folds but also gets called by good hands more."
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "turn_overbet_ip",
+          "equity_denial"
+        ],
+        "explanation": "Pool B calls with Kx, 9x regardless of sizing. Overbet builds a bigger pot for flush hits and denies cheap river equity."
+      },
+      "C": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "turn_overbet_ip"
+        ],
+        "explanation": "Nit folds medium pairs to overbet. Build the pot for river flush value — they won't hero call with Kx."
+      }
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:semi_bluff_overbet",
+      "decision:semi_bluff"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Checking back nut flush draws after two checks — giving free cards to villain",
+        "Betting small and failing to deny equity to range-advantage situations"
+      ],
+      "live_pool_notes": "Nut flush draws after two checks are overbet semi-bluffs, not check-backs. Build the pot when range advantage is highest."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_tn01_03",
+    "node_id": "turn_01",
+    "version": "1.0.0",
+    "title": "KTo IP — No Overbet on Straight-Completing Turn",
+    "prompt": "$2/$5 live. BTN vs BB SRP. Flop K♥J♦5♣ — cbet, BB calls. Turn Q♠ (straight completes). BB checks. You have K♠T♦ (TPTK + gutshot, 90bb eff). What sizing?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "hero_hand": [
+        "Ks",
+        "Td"
+      ],
+      "effective_stack_bb": 90,
+      "board": {
+        "flop": [
+          "Kh",
+          "Jd",
+          "5c"
+        ],
+        "turn": "Qs",
+        "river": null
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 55% pot"
+      },
+      {
+        "key": "RAISE",
+        "label": "Overbet 130% pot"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [
+        "FOLD"
+      ],
+      "required_tags": [
+        "turn_overbet_ip",
+        "polar_turn_big_bet"
+      ],
+      "explanation": "KT on K-J-5-Q is TPTK + gutshot, but this is NOT an overbet spot. Q completes Broadway (AT, AJ, T9 now have straights); BB's calling range on KJ5 includes Qx, JT, T9. Medium or check-back — the board hit BB's flop-calling range heavily."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "turn_overbet_ip"
+        ],
+        "explanation": "Competent BB players have ATs, QJs, T9s in their KJ5 flop-calling range. Q completes straights — check back to control pot and avoid bloating against improved ranges."
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "turn_overbet_ip"
+        ],
+        "explanation": "Pool B stacks off with Kx and JJ/QQ on this board. Medium bet for value — but do NOT overbet; they'll call off with dominated hands that can still have equity."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "turn_overbet_ip"
+        ],
+        "explanation": "Nits with flush draw or Qx now have you beat or are drawing to nut straight. Check back — protect your stack."
+      }
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:turn_discipline",
+      "decision:sizing"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Overbetting TPTK on straight-completing turns without regard for range interaction",
+        "Treating all IP-check situations as overbet opportunities"
+      ],
+      "live_pool_notes": "Turn overbets need clear range advantage and a board that didn't improve villain's flop-calling range. Q on KJ5 is the opposite — use caution."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_tn02_01",
+    "node_id": "turn_02",
+    "version": "1.0.0",
+    "title": "KQ OOP — Call Turn Overbet as Bluff-Catcher vs Aggro Rec",
+    "prompt": "$2/$5 live. BB vs BTN SRP. You bet flop K♥7♦2♣, BTN calls. Turn 3♠ (blank). You check. BTN overbets 135% pot. You have K♣Q♦ (TPTK, 100bb eff). Pool B aggro rec. Call?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "Kc",
+        "Qd"
+      ],
+      "effective_stack_bb": 100,
+      "board": {
+        "flop": [
+          "Kh",
+          "7d",
+          "2c"
+        ],
+        "turn": "3s",
+        "river": null
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "bet",
+          "size_pct_pot": 60
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 135
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Check-Raise"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "turn_overbet_faced",
+        "bluff_catch_live"
+      ],
+      "explanation": "TPTK on K-7-2-3 vs a Pool B aggro rec overbet — their turn overbet range includes many bluffs (flush draws, air, weak Kx). Call and re-evaluate the river. Check-raising bloats the pot unnecessarily."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "turn_overbet_faced"
+        ],
+        "explanation": "Competent regs turn-overbet this dry board with a very nutted range (77, 22, K7, K3, K2). KQ is dominated — fold vs reg overbet on K-7-2-3."
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [],
+        "required_tags": [
+          "turn_overbet_faced",
+          "bluff_catch_live"
+        ],
+        "explanation": "Aggro recs overbet with AK, semi-bluffs, even worse Kx. TPTK is a clear call — let them bluff into you."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "turn_overbet_faced"
+        ],
+        "explanation": "Nit turn overbets signal sets or two pair. Fold TPTK — their range for this action is almost always ahead of KQ."
+      }
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:facing_overbet",
+      "decision:bluff_catch"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Folding TPTK to every turn overbet regardless of villain pool type",
+        "Check-raising into nutted IP overbet ranges and bloating the pot"
+      ],
+      "live_pool_notes": "The correct response to a turn overbet is pool-dependent. Pool B aggro recs overbet too wide — TPTK is a clear call. Pool A regs overbet with nuts — TPTK is a fold."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_tn02_02",
+    "node_id": "turn_02",
+    "version": "1.0.0",
+    "title": "88 OOP — Fold Middle Pair to Turn Overbet",
+    "prompt": "$2/$5 live. BB vs BTN SRP. Flop K♥J♦5♣ — BB checks, BTN cbets, BB calls. Turn 3♠ (blank). BB checks. BTN overbets 130% pot. BB has 8♠8♦ (middle pair below board, 95bb eff).",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "8s",
+        "8d"
+      ],
+      "effective_stack_bb": 95,
+      "board": {
+        "flop": [
+          "Kh",
+          "Jd",
+          "5c"
+        ],
+        "turn": "3s",
+        "river": null
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 130
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Check-Raise"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "turn_overbet_faced"
+      ],
+      "explanation": "88 is middle pair on K-J-5-3. Even vs aggro pools, a turn overbet on this dry coordinated board puts 88 in a terrible spot — Kx, Jx, sets, two pair all have you dominated with few outs. Fold across all pools."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "turn_overbet_faced"
+        ],
+        "explanation": "Clear fold vs reg overbet. Their range has you drawing to two outs most of the time."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "turn_overbet_faced"
+        ],
+        "explanation": "Even Pool B aggro rec overbets have enough Kx/Jx to make calling 88 a losing proposition. You have at most 5 outs — bad price to call 130% pot."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "turn_overbet_faced"
+        ],
+        "explanation": "Nit overbet = top of their range. Fold immediately."
+      }
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:facing_overbet",
+      "decision:fold_discipline"
+    ],
+    "difficulty": 1,
+    "coaching_context": {
+      "common_mistakes": [
+        "Calling turn overbets with middle pair 'because I floated the flop already'",
+        "Using sunk cost reasoning to justify calls with dominated holdings"
+      ],
+      "live_pool_notes": "Flop calls don't obligate turn calls. Middle pair below a K-J board facing an overbet is a clear fold — the money you put in on the flop is gone."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_tn02_03",
+    "node_id": "turn_02",
+    "version": "1.0.0",
+    "title": "KJ OOP — Two Pair on Flush Board vs Turn Overbet",
+    "prompt": "$2/$5 live. BB vs BTN SRP. Flop K♥J♥5♠ — BB leads, BTN calls. Turn 2♦ (blank). BB checks. BTN overbets 120% pot. BB has K♣J♦ (top two pair, no flush, 90bb eff).",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "turn",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "Kc",
+        "Jd"
+      ],
+      "effective_stack_bb": 90,
+      "board": {
+        "flop": [
+          "Kh",
+          "Jh",
+          "5s"
+        ],
+        "turn": "2d",
+        "river": null
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "bet",
+          "size_pct_pot": 55
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "turn",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 120
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Check-Raise All-In"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [
+        "FOLD"
+      ],
+      "required_tags": [
+        "turn_overbet_faced",
+        "bluff_catch_live"
+      ],
+      "explanation": "KJ two pair on K♥J♥5-2 — IP overbet after calling a flop lead. BTN range includes flush draws and semi-bluffs with Ax♥ that float flops, plus KQ/QJ that may overbet turn. Call and evaluate river — KJ is good enough to call once on this board."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "turn_overbet_faced"
+        ],
+        "explanation": "Competent regs who call a lead on KJ5 flush board and overbet turn have strong distribution: KK, JJ, 55, K5s, J5s, flush draws. KJ two pair is beat a lot here."
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [],
+        "required_tags": [
+          "turn_overbet_faced",
+          "bluff_catch_live"
+        ],
+        "explanation": "Pool B aggro recs float flops with flush draws and overbet turns. KJ two pair crushes their bluff range — call and let them hang themselves."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "turn_overbet_faced"
+        ],
+        "explanation": "Nit called a flop lead and now overbets turn — they have a flush, set, or KK/JJ. Fold KJ two pair."
+      }
+    },
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:facing_overbet",
+      "decision:bluff_catch"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Folding two pair to every turn overbet without adjusting for pool tendencies",
+        "Check-raising two pair into IP overbet range and committing without the nuts"
+      ],
+      "live_pool_notes": "KJ two pair on a flush board is a call vs aggro recs who float flops with flush draws, but a fold vs regs who overbet with strong distribution. Pool ID is critical here."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_dk01_01",
+    "node_id": "donk_01",
+    "version": "1.0.0",
+    "title": "AK IP — Raise the Small Donk on Ace-High Board",
+    "prompt": "$2/$5 live. BTN vs BB SRP. Flop A♥7♦2♣ — BB leads small (25% pot). You have A♣K♠ (TPBK, 100bb eff). Raise, call, or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "hero_hand": [
+        "Ac",
+        "Ks"
+      ],
+      "effective_stack_bb": 100,
+      "board": {
+        "flop": [
+          "Ah",
+          "7d",
+          "2c"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 25
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise to 3x"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "donk_small",
+        "merge_vs_passive"
+      ],
+      "explanation": "Small donk from BB on A-7-2 rainbow is a thin lead with a wide range — Ax-worse, 7x, weak pairs. TPBK (AK) should raise: build the pot, charge draws, and fold out the weak donk range that can't continue vs a raise."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "donk_small"
+        ],
+        "explanation": "Competent BBs can small-donk with 77/22 (sets) or Ax-two-pair hands. Call and re-evaluate turn before committing — TPBK is strong but not the nuts."
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "donk_small",
+          "merge_vs_passive"
+        ],
+        "explanation": "Pool B small donks are capped to weak Ax, pair+draw hands. Raise to 3x — fold out 7x and weak pairs, build pot vs worse Ax that can't fold."
+      },
+      "C": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "donk_small"
+        ],
+        "explanation": "Nit small donks tend to be value-oriented but capped. Raise — they fold weaker hands and continue only with two pair or better, which you still beat with AK."
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:donk_response",
+      "decision:raise"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Calling every small donk passively — missing raise value with TPBK",
+        "Folding to small donks out of fear of sets — 77/22 are rare and small donks rarely show sets"
+      ],
+      "live_pool_notes": "Live Pool B small donk bets are often thin probes with weak pairs or draws. Raise TPBK to extract value and fold out their weak donk range."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_dk01_02",
+    "node_id": "donk_01",
+    "version": "1.0.0",
+    "title": "88 IP — Call Small Donk on Jack-High Board",
+    "prompt": "$2/$5 live. BTN vs BB SRP. Flop J♥7♦3♣ — BB leads small (30% pot). You have 8♣8♠ (middle pair, 95bb eff). Raise, call, or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "hero_hand": [
+        "8c",
+        "8s"
+      ],
+      "effective_stack_bb": 95,
+      "board": {
+        "flop": [
+          "Jh",
+          "7d",
+          "3c"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 30
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise to 3x"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "donk_small"
+      ],
+      "explanation": "88 on J-7-3 is middle pair — strong enough to call a small donk, but raising is over-aggressive when BB can have Jx that dominates you. Call, float, and re-evaluate on the turn."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [],
+        "required_tags": [
+          "donk_small"
+        ],
+        "explanation": "Regs can small-donk J7/J3 two pair or 77/33 sets. 88 is a call — you have showdown value but not a raising hand vs their value range."
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [],
+        "required_tags": [
+          "donk_small"
+        ],
+        "explanation": "Pool B donks often probe with Jx and 7x. 88 floats and realizes equity turn — raising creates awkward spots vs their top pair holdings."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "donk_small"
+        ],
+        "explanation": "Nit small donks on J73 tend to have value — Jx or better. 88 is marginal; a fold is defensible if villain is very tight, but a call is standard."
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:donk_response",
+      "decision:call"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Raising 88 into a small donk and building a bloated pot with middle pair",
+        "Folding middle pair to a small probe — giving up too much equity"
+      ],
+      "live_pool_notes": "Middle pair calls small donks — it's not a raising hand and not a fold. Float and see the turn before making a bigger decision."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_dk01_03",
+    "node_id": "donk_01",
+    "version": "1.0.0",
+    "title": "65s IP — Fold Air to Small Donk on Ace-High Board",
+    "prompt": "$2/$5 live. BTN vs BB SRP. Flop A♥K♦J♣ — BB leads small (25% pot). You have 6♠5♠ (whiffed, 100bb eff). Raise, call, or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "hero_hand": [
+        "6s",
+        "5s"
+      ],
+      "effective_stack_bb": 100,
+      "board": {
+        "flop": [
+          "Ah",
+          "Kd",
+          "Jc"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 25
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call (float)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise (bluff)"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "donk_small"
+      ],
+      "explanation": "AKJ is a board that crushes hero's 65s range. No pair, no draw, no backdoor flush draw. Even though the donk is small, 65s has no equity path. Fold and protect the stack."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "donk_small"
+        ],
+        "explanation": "AKJ hits regs' BB defending range extremely well. No reason to float 65s with zero equity on this board."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "donk_small"
+        ],
+        "explanation": "Passive recs donk AKJ with AQ, KJ, AT — all of which crush 65s. Fold and move on."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "donk_small"
+        ],
+        "explanation": "Nit donk on AKJ = Ax/Kx/Jx strength. Clean fold."
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:donk_response",
+      "decision:fold_discipline"
+    ],
+    "difficulty": 1,
+    "coaching_context": {
+      "common_mistakes": [
+        "Floating small donks with air because the sizing is small",
+        "Assuming small donk = bluff range without considering board texture"
+      ],
+      "live_pool_notes": "A small donk does NOT mean a weak hand. On AKJ, BB's donking range is value-heavy regardless of sizing. Fold air without backdoor equity."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_dk02_01",
+    "node_id": "donk_02",
+    "version": "1.0.0",
+    "title": "JJ IP — Fold to Large Polar Donk on KQ9",
+    "prompt": "$2/$5 live. BTN vs BB SRP. Flop K♥Q♦9♣ — BB donks 90% pot. You have J♠J♦ (overpair below board, 100bb eff). Raise, call, or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "hero_hand": [
+        "Js",
+        "Jd"
+      ],
+      "effective_stack_bb": 100,
+      "board": {
+        "flop": [
+          "Kh",
+          "Qd",
+          "9c"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 90
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise All-In"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "donk_large",
+        "polar_turn_big_bet"
+      ],
+      "explanation": "Large polar donk on K-Q-9 — BB's range includes KQ, K9, Q9, KK, QQ, 99, JT (nut straight), all of which demolish JJ. Even the 'bluff' side of a polar donk often has JTs or T8s with huge equity vs JJ. Fold the overpair."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "donk_large"
+        ],
+        "explanation": "Competent regs large-donk K-Q-9 with top of their range (two pair+, nut draws). JJ is crushed. Fold."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "donk_large"
+        ],
+        "explanation": "Aggro recs large-donk wider and may have Kx or a draw. Calling JJ is marginal — even vs a wide polar range, JJ has only about 30% equity vs a reasonable donk range on KQ9. Fold is correct."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "donk_large"
+        ],
+        "explanation": "Nit large donk = two pair or better. Fold immediately."
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:donk_large",
+      "decision:fold_discipline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Calling large donks with overpairs because 'they could be bluffing'",
+        "Raising JJ into a polar donk range on K-Q-9 and stacking off far behind"
+      ],
+      "live_pool_notes": "Large donks on connected high boards are near-polar: strong value or nut draw. JJ has no straight draw and is behind two pair on KQ9. Fold with discipline."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_dk02_02",
+    "node_id": "donk_02",
+    "version": "1.0.0",
+    "title": "KK IP — Raise for Value vs Large Donk on K92",
+    "prompt": "$2/$5 live. BTN vs BB SRP. Flop K♥9♦2♠ — BB donks 85% pot. You have K♠K♣ (top set, 100bb eff). Raise, call, or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "hero_hand": [
+        "Ks",
+        "Kc"
+      ],
+      "effective_stack_bb": 100,
+      "board": {
+        "flop": [
+          "Kh",
+          "9d",
+          "2s"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 85
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call (slow-play)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise for value"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "donk_large"
+      ],
+      "explanation": "Top set vs a large polar donk — raise for value. BB's donk range includes K9/92 two pair, 99/22 sets, and draws. You have them crushed. Don't slow-play top set when they're already building the pot for you."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "donk_large"
+        ],
+        "explanation": "Competent BBs large-donk with some of their range to fold out floating IP ranges. Slow-playing top set vs a reg can work — call and let them fire again on turn."
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "donk_large"
+        ],
+        "explanation": "Aggro recs who large-donk are committed to the pot mentally. Raise and build — they'll often call off with K9 two pair or 99."
+      },
+      "C": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "donk_large"
+        ],
+        "explanation": "Nit large donk = strong two pair or set. You're ahead of some, tied or winning vs 99/22 (KK beats them). Raise and protect vs a backdoor flush completing."
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:donk_large",
+      "decision:value_raise"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Slow-playing top set when villain is already building the pot with a large donk",
+        "Calling when raising extracts more from two pair hands that cannot fold"
+      ],
+      "live_pool_notes": "When villain is large-donking into you and you have top set, raise and build the pot. Their donk range includes hands that will stack off vs a raise — don't let them see the turn for free."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_dk02_03",
+    "node_id": "donk_02",
+    "version": "1.0.0",
+    "title": "QsJs IP — Call Nut Draws vs Large Polar Donk on A-high",
+    "prompt": "$2/$5 live. BTN vs BB SRP. Flop A♠K♠5♣ — BB donks 80% pot. You have Q♠J♠ (nut flush draw + gutshot, 100bb eff). Raise, call, or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "flop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "BB",
+      "hero_hand": [
+        "Qs",
+        "Js"
+      ],
+      "effective_stack_bb": 100,
+      "board": {
+        "flop": [
+          "As",
+          "Ks",
+          "5c"
+        ],
+        "turn": null,
+        "river": null
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "flop",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 80
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call (drawing)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise (semi-bluff)"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [
+        "RAISE"
+      ],
+      "required_tags": [
+        "donk_large",
+        "equity_denial"
+      ],
+      "explanation": "Nut flush draw + gutshot vs a large polar donk on A-K-5 — calling has strong implied odds. Your QsJs makes the nut flush on any spade and the nut straight with T or J. The implied odds vs BB's value-heavy donk range justify calling. Raise is too expensive vs nuts hands in the range."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "donk_large"
+        ],
+        "explanation": "Competent BBs large-donk AK5 with Ax/Kx top pair. QJs as a semi-bluff raise can fold out their weaker value — but implied odds of calling are also excellent."
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [],
+        "required_tags": [
+          "donk_large"
+        ],
+        "explanation": "Pool B donks value: AK, A5, K5, AA/KK/55. Against this range, QJs has 35-40% equity and nut outs. Call and bust them when you hit."
+      },
+      "C": {
+        "correct": "CALL",
+        "accepted": [],
+        "required_tags": [
+          "donk_large"
+        ],
+        "explanation": "Nit donk = strong hand. Call for implied odds — they'll pay off when your flush hits."
+      }
+    },
+    "tags": [
+      "street:flop",
+      "pot:srp",
+      "position:ip",
+      "spot:donk_large",
+      "decision:draw_call"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Folding nut draws to large donks without calculating implied odds",
+        "Raising into polar value ranges with draws and getting stacked on the flop"
+      ],
+      "live_pool_notes": "Nut draws have excellent implied odds vs value-heavy polar donk ranges. Call and extract maximum on the turn/river when you hit — don't fold draws because the donk is large."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_cr03_01",
+    "node_id": "cr_03",
+    "version": "1.0.0",
+    "title": "A8 OOP — Value Bet River After Turn Check-Raise",
+    "prompt": "$2/$5 live. BB vs BTN SRP. Turn: board A♥8♦3♣8♠ — BB check-raised with A♣8♥ (full house), BTN called. River 5♦ (blank). BB should fire river value?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "Ac",
+        "8h"
+      ],
+      "effective_stack_bb": 70,
+      "board": {
+        "flop": [
+          "Ah",
+          "8d",
+          "3c"
+        ],
+        "turn": "8s",
+        "river": "5d"
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 65
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "raise",
+          "size_pct_pot": 200
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check Back (give up)"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet 50% pot"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 80% pot (value)"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "cr_river_follow_through"
+      ],
+      "explanation": "Full house after turn check-raise — no reason to check back river. BTN called a massive turn CR and still has Ax, 3x, and worse hands that will pay off. Bet 80% for value. Check-back is a massive mistake here."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "cr_river_follow_through"
+        ],
+        "explanation": "Competent regs who call large turn CRs sometimes have 33, A3, or AA. Medium sizing (50%) extracts from all paying hands without over-sizing vs a capped range."
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "cr_river_follow_through"
+        ],
+        "explanation": "Pool B called the turn CR with Ax or even worse. Bet large — they'll call 80% with top pair. Extract maximum."
+      },
+      "C": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "cr_river_follow_through"
+        ],
+        "explanation": "Nit called the turn CR — they have something real. Bet 80% to extract max from their strong-but-not-nut holding."
+      }
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:cr_follow_through",
+      "decision:value_bet"
+    ],
+    "difficulty": 1,
+    "coaching_context": {
+      "common_mistakes": [
+        "Checking back the river after a turn check-raise with the best hand — extreme value loss",
+        "Betting too small on the river after showing maximum strength on the turn"
+      ],
+      "live_pool_notes": "You check-raised the turn for maximum strength. Follow through on the river with value. Checking back a full house in a bloated pot is a cardinal mistake."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_cr03_02",
+    "node_id": "cr_03",
+    "version": "1.0.0",
+    "title": "Missed Flush Draw OOP — Bluff River After Turn CR",
+    "prompt": "$2/$5 live. BB vs BTN SRP. Board J♥T♥5♦ — BB calls flop cbet. Turn K♥ — BB check-raises with A♥2♥ (nut flush draw), BTN calls. River 3♦ (flush misses). What now?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "Ah",
+        "2h"
+      ],
+      "effective_stack_bb": 55,
+      "board": {
+        "flop": [
+          "Jh",
+          "Th",
+          "5d"
+        ],
+        "turn": "Kh",
+        "river": "3d"
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 60
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "raise",
+          "size_pct_pot": 180
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check Back (give up)"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (30% pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet Large (75% pot bluff)"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "FOLD"
+      ],
+      "required_tags": [
+        "cr_river_follow_through",
+        "check_raise_live"
+      ],
+      "explanation": "Turn CR as semi-bluff missed. You've shown maximum strength — a river check looks like a missed draw. Fire the bluff follow-through vs Pool A/C who can fold KJ, KT. Your line is credible with KQ, KK, AK; bluff with draws that missed."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "RAISE",
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "cr_river_follow_through"
+        ],
+        "explanation": "Competent regs call turn CRs with some KJ/KT but can fold river to continued aggression. Bluff the river — your semi-bluff turn CR range naturally contains flush draws that missed."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "cr_river_follow_through"
+        ],
+        "explanation": "Pool B passive recs call down with KJ/KT regardless. No fold equity — check it back and accept the loss. River bluffs against callers are -EV."
+      },
+      "C": {
+        "correct": "RAISE",
+        "accepted": [],
+        "required_tags": [
+          "cr_river_follow_through"
+        ],
+        "explanation": "Nits can fold KJ/KT on a missed draw line. Bluff the river — they respect your turn CR story."
+      }
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:cr_follow_through",
+      "decision:bluff"
+    ],
+    "difficulty": 4,
+    "coaching_context": {
+      "common_mistakes": [
+        "Always giving up when a semi-bluff misses after a turn check-raise — leaving fold equity on the table",
+        "Bluffing into passive callers who will never fold — pool-blind bluffing"
+      ],
+      "live_pool_notes": "River bluff follow-through after a turn CR is pool-dependent. Against capable regs (Pool A) or nits (Pool C), fire the river — your line tells a credible story. Against Pool B callers, check it down."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_cr03_03",
+    "node_id": "cr_03",
+    "version": "1.0.0",
+    "title": "Missed OESD OOP — Shut Down River After Turn CR",
+    "prompt": "$2/$5 live. BB vs BTN SRP. Board Q♠J♦7♣ — cbet called. Turn T♦ — BB check-raises with 9♦8♦ (OESD), BTN calls. River 2♠ (missed). Pool B: over-caller. Fire or give up?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "9d",
+        "8d"
+      ],
+      "effective_stack_bb": 52,
+      "board": {
+        "flop": [
+          "Qs",
+          "Jd",
+          "7c"
+        ],
+        "turn": "Td",
+        "river": "2s"
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 60
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "raise",
+          "size_pct_pot": 180
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "check"
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Check Back (give up)"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (25% pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet Large (75% pot bluff)"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "cr_river_follow_through"
+      ],
+      "explanation": "Missed OESD on Q-J-7-T-2 vs a Pool B over-caller. Your straight missed, villain has Q-J-T combos that smash this board and won't fold. Shut down — no fold equity against passive callers who called a large turn CR."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "RAISE",
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "cr_river_follow_through"
+        ],
+        "explanation": "Vs a competent reg, a missed straight draw CR can bluff-fire the river — QJ/QT can fold. But baseline Pool B: give up."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "cr_river_follow_through"
+        ],
+        "explanation": "Pool B called the turn CR — they have Qx/Jx/sets that won't fold. No fold equity. Check back and show the hand."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "cr_river_follow_through"
+        ],
+        "explanation": "Nit called the turn CR — they have it. Shut down."
+      }
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:cr_follow_through",
+      "decision:shut_down"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Auto-firing river bluffs after turn CRs regardless of pool and board — bleeding chips",
+        "Bluffing into passive callers who 'couldn't possibly call' — they always do"
+      ],
+      "live_pool_notes": "Against Pool B over-callers, missed semi-bluff CRs should check back the river. They called for a reason. Save the bluff follow-through for capable pools."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_bc01_01",
+    "node_id": "bluff_catch_01",
+    "version": "1.0.0",
+    "title": "TT OOP — Call River Overbet from Aggro Rec (Bluff-Catch Widen)",
+    "prompt": "$2/$5 live. BB vs BTN SRP. Board A♥K♦9♣2♠5♦ (runout complete). Villain Pool B aggro rec fires river overbet 140% pot. You have T♠T♦ (second pair on AK952). Call or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "Ts",
+        "Td"
+      ],
+      "effective_stack_bb": 80,
+      "board": {
+        "flop": [
+          "Ah",
+          "Kd",
+          "9c"
+        ],
+        "turn": "2s",
+        "river": "5d"
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 40
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 140
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Check-Raise"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "bluff_catch_live",
+        "overbluff_punish"
+      ],
+      "explanation": "Pool B aggro rec overbets rivers with wide bluff range — flush draws that missed, straight draws that bricked, air. TT on AK952 beats all their missed draws. Call and punish the overbluff frequency."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "bluff_catch_live"
+        ],
+        "explanation": "Competent reg river overbet after checking back turn = polarized. TT on AK952 is only second pair — fold vs reg overbet."
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [],
+        "required_tags": [
+          "bluff_catch_live",
+          "overbluff_punish"
+        ],
+        "explanation": "Aggro recs fire river overbets with missed draws and air at high frequency. TT beats all of it. Call."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "bluff_catch_live"
+        ],
+        "explanation": "Nit river overbet = strong value. Fold TT immediately."
+      }
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:bluff_catch",
+      "decision:call"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Folding bluff-catchers to river overbets without adjusting for pool type",
+        "Check-raising TT into a polar overbet range — worse hands fold, better hands call"
+      ],
+      "live_pool_notes": "Pool B aggro recs overbet rivers at very high frequencies with air and missed draws. Widen your bluff-catching range vs these players — TT is a standard call."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_bc01_02",
+    "node_id": "bluff_catch_01",
+    "version": "1.0.0",
+    "title": "QQ OOP — Call River Bet on Paired Board vs Aggro Player",
+    "prompt": "$2/$5 live. BB vs BTN SRP. Board K♥K♦7♣3♠J♦. Villain fires 75% pot on river after checking back turn. You have Q♠Q♦ (second pair under KK). Pool B rec. Call or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "Qs",
+        "Qd"
+      ],
+      "effective_stack_bb": 75,
+      "board": {
+        "flop": [
+          "Kh",
+          "Kd",
+          "7c"
+        ],
+        "turn": "3s",
+        "river": "Jd"
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 33
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 75
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Check-Raise"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "bluff_catch_live",
+        "overbluff_punish"
+      ],
+      "explanation": "QQ on K-K-7-3-J vs a rec who checked turn then fires river. Pool B fires with Jx, 77, random pair+draw combos. A turn check-back caps their range — QQ is a bluff-catcher that beats their river betting range. Call."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "bluff_catch_live"
+        ],
+        "explanation": "Reg checks turn, fires river — could be a slowplay (Kx, JJ) or credible bluff. QQ is marginal; fold is reasonable vs reg river bets."
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [],
+        "required_tags": [
+          "bluff_catch_live",
+          "overbluff_punish"
+        ],
+        "explanation": "Pool B fires river with Jx, 77, and draws. QQ is ahead of most of that — call."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "bluff_catch_live"
+        ],
+        "explanation": "Nit checked back turn and fires river — slowplayed Kx or hit the Jack. Fold QQ."
+      }
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:bluff_catch",
+      "decision:call"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Folding QQ to every river bet on paired boards without adjusting for pool tendencies",
+        "Over-weighting Kx combos in villain's river betting range after a turn check-back"
+      ],
+      "live_pool_notes": "A turn check-back caps villain's range. On K-K-7-3-J, Pool B fires river with Jx and worse — QQ is a clear call vs these players."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_bc01_03",
+    "node_id": "bluff_catch_01",
+    "version": "1.0.0",
+    "title": "AQ OOP — Too Thin to Bluff-Catch on Straight Board vs River Overbet",
+    "prompt": "$2/$5 live. BB vs BTN SRP. Board 9♠8♦7♣K♥2♦. Villain fires 120% pot river overbet. You have A♠Q♦ (ace-high, no pair). Pool B aggro rec. Call?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "As",
+        "Qd"
+      ],
+      "effective_stack_bb": 78,
+      "board": {
+        "flop": [
+          "9s",
+          "8d",
+          "7c"
+        ],
+        "turn": "Kh",
+        "river": "2d"
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 120
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call (hero-call)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Check-Raise Bluff"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "bluff_catch_live",
+        "overbluff_punish"
+      ],
+      "explanation": "Ace-high on 9-8-7-K-2 vs a river overbet. Even vs Pool B aggro recs, ace-high is too thin on a straight-possible board. BTN could have JT, T6, 65 straights, or Kx. Too much value in villain's range for an ace-high call."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "bluff_catch_live"
+        ],
+        "explanation": "Clear fold vs reg overbet on a straight board. Ace-high has virtually no showdown value."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "bluff_catch_live",
+          "overbluff_punish"
+        ],
+        "explanation": "Even vs Pool B aggro recs, this board has too many straights and Kx. Fold — you need at least a pair to bluff-catch here."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "bluff_catch_live"
+        ],
+        "explanation": "Nit overbet on a straight board = they have it. Fold."
+      }
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:bluff_catch",
+      "decision:fold_discipline"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "common_mistakes": [
+        "Hero-calling river overbets with ace-high against wide bluffing pools",
+        "Widening bluff-catch range beyond reasonable showdown value hands"
+      ],
+      "live_pool_notes": "Bluff-catching requires showdown value. Ace-high on a straight board is too thin — even Pool B players have enough straights and Kx here."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_bc02_01",
+    "node_id": "bluff_catch_02",
+    "version": "1.0.0",
+    "title": "KJ Two Pair OOP — Fold to River Check-Raise from Passive Station",
+    "prompt": "$2/$5 live. BB bets three streets vs BTN passive station. Board J♥9♦4♣2♠K♦. Hero has K♠J♦ (two pair). River: passive station check-calls flop and turn, then check-raises river 3x. Fold or call?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "Ks",
+        "Jd"
+      ],
+      "effective_stack_bb": 65,
+      "board": {
+        "flop": [
+          "Jh",
+          "9d",
+          "4c"
+        ],
+        "turn": "2s",
+        "river": "Kd"
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "bet",
+          "size_pct_pot": 55
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "bet",
+          "size_pct_pot": 60
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "bet",
+          "size_pct_pot": 65
+        },
+        {
+          "street": "river",
+          "player": "BTN",
+          "action": "raise",
+          "size_pct_pot": 300
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "raise",
+        "size_pct_pot": 300
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "4-Bet All-In"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "bluff_catch_live",
+        "underfold_exploit"
+      ],
+      "explanation": "Passive station check-called two streets and raised the river. Passive players almost never bluff-raise rivers — when they raise, it means the nuts (KK, JJ, K9, 99 here). Fold two pair. Their river raise range has you crushed."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "bluff_catch_live"
+        ],
+        "explanation": "Competent reg river raises can include some bluffs, but KJ vs a river check-raise after calling two streets is a difficult spot — fold is safe."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "bluff_catch_live",
+          "underfold_exploit"
+        ],
+        "explanation": "Passive stations NEVER river check-raise as a bluff. When they raise, they have it. Fold KJ two pair without hesitation."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "bluff_catch_live"
+        ],
+        "explanation": "Nit river raise after calling two streets = nuts. Fold instantly."
+      }
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:bluff_catch_tighten",
+      "decision:fold_discipline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Calling river raises with two pair against passive players who 'couldn't possibly have that'",
+        "Treating all river raises the same regardless of villain pool type"
+      ],
+      "live_pool_notes": "Passive stations don't raise rivers as bluffs. When they raise, lay down two pair and save the stack."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_bc02_02",
+    "node_id": "bluff_catch_02",
+    "version": "1.0.0",
+    "title": "8x Middle Pair OOP — Fold River Bet from Passive Pool",
+    "prompt": "$2/$5 live. BB vs BTN SRP. Board A♥8♦3♣5♦K♠. Passive BTN rec bets 65% pot on river. You have 8♠7♠ (middle pair — 8s, 100bb eff). Call or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "8s",
+        "7s"
+      ],
+      "effective_stack_bb": 85,
+      "board": {
+        "flop": [
+          "Ah",
+          "8d",
+          "3c"
+        ],
+        "turn": "5d",
+        "river": "Ks"
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 65
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Check-Raise"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "bluff_catch_live",
+        "underfold_exploit"
+      ],
+      "explanation": "Passive BTN checked turn and fires river 65% pot. Middle pair (8s) on A-8-3-5-K — K on river improved many of their turn-check hands (KQ, KJ, K5). Passive players rarely bluff rivers after turn check-backs. Fold middle pair."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "bluff_catch_live"
+        ],
+        "explanation": "Competent reg checked turn and fires river — could be a well-timed bluff. Middle pair is a marginal call vs reg river bets on this board."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "bluff_catch_live",
+          "underfold_exploit"
+        ],
+        "explanation": "Passive recs check back turn and fire river with strong hands. K on river improved many of their holdings. Fold middle pair."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "bluff_catch_live"
+        ],
+        "explanation": "Nit river bet after checking turn = improved value. Fold middle pair."
+      }
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:bluff_catch_tighten",
+      "decision:fold_discipline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Calling river bets with middle pair against passive players who rarely bluff",
+        "Treating river bets as bluffs because villain checked the turn"
+      ],
+      "live_pool_notes": "Passive pool river bets after turn check-backs are value-heavy. Middle pair is not good enough to call — fold and protect your stack."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_bc02_03",
+    "node_id": "bluff_catch_02",
+    "version": "1.0.0",
+    "title": "TT OOP — Fold Third Pair vs River Bet on Ace-High Board",
+    "prompt": "$2/$5 live. BB vs BTN SRP. Board Q♥J♦5♣9♠A♦. Passive BTN bets 60% pot on river after calling flop cbet and checking turn. You have T♥T♦ (third pair, 80bb eff). Call or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "Th",
+        "Td"
+      ],
+      "effective_stack_bb": 80,
+      "board": {
+        "flop": [
+          "Qh",
+          "Jd",
+          "5c"
+        ],
+        "turn": "9s",
+        "river": "Ad"
+      },
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": {
+        "action": "bet",
+        "size_pct_pot": 60
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Check-Raise"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "bluff_catch_live",
+        "underfold_exploit"
+      ],
+      "explanation": "TT on Q-J-5-9-A is third pair. The A on river expands BTN's betting range with made aces. Passive BTN checked turn and fires river with Ax, Qx, Jx hands. Third pair (TT) doesn't have enough equity to call."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "bluff_catch_live"
+        ],
+        "explanation": "Reg checks turn and fires river after an A — likely Ax. TT is a fold."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "bluff_catch_live",
+          "underfold_exploit"
+        ],
+        "explanation": "Pool B passive BTN checked turn and bets river with Ax they hit. Third pair can't beat their river range. Fold."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "bluff_catch_live"
+        ],
+        "explanation": "Nit checked turn and fired river after an ace — they have an ace. Fold."
+      }
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:bluff_catch_tighten",
+      "decision:fold_discipline"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Calling with underpairs on ace-high rivers because the pot is big",
+        "Treating all river bets as potential bluffs regardless of pool and board texture"
+      ],
+      "live_pool_notes": "An ace on the river improves passive players' ranges significantly. Third pair is not a bluff-catcher vs a passive player's river bet — fold and save chips."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_bl01_01",
+    "node_id": "blind_01",
+    "version": "1.0.0",
+    "title": "85s SB — Fold Weak Suited Gapper vs BTN Open",
+    "prompt": "$2/$5 live. BTN opens $15 (3x). You're SB with 8♦5♦ (100bb). Complete, fold, or 3-bet?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "SB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "8d",
+        "5d"
+      ],
+      "effective_stack_bb": 100,
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "raise",
+        "size_bb": 3
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Complete ($13 more)"
+      },
+      {
+        "key": "RAISE",
+        "label": "3-Bet"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "blind_live_mistake"
+      ],
+      "explanation": "8-5 suited is playable IP but a clear fold from SB. Completing OOP vs BTN creates a tough postflop situation out of position for every street. Fold the marginal suited gapper."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "blind_live_mistake"
+        ],
+        "explanation": "Competent BTN opens wide and plays well IP. 85s OOP from SB is a losing call — fold."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "blind_live_mistake"
+        ],
+        "explanation": "Pool B BTN plays too many hands postflop but still wins IP. Fold 85s from SB — completing marginal hands OOP bleeds money over time."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "blind_live_mistake"
+        ],
+        "explanation": "Nit BTN opening range dominates 85s. Fold."
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:srp",
+      "position:oop",
+      "spot:sb_complete_mistake"
+    ],
+    "difficulty": 1,
+    "coaching_context": {
+      "common_mistakes": [
+        "Completing SB with marginal suited hands because of pot odds",
+        "Underestimating the positional disadvantage of playing OOP postflop for three streets"
+      ],
+      "live_pool_notes": "Completing SB with marginal hands is one of the most common live cash leaks. You're OOP for every postflop street — fold 85s and wait for better spots."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_bl01_02",
+    "node_id": "blind_01",
+    "version": "1.0.0",
+    "title": "AQo SB — 3-Bet, Don't Call, vs BTN Open",
+    "prompt": "$2/$5 live. BTN opens $15 (3x). You're SB with A♥Q♦ (100bb). Call, 3-bet, or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "SB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "Ah",
+        "Qd"
+      ],
+      "effective_stack_bb": 100,
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "raise",
+        "size_bb": 3
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call (OOP flat)"
+      },
+      {
+        "key": "RAISE",
+        "label": "3-Bet to $50"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [],
+      "required_tags": [
+        "blind_live_mistake",
+        "preflop_3bet"
+      ],
+      "explanation": "AQo from SB vs BTN is a mandatory 3-bet. Calling OOP vs BTN's wide range is a leak — you play every postflop street out of position. 3-bet to $50-60 and play HU in position or take it down pre."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "RAISE",
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "blind_live_mistake",
+          "preflop_3bet"
+        ],
+        "explanation": "Reg BTN opens wide. 3-bet AQo — it's both value and fold-equity. Calling OOP gives up initiative."
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [],
+        "required_tags": [
+          "blind_live_mistake",
+          "preflop_3bet"
+        ],
+        "explanation": "Pool B BTN rarely 4-bets. Size to $50 — they call with wide ranges that AQo dominates, and you play HU OOP with initiative and a strong hand."
+      },
+      "C": {
+        "correct": "RAISE",
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "blind_live_mistake",
+          "preflop_3bet"
+        ],
+        "explanation": "Nit BTN 4-bets only with QQ+/AK. 3-bet AQo, fold to a 4-bet."
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:srp",
+      "position:oop",
+      "spot:sb_3bet"
+    ],
+    "difficulty": 1,
+    "coaching_context": {
+      "common_mistakes": [
+        "Cold-calling AQo from SB vs BTN and playing a bloated pot OOP",
+        "Folding AQo thinking it's dominated — BTN's opening range is much wider than AQ+"
+      ],
+      "live_pool_notes": "AQo SB vs BTN is a 3-bet — not a call, not a fold. Take initiative, play for folds, and avoid the OOP postflop trap."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_bl01_03",
+    "node_id": "blind_01",
+    "version": "1.0.0",
+    "title": "55 SB — Fold Small Pair vs Multiway Action",
+    "prompt": "$2/$5 live. HJ opens $15 (3x), CO calls. You're SB with 5♥5♦ (100bb). Complete, fold, or squeeze?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "SRP",
+      "players_to_flop": 3,
+      "hero_position": "SB",
+      "villain_position": "HJ",
+      "hero_hand": [
+        "5h",
+        "5d"
+      ],
+      "effective_stack_bb": 100,
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "HJ",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "call",
+          "size_bb": 3
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "call",
+        "size_bb": 3
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Complete ($13 more)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Squeeze"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "blind_live_mistake",
+        "multiway_context"
+      ],
+      "explanation": "55 from SB in a 3-way pot: completing creates a bloated multiway pot OOP. You're set-mining with marginal implied odds at 100bb effective, and when you miss (7/8 of the time) you face a difficult OOP spot. Fold."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "blind_live_mistake"
+        ],
+        "explanation": "Competent players will play well postflop — set mine requires ~20:1 implied odds at minimum. 100bb vs two players barely qualifies. Fold is cleaner."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "blind_live_mistake",
+          "multiway_context"
+        ],
+        "explanation": "Pool B will pay off sets — but completing 55 OOP in a 3-way pot still loses money in aggregate. Fold the marginal complete."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "blind_live_mistake"
+        ],
+        "explanation": "Nit opener and flatter have tight ranges. Fold 55 from SB."
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:srp",
+      "position:oop",
+      "spot:sb_complete_mistake",
+      "spot:set_mine"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Completing SB with small pairs in multiway pots and calling off stacks when missing",
+        "Overestimating set-mine implied odds at 100bb effective stacks"
+      ],
+      "live_pool_notes": "Completing SB with 55 in a 3-way pot is a marginal-to-losing play at 100bb. You need deep stacks (150bb+) and reliable implied odds. Fold and protect your SB budget."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_bl02_01",
+    "node_id": "blind_02",
+    "version": "1.0.0",
+    "title": "K7s BB — Defend vs BTN Open + SB Cold-Call",
+    "prompt": "$2/$5 live. BTN opens $15 (3x), SB calls. You're BB with K♠7♠ (100bb). Defend, squeeze, or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "SRP",
+      "players_to_flop": 3,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "hero_hand": [
+        "Ks",
+        "7s"
+      ],
+      "effective_stack_bb": 100,
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "SB",
+          "action": "call",
+          "size_bb": 3
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "call",
+        "size_bb": 3
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call (defend)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Squeeze"
+      }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": [
+        "blind_live_mistake",
+        "bb_defend_live"
+      ],
+      "explanation": "K7s from BB at ~4:1 pot odds closing the action. K7s has decent implied odds in multiway pots and you're getting the right price to see a flop. Defend — don't over-fold the BB when pot odds are compelling."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "bb_defend_live"
+        ],
+        "explanation": "K7s is mainly a call at these pot odds. Squeeze possible with a tighter linear range."
+      },
+      "B": {
+        "correct": "CALL",
+        "accepted": [],
+        "required_tags": [
+          "blind_live_mistake",
+          "bb_defend_live"
+        ],
+        "explanation": "Pool B BTN opens wide, SB completes loose — you're in a multiway pot with decent equity. Call and see a flop with K7s."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "bb_defend_live"
+        ],
+        "explanation": "Nit BTN and tight SB = tight ranges that can dominate K7s. Fold is defensible vs very tight pools."
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:srp",
+      "position:oop",
+      "spot:bb_defend"
+    ],
+    "difficulty": 1,
+    "coaching_context": {
+      "common_mistakes": [
+        "Over-folding BB against multiway pot odds — giving up too much equity",
+        "Folding K7s when pot odds are compelling and implied odds are positive"
+      ],
+      "live_pool_notes": "BB defense at 4:1 pot odds with a suited hand is almost always correct vs passive live pools. Don't over-fold the BB — you're getting the right price for K7s."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_bl02_02",
+    "node_id": "blind_02",
+    "version": "1.0.0",
+    "title": "A6o BB — Over-Defending Mistake vs UTG Open",
+    "prompt": "$2/$5 live. UTG opens $20 (4x). Folds to you in BB with A♦6♣ (100bb). Defend or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "UTG",
+      "hero_hand": [
+        "Ad",
+        "6c"
+      ],
+      "effective_stack_bb": 100,
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "UTG",
+          "action": "raise",
+          "size_bb": 4
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "raise",
+        "size_bb": 4
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Defend ($15 more)"
+      },
+      {
+        "key": "RAISE",
+        "label": "3-Bet"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "blind_live_mistake",
+        "bb_defend_live"
+      ],
+      "explanation": "UTG opening range in live cash is very tight — primarily strong pairs, broadways, suited aces with strong kickers. A6o is dominated by AK, AQ, AJ, AT in UTG range. Fold — over-defending BB vs early position opens is a significant live leak."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "blind_live_mistake",
+          "bb_defend_live"
+        ],
+        "explanation": "UTG reg = tight opening range. A6o faces frequent domination by better aces. Fold."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "blind_live_mistake",
+          "bb_defend_live"
+        ],
+        "explanation": "Pool B UTG opens slightly looser but A6o still faces domination problems. Fold — positional disadvantage and range disadvantage combine to make this a losing call."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "blind_live_mistake"
+        ],
+        "explanation": "Nit UTG = only premiums. Fold A6o immediately."
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:srp",
+      "position:oop",
+      "spot:bb_over_defend"
+    ],
+    "difficulty": 1,
+    "coaching_context": {
+      "common_mistakes": [
+        "Defending A6o BB vs UTG because 'I have an ace and getting pot odds'",
+        "Conflating pot odds with profitability — early position ranges dominate A6o"
+      ],
+      "live_pool_notes": "Over-defending BB vs UTG is a major live cash leak. UTG range destroys A6o — fold and wait for better spots."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_bl02_03",
+    "node_id": "blind_02",
+    "version": "1.0.0",
+    "title": "AKo BB — Squeeze, Don't Flat, vs CO Open + BTN Flat",
+    "prompt": "$2/$5 live. CO opens $15 (3x), BTN calls. You're BB with A♠K♦ (100bb). Call, squeeze, or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "SRP",
+      "players_to_flop": 3,
+      "hero_position": "BB",
+      "villain_position": "CO",
+      "hero_hand": [
+        "As",
+        "Kd"
+      ],
+      "effective_stack_bb": 100,
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "raise",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "call",
+          "size_bb": 3
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "call",
+        "size_bb": 3
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call (defend)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Squeeze to $60"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [],
+      "required_tags": [
+        "blind_live_mistake",
+        "bb_defend_live",
+        "squeeze_live"
+      ],
+      "explanation": "AKo is a mandatory squeeze vs CO opener + BTN flat. Calling puts you OOP in a 3-way pot with a premium hand and no initiative. Squeeze to $60 — isolate CO, trap BTN, build pot. Under-squeezing BB with AK is a significant live cash mistake."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "RAISE",
+        "accepted": [],
+        "required_tags": [
+          "blind_live_mistake",
+          "squeeze_live"
+        ],
+        "explanation": "AKo is a 3-bet regardless of position. Squeeze — size up to $65-70 to price out BTN and play HU vs CO."
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [],
+        "required_tags": [
+          "blind_live_mistake",
+          "squeeze_live",
+          "bb_defend_live"
+        ],
+        "explanation": "Pool B BTN calls squeezes too wide. Size to $65 and play vs both or take it down pre. Either way, don't flat AK OOP."
+      },
+      "C": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "blind_live_mistake",
+          "squeeze_live"
+        ],
+        "explanation": "Nit CO and BTN — squeeze $65 and fold both out. Calling multiway OOP with AK is a mistake."
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:srp",
+      "position:oop",
+      "spot:bb_under_squeeze"
+    ],
+    "difficulty": 1,
+    "coaching_context": {
+      "common_mistakes": [
+        "Flatting AKo BB vs opener + flat and playing a 3-way pot OOP with no initiative",
+        "Under-sizing BB squeezes and not building pot with premium holdings"
+      ],
+      "live_pool_notes": "AKo BB with CO opener + BTN flat is a squeeze. Don't flat with premiums from BB — take initiative, build the pot, and play HU if possible."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_lt01_01",
+    "node_id": "live_tree_01",
+    "version": "1.0.0",
+    "title": "TT BTN — Fold to SB Limp-Reraise",
+    "prompt": "$2/$5 live. UTG limps. You raise BTN to $20 with T♥T♦ (100bb). SB (passive rec) limp-reraises to $80. Call or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "limp",
+      "players_to_flop": 2,
+      "hero_position": "BTN",
+      "villain_position": "SB",
+      "hero_hand": [
+        "Th",
+        "Td"
+      ],
+      "effective_stack_bb": 100,
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "UTG",
+          "action": "call",
+          "size_bb": 1
+        },
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 4
+        },
+        {
+          "street": "preflop",
+          "player": "SB",
+          "action": "call",
+          "size_bb": 1
+        },
+        {
+          "street": "preflop",
+          "player": "UTG",
+          "action": "fold"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "raise",
+        "size_bb": 16
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call (set mine)"
+      },
+      {
+        "key": "RAISE",
+        "label": "4-Bet"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "limp_reraise"
+      ],
+      "explanation": "SB limp-reraise in a live game is almost exclusively AA/KK. Passive players who limp and then reraise when raised have an extremely polarized range. Fold TT — you're a massive underdog vs AA/KK."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "limp_reraise"
+        ],
+        "explanation": "Even competent players who limp-reraise have a very strong range. TT is a fold — pot odds and range considerations don't support a call."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "limp_reraise"
+        ],
+        "explanation": "Pool B passive rec limp-reraise = AA or KK, period. Fold TT immediately."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "limp_reraise"
+        ],
+        "explanation": "Nit limp-reraise = always AA/KK. Fold and don't look back."
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:limp",
+      "position:ip",
+      "spot:limp_reraise_faced"
+    ],
+    "difficulty": 1,
+    "coaching_context": {
+      "common_mistakes": [
+        "Calling off TT vs a limp-reraise 'to set mine' — raise size eliminates this option",
+        "4-betting TT vs a limp-reraise and getting it in vs AA/KK"
+      ],
+      "live_pool_notes": "Live limp-reraise is the clearest range tell in poker. Passive players who open-limp and reraise when raised have AA or KK almost always. Fold TT, fold JJ, fold AQs."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_lt01_02",
+    "node_id": "live_tree_01",
+    "version": "1.0.0",
+    "title": "AJo CO — Fold to SB Limp-Reraise in Multiway Pot",
+    "prompt": "$2/$5 live. UTG limps, MP limps. You raise CO to $25 with A♣J♦ (100bb). SB (passive rec) limp-reraises to $90. Call or fold?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "limp",
+      "players_to_flop": 2,
+      "hero_position": "CO",
+      "villain_position": "SB",
+      "hero_hand": [
+        "Ac",
+        "Jd"
+      ],
+      "effective_stack_bb": 100,
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "UTG",
+          "action": "call",
+          "size_bb": 1
+        },
+        {
+          "street": "preflop",
+          "player": "MP",
+          "action": "call",
+          "size_bb": 1
+        },
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "raise",
+          "size_bb": 5
+        },
+        {
+          "street": "preflop",
+          "player": "SB",
+          "action": "call",
+          "size_bb": 1
+        },
+        {
+          "street": "preflop",
+          "player": "UTG",
+          "action": "fold"
+        },
+        {
+          "street": "preflop",
+          "player": "MP",
+          "action": "fold"
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "raise",
+        "size_bb": 18
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "4-Bet"
+      }
+    ],
+    "answer": {
+      "correct": "FOLD",
+      "accepted": [],
+      "required_tags": [
+        "limp_reraise"
+      ],
+      "explanation": "SB limp-reraise vs a multiway pot raise = AA/KK. AJo is dominated by AA, by KK, and by AK. Fold without hesitation — you're investing $65 more into a pot where you're a 2:1 underdog at best."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "limp_reraise"
+        ],
+        "explanation": "Limp-reraise from SB vs multiple limpers and a raiser = nuts. Fold AJo."
+      },
+      "B": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "limp_reraise"
+        ],
+        "explanation": "Passive Pool B SB limp-reraises exclusively with AA/KK. AJo is dominated by both. Fold."
+      },
+      "C": {
+        "correct": "FOLD",
+        "accepted": [],
+        "required_tags": [
+          "limp_reraise"
+        ],
+        "explanation": "Nit limp-reraise = premium. Fold AJo."
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:limp",
+      "position:ip",
+      "spot:limp_reraise_faced"
+    ],
+    "difficulty": 1,
+    "coaching_context": {
+      "common_mistakes": [
+        "Calling with dominated aces vs limp-reraises — AJo loses to AA, KK, and AK",
+        "4-betting as a bluff vs limp-reraise — passive players never fold"
+      ],
+      "live_pool_notes": "A limp-reraise in a multiway pot is even more polarized than single-handed. SB watched multiple people enter and still trapped — it's always AA or KK. Fold AJo."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  },
+  {
+    "drill_id": "lc4_lt01_03",
+    "node_id": "live_tree_01",
+    "version": "1.0.0",
+    "title": "AA SB — Execute the Limp-Reraise Correctly",
+    "prompt": "$2/$5 live. UTG limps, MP limps. You're SB with A♥A♦ (100bb). Limp and trap, raise directly, or limp-reraise plan?",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "preflop",
+      "pot_type": "limp",
+      "players_to_flop": 3,
+      "hero_position": "SB",
+      "villain_position": "UTG",
+      "hero_hand": [
+        "Ah",
+        "Ad"
+      ],
+      "effective_stack_bb": 100,
+      "action_history": [
+        {
+          "street": "preflop",
+          "player": "UTG",
+          "action": "call",
+          "size_bb": 1
+        },
+        {
+          "street": "preflop",
+          "player": "MP",
+          "action": "call",
+          "size_bb": 1
+        }
+      ]
+    },
+    "decision_point": {
+      "street": "preflop",
+      "facing": {
+        "action": "call",
+        "size_bb": 1
+      },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      {
+        "key": "FOLD",
+        "label": "Limp (complete SB)"
+      },
+      {
+        "key": "CALL",
+        "label": "Raise directly ($15-20)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Limp, then reraise any iso raise"
+      }
+    ],
+    "answer": {
+      "correct": "RAISE",
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "limp_reraise",
+        "preflop_3bet"
+      ],
+      "explanation": "AA in SB with limpers — limp-reraise sets a trap for the BTN/CO iso raise. Complete the SB, invite a raise, then come over the top to $80-100. If no iso raise comes, completing with AA multiway is also fine. Direct raise works but limp-reraise extracts more from iso-raisers."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "limp_reraise",
+          "preflop_3bet"
+        ],
+        "explanation": "Competent players may read the limp-reraise for AA and size down their iso. Direct raise to $20 sometimes extracts more vs skilled pools."
+      },
+      "B": {
+        "correct": "RAISE",
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "limp_reraise",
+          "preflop_3bet"
+        ],
+        "explanation": "Pool B BTN/CO loves to iso limper pots. Limp-reraise is perfect — they'll iso wide and call off with AK/QQ-JJ vs your $90 reraise."
+      },
+      "C": {
+        "correct": "CALL",
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "limp_reraise"
+        ],
+        "explanation": "Nit BTN/CO won't iso limpers. Raise directly to $15 to build a pot — limp-reraise won't activate vs a passive table."
+      }
+    },
+    "tags": [
+      "street:preflop",
+      "pot:limp",
+      "position:oop",
+      "spot:limp_reraise_execute"
+    ],
+    "difficulty": 2,
+    "coaching_context": {
+      "common_mistakes": [
+        "Always raising directly with AA instead of using positional trap lines vs aggro iso-raisers",
+        "Limping AA and never re-raising when an iso opportunity arises"
+      ],
+      "live_pool_notes": "Limp-reraise with AA is most effective vs Pool B tables with frequent iso-raisers. Complete the SB, wait for the iso, then come over the top. It's one of the highest EV plays at live $2/$5."
+    },
+    "metadata": {
+      "source": "manual"
+    }
+  }
+]

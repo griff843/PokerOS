@@ -1,0 +1,13 @@
+{
+  "node_id": "blind_02",
+  "name": "BB Live Mistakes — Over-Defending and Under-Squeezing",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "OOP",
+    "street": "preflop",
+    "pot_type": "SRP"
+  },
+  "triggers": ["blind_live_mistake", "bb_defend_live", "multiway_context"],
+  "defaults": { "population_toggle": "B" }
+}

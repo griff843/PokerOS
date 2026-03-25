@@ -1,0 +1,13 @@
+{
+  "node_id": "cr_03",
+  "name": "Turn CR Follow-Through — River Value, Bluff Commit, and Shut-Down",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "OOP",
+    "street": "river",
+    "pot_type": "SRP"
+  },
+  "triggers": ["cr_river_follow_through", "check_raise_live", "river_bet_fold"],
+  "defaults": { "population_toggle": "B" }
+}
