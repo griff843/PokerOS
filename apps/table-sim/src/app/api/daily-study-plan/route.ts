@@ -8,6 +8,9 @@ import { buildTableSimPlayerIntelligence } from "../../../lib/player-intelligenc
 import { buildPatternAttemptSignals, hydratePersistedStudyAttempts } from "../../../lib/intervention-support";
 import { buildDailyStudyPlanBundle } from "../../../lib/daily-study-plan";
 import { buildPersistedRealHandInterventionBridgeBundle } from "../../../lib/real-hand-bridge";
+import { buildConceptTransferEvaluationMap } from "../../../lib/transfer-evaluation";
+import { buildCalibrationSurfaceAdapter } from "../../../lib/calibration-surface";
+import { buildPersistedCalibrationOutcomesBundle } from "../../../lib/calibration-outcomes";
 
 const ACTIVE_INTERVENTION_STATUSES = new Set(["assigned", "in_progress", "stabilizing"]);
 
@@ -63,6 +66,30 @@ export async function GET() {
       .filter((s) => s.status === "due")
       .map((s) => s.concept_key);
 
+    // v5: build transfer evaluation map for concept assignment scoring
+    const transferEvaluationMap = buildConceptTransferEvaluationMap({
+      playerIntelligence,
+      diagnosisHistory,
+      interventionHistory,
+      realPlaySignals,
+      retentionSchedules,
+      now,
+    });
+
+    // v5: build calibration surface for concept assignment scoring
+    const calibrationBundle = buildPersistedCalibrationOutcomesBundle({
+      drills,
+      attempts,
+      srs,
+      importedHands,
+      diagnoses,
+      interventions,
+      retentionSchedules,
+      activePool,
+      now,
+    });
+    const calibrationSurface = buildCalibrationSurfaceAdapter(calibrationBundle);
+
     // v3: build real-hand bridge bundle when imported hands are present
     const bridgeBundle =
       importedHands.length > 0
@@ -89,6 +116,8 @@ export async function GET() {
       activeInterventionConceptLabel: activeInterventionConcept?.label ?? null,
       now,
       bridgeBundle,
+      transferEvaluationMap,
+      calibrationSurface,
     });
 
     return NextResponse.json(bundle);
