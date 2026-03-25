@@ -110,6 +110,44 @@ const BASE_CONCEPT_NODES: ConceptNodeDefinition[] = [
     summary: "Adjusting thresholds and incentives when more players see the flop.",
     aliases: ["multiway_context"],
   },
+  // v1.2 — Live Cash Pack 2
+  {
+    key: "iso_raise",
+    label: "Iso-Raising",
+    summary: "Punishing live limpers with isolation raises and playing IP in inflated pots.",
+    aliases: ["iso_raise_live", "concept:iso_raise"],
+  },
+  {
+    key: "bb_defense",
+    label: "BB Defense",
+    summary: "Adjusting BB defending thresholds and 3-bet frequency based on live opponent pool tendencies.",
+    aliases: ["bb_defend_live", "concept:bb_defense"],
+  },
+  {
+    key: "delayed_aggression",
+    label: "Delayed Aggression",
+    summary: "C-betting or probing on later streets after checking back the flop or facing a check-through.",
+    aliases: ["delayed_cbet", "concept:delayed_cbet"],
+  },
+  {
+    key: "thin_value_extraction",
+    label: "Thin Value Extraction",
+    summary: "Betting for value in marginal spots against capped or passive ranges that cannot fold medium-strength hands.",
+    aliases: ["river_thin_value", "concept:thin_value"],
+  },
+  {
+    key: "multiway_late_street",
+    label: "Multiway Late Street",
+    summary: "Managing turn and river decisions in multiway pots — lower bluffing incentives, tighter value thresholds.",
+    aliases: ["multiway_turn_discipline", "concept:multiway_discipline"],
+  },
+  // v1.2 — Exploit Framing
+  {
+    key: "exploit_framing",
+    label: "Live Pool Exploit Framing",
+    summary: "Adjusting decisions based on population tendencies: fold more vs under-bluffing pools, value-bet wider vs over-callers, size up vs under-raising tables.",
+    aliases: ["live_exploit_framing", "concept:exploit_framing"],
+  },
 ];
 
 const BASE_CONCEPT_EDGES: ConceptEdge[] = [
@@ -129,6 +167,21 @@ const BASE_CONCEPT_EDGES: ConceptEdge[] = [
   { from: "river_defense", to: "bluff_catching", type: "related", note: "Many bluff-catching mistakes are a subtype of river defense." },
   { from: "scare_card_pressure", to: "river_defense", type: "related", note: "Scare-card decisions often show up on river defense nodes." },
   { from: "equity_denial", to: "cbetting", type: "related", note: "Equity-denial decisions commonly overlap with c-bet logic." },
+  // v1.2 edges
+  { from: "iso_raise", to: "range_advantage", type: "supports", note: "Iso-raising builds IP range advantage in inflated pots." },
+  { from: "iso_raise", to: "population_pressure", type: "related", note: "Iso-raise frequency and sizing depend heavily on pool tendencies." },
+  { from: "bb_defense", to: "population_pressure", type: "supports", note: "BB defense thresholds are highly pool-dependent in live cash games." },
+  { from: "delayed_aggression", to: "cbetting", type: "related", note: "Delayed c-bets are an extension of post-flop aggression principles." },
+  { from: "delayed_aggression", to: "range_advantage", type: "supports", note: "Delayed stabs exploit IP range advantage when opponent shows weakness." },
+  { from: "thin_value_extraction", to: "value_targeting", type: "supports", note: "Thin value depends on opponent's inability to fold medium-strength hands." },
+  { from: "thin_value_extraction", to: "population_pressure", type: "supports", note: "Thin value opportunities increase against passive, over-calling pools." },
+  { from: "multiway_late_street", to: "multiway_awareness", type: "supports", note: "Late-street multiway discipline builds on flop multiway threshold awareness." },
+  { from: "multiway_late_street", to: "value_targeting", type: "related", note: "Thin value thresholds tighten significantly in multiway late-street spots." },
+  // Exploit framing edges
+  { from: "exploit_framing", to: "population_pressure", type: "supports", note: "Exploit framing is the applied arm of population pressure — converting reads into decisions." },
+  { from: "exploit_framing", to: "value_targeting", type: "supports", note: "Thin value extractions depend on identifying over-calling tendencies." },
+  { from: "exploit_framing", to: "bluff_catching", type: "supports", note: "Bluff-catch width narrows against under-bluffing live pools." },
+  { from: "exploit_framing", to: "iso_raise", type: "related", note: "ISO sizing exploits under-raising passive tables directly." },
 ];
 
 const CONCEPT_SOURCE_TO_KEY = new Map<string, string>();
@@ -167,6 +220,14 @@ const RULE_TAG_TO_CONCEPTS: Record<RuleTag, string[]> = {
   "3bet_pot_cbet": ["cbetting", "3bet_pot_play"],
   preflop_3bet: ["preflop_decision", "range_advantage"],
   turn_give_up: ["turn_aggression", "equity_denial"],
+  // v1.2
+  iso_raise_live: ["iso_raise", "range_advantage", "population_pressure"],
+  bb_defend_live: ["bb_defense", "population_pressure"],
+  delayed_cbet: ["delayed_aggression", "cbetting", "range_advantage"],
+  river_thin_value: ["thin_value_extraction", "value_targeting", "population_pressure"],
+  multiway_turn_discipline: ["multiway_late_street", "multiway_awareness", "turn_defense"],
+  // v1.2 — Exploit Framing
+  live_exploit_framing: ["exploit_framing", "population_pressure", "value_targeting", "bluff_catching"],
 };
 
 export function buildConceptGraph(drills: CanonicalDrill[] = []): ConceptGraph {
