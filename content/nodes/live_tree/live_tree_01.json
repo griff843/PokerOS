@@ -1,0 +1,13 @@
+{
+  "node_id": "live_tree_01",
+  "name": "Limp-Reraise and Unusual Live Preflop Trees",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "mixed",
+    "street": "preflop",
+    "pot_type": "SRP"
+  },
+  "triggers": ["limp_reraise", "preflop_3bet"],
+  "defaults": { "population_toggle": "B" }
+}

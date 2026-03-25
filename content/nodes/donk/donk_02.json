@@ -1,0 +1,13 @@
+{
+  "node_id": "donk_02",
+  "name": "Large Polar Donk Bet Response — When OOP Leads Big in Live Pools",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP",
+    "street": "mixed",
+    "pot_type": "SRP"
+  },
+  "triggers": ["donk_large", "polar_turn_big_bet", "river_bet_fold"],
+  "defaults": { "population_toggle": "B" }
+}

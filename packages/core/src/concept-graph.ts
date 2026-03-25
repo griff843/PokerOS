@@ -191,6 +191,49 @@ const BASE_CONCEPT_NODES: ConceptNodeDefinition[] = [
     summary: "Identifying and exploiting aggro recreational players — trap with strong hands, call down bluff-catchers, and let them over-bluff.",
     aliases: ["aggro_rec_exploit", "concept:aggro_rec_reads"],
   },
+  // v1.4 — Live Cash Pack 4
+  {
+    key: "turn_overbet_construction",
+    label: "Turn Overbet Construction",
+    summary: "Building polar overbet ranges on the turn IP — selecting value hands and bluffs that benefit from 120%+ sizing in live pools.",
+    aliases: ["turn_overbet_ip", "concept:turn_overbet_construction"],
+  },
+  {
+    key: "donk_small_response",
+    label: "Small Donk Bet Response",
+    summary: "Responding correctly to small OOP leads (20–35% pot) — raising thin value, calling draws, folding air with discipline.",
+    aliases: ["donk_small", "concept:donk_small_response"],
+  },
+  {
+    key: "donk_polar_response",
+    label: "Large Polar Donk Response",
+    summary: "Responding to large/polar OOP leads (75%+ pot) — folding medium-strength hands, raising the nuts, and not paying off the polar range.",
+    aliases: ["donk_large", "concept:donk_polar_response"],
+  },
+  {
+    key: "cr_follow_through",
+    label: "CR Follow-Through",
+    summary: "Managing river decisions as the turn check-raiser — committing with value and semi-bluffs, shutting down when equity evaporates.",
+    aliases: ["cr_river_follow_through", "concept:cr_follow_through"],
+  },
+  {
+    key: "population_bluff_catch",
+    label: "Population Bluff Catching",
+    summary: "Adjusting bluff-catching thresholds pool-by-pool — widening vs over-bluffing populations, tightening vs under-bluffing passive pools.",
+    aliases: ["bluff_catch_live", "concept:population_bluff_catch"],
+  },
+  {
+    key: "blind_live_discipline",
+    label: "Blind Live Discipline",
+    summary: "Correcting SB/BB live mistakes — avoiding weak completes from SB, not over-defending BB, and squeezing when the spots arise.",
+    aliases: ["blind_live_mistake", "concept:blind_live_discipline"],
+  },
+  {
+    key: "limp_reraise_tree",
+    label: "Limp-Reraise Tree",
+    summary: "Navigating limp-reraise and unusual live preflop trees — recognizing the strong-hand signal, folding medium holdings, and trapping correctly.",
+    aliases: ["limp_reraise", "concept:limp_reraise_tree"],
+  },
 ];
 
 const BASE_CONCEPT_EDGES: ConceptEdge[] = [
@@ -240,6 +283,21 @@ const BASE_CONCEPT_EDGES: ConceptEdge[] = [
   { from: "passive_station_reads", to: "population_pressure", type: "supports", note: "Station identification is a core population-pressure skill." },
   { from: "aggro_rec_reads", to: "bluff_catching", type: "supports", note: "Aggro rec reads directly expand bluff-catching ranges." },
   { from: "aggro_rec_reads", to: "population_pressure", type: "supports", note: "Aggro rec identification is a core population-pressure read." },
+  // v1.4 edges
+  { from: "turn_overbet_construction", to: "polarization", type: "supports", note: "Overbet construction requires understanding polarized range composition." },
+  { from: "turn_overbet_construction", to: "range_advantage", type: "supports", note: "IP overbet incentives depend on range and nut advantage." },
+  { from: "donk_small_response", to: "value_targeting", type: "supports", note: "Responding correctly to small donks is a thin-value and raise discipline skill." },
+  { from: "donk_small_response", to: "population_pressure", type: "supports", note: "Small donk frequencies and ranges vary sharply by player pool." },
+  { from: "donk_polar_response", to: "polarization", type: "supports", note: "Large polar donks signal a polar range — response depends on understanding polarization." },
+  { from: "donk_polar_response", to: "bluff_catching", type: "related", note: "Calling large donks is a form of bluff-catching against polar OOP leads." },
+  { from: "cr_follow_through", to: "check_raise_discipline", type: "supports", note: "CR follow-through builds on the decision to check-raise the turn." },
+  { from: "cr_follow_through", to: "bet_fold_discipline", type: "related", note: "River follow-through decisions overlap with bet-fold discipline on final streets." },
+  { from: "population_bluff_catch", to: "bluff_catching", type: "supports", note: "Population bluff catching is the applied, pool-adjusted form of core bluff-catching." },
+  { from: "population_bluff_catch", to: "population_pressure", type: "supports", note: "Bluff-catch width is one of the most important population-sensitive decisions." },
+  { from: "blind_live_discipline", to: "population_pressure", type: "supports", note: "Blind mistakes in live cash are often driven by poor population reads." },
+  { from: "blind_live_discipline", to: "bb_defense", type: "supports", note: "BB live discipline extends core BB defense to real game spots." },
+  { from: "limp_reraise_tree", to: "range_advantage", type: "supports", note: "Recognizing limp-reraise signals informs range-reading and folding discipline." },
+  { from: "limp_reraise_tree", to: "population_pressure", type: "supports", note: "Limp-reraise frequency is highly pool-dependent in live cash." },
 ];
 
 const CONCEPT_SOURCE_TO_KEY = new Map<string, string>();
@@ -294,6 +352,14 @@ const RULE_TAG_TO_CONCEPTS: Record<RuleTag, string[]> = {
   river_bet_fold: ["bet_fold_discipline", "value_targeting", "river_defense"],
   passive_station_exploit: ["passive_station_reads", "value_targeting", "population_pressure"],
   aggro_rec_exploit: ["aggro_rec_reads", "bluff_catching", "population_pressure"],
+  // v1.4 — Live Cash Pack 4
+  turn_overbet_ip: ["turn_overbet_construction", "polarization", "range_advantage"],
+  donk_small: ["donk_small_response", "value_targeting", "population_pressure"],
+  donk_large: ["donk_polar_response", "polarization", "bluff_catching"],
+  cr_river_follow_through: ["cr_follow_through", "check_raise_discipline", "bet_fold_discipline"],
+  bluff_catch_live: ["population_bluff_catch", "bluff_catching", "population_pressure"],
+  blind_live_mistake: ["blind_live_discipline", "bb_defense", "population_pressure"],
+  limp_reraise: ["limp_reraise_tree", "range_advantage", "population_pressure"],
 };
 
 export function buildConceptGraph(drills: CanonicalDrill[] = []): ConceptGraph {

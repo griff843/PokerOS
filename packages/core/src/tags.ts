@@ -38,6 +38,14 @@ export const VALID_TAGS = [
   "river_bet_fold",
   "passive_station_exploit",
   "aggro_rec_exploit",
+  // v1.4 — Live Cash Pack 4
+  "turn_overbet_ip",
+  "donk_small",
+  "donk_large",
+  "cr_river_follow_through",
+  "bluff_catch_live",
+  "blind_live_mistake",
+  "limp_reraise",
 ] as const;
 
 export type RuleTag = (typeof VALID_TAGS)[number];
@@ -85,6 +93,14 @@ export function tagLabel(tag: RuleTag): string {
     river_bet_fold: "River bet-fold — bet for value then fold to raise",
     passive_station_exploit: "Exploit passive station — value max, no bluffs",
     aggro_rec_exploit: "Exploit aggro recreational player — trap and call down",
+    // v1.4
+    turn_overbet_ip: "Hero IP turn overbet construction (120%+ pot)",
+    donk_small: "Responding to small OOP donk (20–35% pot)",
+    donk_large: "Responding to large/polar OOP donk (75%+ pot)",
+    cr_river_follow_through: "River follow-through after turn check-raise",
+    bluff_catch_live: "Population-adjusted bluff catching in live pools",
+    blind_live_mistake: "SB/BB live-specific preflop mistakes",
+    limp_reraise: "Limp-reraise and unusual live preflop trees",
   };
   return labels[tag];
 }

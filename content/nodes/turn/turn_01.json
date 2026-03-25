@@ -1,0 +1,13 @@
+{
+  "node_id": "turn_01",
+  "name": "SRP Turn Overbet IP — Constructing Polar Lines in Live Pools",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP",
+    "street": "turn",
+    "pot_type": "SRP"
+  },
+  "triggers": ["turn_overbet_ip", "polar_turn_big_bet", "range_advantage_ip"],
+  "defaults": { "population_toggle": "B" }
+}
