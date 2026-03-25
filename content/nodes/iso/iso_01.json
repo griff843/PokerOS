@@ -1,0 +1,13 @@
+{
+  "node_id": "iso_01",
+  "name": "BTN/CO Iso-Raise vs Live Limpers (Preflop)",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP",
+    "street": "preflop",
+    "pot_type": "SRP"
+  },
+  "triggers": ["iso_raise_live", "range_advantage_ip", "underfold_exploit"],
+  "defaults": { "population_toggle": "B" }
+}
