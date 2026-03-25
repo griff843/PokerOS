@@ -28,6 +28,8 @@ export const VALID_TAGS = [
   "delayed_cbet",
   "river_thin_value",
   "multiway_turn_discipline",
+  // v1.2 — Live Cash Pack 2 — Exploit Framing
+  "live_exploit_framing",
 ] as const;
 
 export type RuleTag = (typeof VALID_TAGS)[number];
@@ -66,6 +68,7 @@ export function tagLabel(tag: RuleTag): string {
     delayed_cbet: "Delayed c-bet / turn stab after flop skip",
     river_thin_value: "River thin value vs capped ranges",
     multiway_turn_discipline: "Turn discipline in multiway pots",
+    live_exploit_framing: "Live pool exploit framing — population-adjusted decisions",
   };
   return labels[tag];
 }

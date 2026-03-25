@@ -141,6 +141,13 @@ const BASE_CONCEPT_NODES: ConceptNodeDefinition[] = [
     summary: "Managing turn and river decisions in multiway pots — lower bluffing incentives, tighter value thresholds.",
     aliases: ["multiway_turn_discipline", "concept:multiway_discipline"],
   },
+  // v1.2 — Exploit Framing
+  {
+    key: "exploit_framing",
+    label: "Live Pool Exploit Framing",
+    summary: "Adjusting decisions based on population tendencies: fold more vs under-bluffing pools, value-bet wider vs over-callers, size up vs under-raising tables.",
+    aliases: ["live_exploit_framing", "concept:exploit_framing"],
+  },
 ];
 
 const BASE_CONCEPT_EDGES: ConceptEdge[] = [
@@ -170,6 +177,11 @@ const BASE_CONCEPT_EDGES: ConceptEdge[] = [
   { from: "thin_value_extraction", to: "population_pressure", type: "supports", note: "Thin value opportunities increase against passive, over-calling pools." },
   { from: "multiway_late_street", to: "multiway_awareness", type: "supports", note: "Late-street multiway discipline builds on flop multiway threshold awareness." },
   { from: "multiway_late_street", to: "value_targeting", type: "related", note: "Thin value thresholds tighten significantly in multiway late-street spots." },
+  // Exploit framing edges
+  { from: "exploit_framing", to: "population_pressure", type: "supports", note: "Exploit framing is the applied arm of population pressure — converting reads into decisions." },
+  { from: "exploit_framing", to: "value_targeting", type: "supports", note: "Thin value extractions depend on identifying over-calling tendencies." },
+  { from: "exploit_framing", to: "bluff_catching", type: "supports", note: "Bluff-catch width narrows against under-bluffing live pools." },
+  { from: "exploit_framing", to: "iso_raise", type: "related", note: "ISO sizing exploits under-raising passive tables directly." },
 ];
 
 const CONCEPT_SOURCE_TO_KEY = new Map<string, string>();
@@ -214,6 +226,8 @@ const RULE_TAG_TO_CONCEPTS: Record<RuleTag, string[]> = {
   delayed_cbet: ["delayed_aggression", "cbetting", "range_advantage"],
   river_thin_value: ["thin_value_extraction", "value_targeting", "population_pressure"],
   multiway_turn_discipline: ["multiway_late_street", "multiway_awareness", "turn_defense"],
+  // v1.2 — Exploit Framing
+  live_exploit_framing: ["exploit_framing", "population_pressure", "value_targeting", "bluff_catching"],
 };
 
 export function buildConceptGraph(drills: CanonicalDrill[] = []): ConceptGraph {
