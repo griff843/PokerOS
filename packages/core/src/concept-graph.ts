@@ -148,6 +148,49 @@ const BASE_CONCEPT_NODES: ConceptNodeDefinition[] = [
     summary: "Adjusting decisions based on population tendencies: fold more vs under-bluffing pools, value-bet wider vs over-callers, size up vs under-raising tables.",
     aliases: ["live_exploit_framing", "concept:exploit_framing"],
   },
+  // v1.3 — Live Cash Pack 3
+  {
+    key: "squeeze_play",
+    label: "Squeeze Play",
+    summary: "3-betting vs an opener and one or more callers to charge trapped flatters and build a pot with initiative.",
+    aliases: ["squeeze_live", "concept:squeeze_play"],
+  },
+  {
+    key: "cold_call_defense",
+    label: "Cold-Call Defense",
+    summary: "Discipline around cold-calling and overcalling preflop — when calling adds value vs when 4-betting or folding is correct.",
+    aliases: ["cold_call_live", "concept:cold_call_defense"],
+  },
+  {
+    key: "probe_betting",
+    label: "OOP Probe Betting",
+    summary: "Leading the turn OOP after the IP aggressor checks back the flop — reclaiming initiative and charging equity when IP is capped.",
+    aliases: ["probe_discipline", "concept:probe_betting"],
+  },
+  {
+    key: "check_raise_discipline",
+    label: "Check-Raise Discipline",
+    summary: "Selecting the right hands to check-raise vs call in live pools — balancing semi-bluff draws, combo hands, and trap lines.",
+    aliases: ["check_raise_live", "concept:check_raise_discipline"],
+  },
+  {
+    key: "bet_fold_discipline",
+    label: "River Bet-Fold Discipline",
+    summary: "Betting for value on the river while planning to fold to a raise — essential live-cash skill separating good value bets from hero calls.",
+    aliases: ["river_bet_fold", "concept:bet_fold_discipline"],
+  },
+  {
+    key: "passive_station_reads",
+    label: "Passive Station Reads",
+    summary: "Identifying and exploiting passive calling stations — value-bet every street, never bluff, size up for maximum extraction.",
+    aliases: ["passive_station_exploit", "concept:passive_station_reads"],
+  },
+  {
+    key: "aggro_rec_reads",
+    label: "Aggro Recreational Reads",
+    summary: "Identifying and exploiting aggro recreational players — trap with strong hands, call down bluff-catchers, and let them over-bluff.",
+    aliases: ["aggro_rec_exploit", "concept:aggro_rec_reads"],
+  },
 ];
 
 const BASE_CONCEPT_EDGES: ConceptEdge[] = [
@@ -182,6 +225,21 @@ const BASE_CONCEPT_EDGES: ConceptEdge[] = [
   { from: "exploit_framing", to: "value_targeting", type: "supports", note: "Thin value extractions depend on identifying over-calling tendencies." },
   { from: "exploit_framing", to: "bluff_catching", type: "supports", note: "Bluff-catch width narrows against under-bluffing live pools." },
   { from: "exploit_framing", to: "iso_raise", type: "related", note: "ISO sizing exploits under-raising passive tables directly." },
+  // v1.3 edges
+  { from: "squeeze_play", to: "range_advantage", type: "supports", note: "Squeeze plays create IP range advantage by trapping flatters." },
+  { from: "squeeze_play", to: "population_pressure", type: "supports", note: "Squeeze sizing and frequency adapt heavily to live pool fold tendencies." },
+  { from: "cold_call_defense", to: "population_pressure", type: "supports", note: "Overcall and cold-call decisions shift based on pool tendencies." },
+  { from: "cold_call_defense", to: "multiway_awareness", type: "supports", note: "Overcalls work in tandem with multiway pot construction." },
+  { from: "probe_betting", to: "range_advantage", type: "supports", note: "Probes exploit the range-capping signal of an IP check-through." },
+  { from: "probe_betting", to: "equity_denial", type: "supports", note: "Probe bets deny free equity to IP's medium-strength hands and draws." },
+  { from: "check_raise_discipline", to: "equity_denial", type: "supports", note: "Check-raises are a primary equity-denial tool OOP." },
+  { from: "check_raise_discipline", to: "value_targeting", type: "supports", note: "Selecting the right combos to CR is a value-targeting skill." },
+  { from: "bet_fold_discipline", to: "river_defense", type: "supports", note: "River bet-fold is the flip side of river defense — betting while managing fold decisions." },
+  { from: "bet_fold_discipline", to: "value_targeting", type: "supports", note: "Knowing when to bet-fold vs check-back requires accurate value targeting." },
+  { from: "passive_station_reads", to: "value_targeting", type: "supports", note: "Station reads enable wider value betting and eliminate bluffing." },
+  { from: "passive_station_reads", to: "population_pressure", type: "supports", note: "Station identification is a core population-pressure skill." },
+  { from: "aggro_rec_reads", to: "bluff_catching", type: "supports", note: "Aggro rec reads directly expand bluff-catching ranges." },
+  { from: "aggro_rec_reads", to: "population_pressure", type: "supports", note: "Aggro rec identification is a core population-pressure read." },
 ];
 
 const CONCEPT_SOURCE_TO_KEY = new Map<string, string>();
@@ -228,6 +286,14 @@ const RULE_TAG_TO_CONCEPTS: Record<RuleTag, string[]> = {
   multiway_turn_discipline: ["multiway_late_street", "multiway_awareness", "turn_defense"],
   // v1.2 — Exploit Framing
   live_exploit_framing: ["exploit_framing", "population_pressure", "value_targeting", "bluff_catching"],
+  // v1.3 — Live Cash Pack 3
+  squeeze_live: ["squeeze_play", "range_advantage", "population_pressure"],
+  cold_call_live: ["cold_call_defense", "population_pressure", "multiway_awareness"],
+  probe_discipline: ["probe_betting", "range_advantage", "equity_denial"],
+  check_raise_live: ["check_raise_discipline", "equity_denial", "value_targeting"],
+  river_bet_fold: ["bet_fold_discipline", "value_targeting", "river_defense"],
+  passive_station_exploit: ["passive_station_reads", "value_targeting", "population_pressure"],
+  aggro_rec_exploit: ["aggro_rec_reads", "bluff_catching", "population_pressure"],
 };
 
 export function buildConceptGraph(drills: CanonicalDrill[] = []): ConceptGraph {

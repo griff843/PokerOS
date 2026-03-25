@@ -1,0 +1,13 @@
+{
+  "node_id": "probe_01",
+  "name": "OOP Flop Probe After Aggressor Checks Back",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "OOP",
+    "street": "flop",
+    "pot_type": "SRP"
+  },
+  "triggers": ["probe_discipline", "range_advantage_ip", "equity_denial"],
+  "defaults": { "population_toggle": "B" }
+}

@@ -1,4 +1,4 @@
-/** All valid rule tags for v1 + v1.1 + v1.2 (Live Cash Pack 2) */
+/** All valid rule tags for v1 + v1.1 + v1.2 (Live Cash Pack 2) + v1.3 (Live Cash Pack 3) */
 export const VALID_TAGS = [
   "paired_top_river",
   "scare_river_ace",
@@ -30,6 +30,14 @@ export const VALID_TAGS = [
   "multiway_turn_discipline",
   // v1.2 — Live Cash Pack 2 — Exploit Framing
   "live_exploit_framing",
+  // v1.3 — Live Cash Pack 3
+  "squeeze_live",
+  "cold_call_live",
+  "probe_discipline",
+  "check_raise_live",
+  "river_bet_fold",
+  "passive_station_exploit",
+  "aggro_rec_exploit",
 ] as const;
 
 export type RuleTag = (typeof VALID_TAGS)[number];
@@ -69,6 +77,14 @@ export function tagLabel(tag: RuleTag): string {
     river_thin_value: "River thin value vs capped ranges",
     multiway_turn_discipline: "Turn discipline in multiway pots",
     live_exploit_framing: "Live pool exploit framing — population-adjusted decisions",
+    // v1.3
+    squeeze_live: "Preflop squeeze in live pool",
+    cold_call_live: "Cold-call / overcall discipline in live pool",
+    probe_discipline: "OOP probe bet after aggressor checks back",
+    check_raise_live: "Check-raise discipline in live pool",
+    river_bet_fold: "River bet-fold — bet for value then fold to raise",
+    passive_station_exploit: "Exploit passive station — value max, no bluffs",
+    aggro_rec_exploit: "Exploit aggro recreational player — trap and call down",
   };
   return labels[tag];
 }
