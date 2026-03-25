@@ -1,0 +1,13 @@
+{
+  "node_id": "bb_01",
+  "name": "BB Defend vs BTN Open — Live Thresholds",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "OOP",
+    "street": "preflop",
+    "pot_type": "SRP"
+  },
+  "triggers": ["bb_defend_live", "preflop_3bet"],
+  "defaults": { "population_toggle": "B" }
+}
