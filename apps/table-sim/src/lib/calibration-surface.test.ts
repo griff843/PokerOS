@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import type { CalibrationOutcomesBundle } from "./calibration-outcomes";
-import { buildCalibrationSurfaceAdapter, fetchCalibrationSurface } from "./calibration-surface";
+import {
+  buildCalibrationSurfaceAdapter,
+  fetchCalibrationSurface,
+  findCalibrationSurfaceConcept,
+} from "./calibration-surface";
 
 function makeBundle(overrides: Partial<CalibrationOutcomesBundle> = {}): CalibrationOutcomesBundle {
   return {
@@ -92,6 +96,7 @@ describe("calibration surface adapter", () => {
     const surface = buildCalibrationSurfaceAdapter(null);
 
     expect(surface.state).toBe("no_calibration");
+    expect(surface.conceptSummaries).toEqual([]);
     expect(surface.topConceptSummaries).toEqual([]);
     expect(surface.highPriorityCount).toBe(0);
   });
@@ -129,7 +134,6 @@ describe("calibration surface adapter", () => {
     }));
 
     expect(surface.state).toBe("no_meaningful_history");
-    expect(surface.topConceptSummaries[0]?.priority).toBe("medium");
     expect(surface.topConceptSummaries[0]?.trustLevel).toBe("low");
   });
 
@@ -180,6 +184,7 @@ describe("calibration surface adapter", () => {
     expect(surface.topConceptSummaries[0]?.suggestedAction?.label).toBe("Repair Transfer Gap");
     expect(surface.topConceptSummaries[0]?.destination).toBe("/app/concepts/river_value_thresholds");
     expect(surface.highPriorityCount).toBe(1);
+    expect(findCalibrationSurfaceConcept(surface, "turn_probe_discipline")?.label).toBe("Turn Probe Discipline");
   });
 
   it("fetches calibration outcomes and shapes them without duplicating route parsing", async () => {

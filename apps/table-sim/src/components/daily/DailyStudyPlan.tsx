@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type {
@@ -9,9 +10,12 @@ import type {
   DailyStudyPlan,
   DailyStudyPlanBundle,
 } from "@/lib/daily-study-plan";
+import type { CalibrationSurfaceAdapter } from "@/lib/calibration-surface";
+import { fetchCalibrationSurface } from "@/lib/calibration-surface";
 
 export function DailyStudyPlan() {
   const [bundle, setBundle] = useState<DailyStudyPlanBundle | null>(null);
+  const [calibration, setCalibration] = useState<CalibrationSurfaceAdapter | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedLength, setSelectedLength] = useState<DailySessionLength>(45);
   // v4: lightweight in-session completion tracking (not persisted)
@@ -23,12 +27,28 @@ export function DailyStudyPlan() {
     async function load() {
       setLoading(true);
       try {
-        const response = await fetch("/api/daily-study-plan", { cache: "no-store" });
-        if (!response.ok) throw new Error("Failed to load daily study plan");
-        const data = (await response.json()) as DailyStudyPlanBundle;
+        const [planResult, calibrationResult] = await Promise.allSettled([
+          fetch("/api/daily-study-plan", { cache: "no-store" }),
+          fetchCalibrationSurface({ limit: 12, topLimit: 1 }),
+        ]);
+
+        if (planResult.status !== "fulfilled") {
+          throw new Error("Failed to load daily study plan");
+        }
+        if (!planResult.value.ok) {
+          throw new Error("Failed to load daily study plan");
+        }
+
+        const data = (await planResult.value.json()) as DailyStudyPlanBundle;
         if (!cancelled) {
           setBundle(data);
           setSelectedLength(data.defaultSessionLength);
+          if (calibrationResult.status === "fulfilled") {
+            setCalibration(calibrationResult.value);
+          } else {
+            console.error("Failed to load calibration surface:", calibrationResult.reason);
+            setCalibration(null);
+          }
         }
       } catch (error) {
         console.error("Failed to load daily study plan:", error);
@@ -82,6 +102,7 @@ export function DailyStudyPlan() {
             />
             <MainFocusCard loading={loading} plan={plan} />
             <PlanSummarySection loading={loading} plan={plan} bundle={bundle} />
+            <CalibrationSummaryPanel loading={loading} calibration={calibration} />
             <BlockList
               loading={loading}
               plan={plan}
@@ -93,6 +114,59 @@ export function DailyStudyPlan() {
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+export function CalibrationSummaryPanel({
+  loading,
+  calibration,
+}: {
+  loading: boolean;
+  calibration: CalibrationSurfaceAdapter | null;
+}) {
+  if (loading) {
+    return <div className="h-24 animate-pulse rounded-xl border border-white/10 bg-white/5" />;
+  }
+
+  if (!calibration || calibration.state === "no_calibration") {
+    return null;
+  }
+
+  const summary = calibration.highlightedConcept;
+  const toneClass = calibration.state === "strong_evidence"
+    ? "border-emerald-500/20 bg-emerald-950/20"
+    : calibration.state === "partial_evidence"
+      ? "border-amber-500/20 bg-amber-950/20"
+      : "border-white/10 bg-white/[0.03]";
+
+  return (
+    <div className={`rounded-xl border px-5 py-4 ${toneClass}`}>
+      <p className="text-xs font-semibold uppercase tracking-widest text-white/40">
+        Calibration Summary
+      </p>
+      <p className="mt-2 text-sm font-medium text-white">{calibration.headline}</p>
+      <p className="mt-1 text-sm text-white/60">{summary?.whyThisStillMatters ?? calibration.detail}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <span className="rounded bg-white/10 px-2 py-0.5 text-xs font-medium text-white/60">
+          {calibration.state.replace(/_/g, " ")}
+        </span>
+        {summary && (
+          <span className="rounded bg-white/10 px-2 py-0.5 text-xs font-medium text-white/60">
+            {summary.label}
+          </span>
+        )}
+        {summary && (
+          <span className="rounded bg-white/10 px-2 py-0.5 text-xs font-medium text-white/60">
+            {summary.interventionState.replace(/_/g, " ")}
+          </span>
+        )}
+      </div>
+      {summary && (
+        <p className="mt-3 text-xs text-white/40">
+          Next move: {summary.suggestedAction?.detail ?? summary.retentionSummary}
+        </p>
+      )}
     </div>
   );
 }

@@ -30,6 +30,7 @@ export interface CalibrationSurfaceAdapter {
   headline: string;
   detail: string;
   generatedAt?: string;
+  conceptSummaries: CalibrationSurfaceConceptSummary[];
   topConceptSummaries: CalibrationSurfaceConceptSummary[];
   highlightedConcept?: CalibrationSurfaceConceptSummary;
   highPriorityCount: number;
@@ -68,25 +69,35 @@ export function buildCalibrationSurfaceAdapter(
       state: "no_calibration",
       headline: "Calibration outcomes are not loaded yet.",
       detail: "Load calibration outcomes before shaping trust summaries for concept, daily-plan, or dashboard surfaces.",
+      conceptSummaries: [],
       topConceptSummaries: [],
       highPriorityCount: 0,
     };
   }
 
-  const topConceptSummaries = bundle.concepts
-    .slice(0, Math.max(0, topLimit))
-    .map((concept) => buildConceptSummary(concept));
-  const highPriorityCount = topConceptSummaries.filter((concept) => concept.priority === "high").length;
+  const conceptSummaries = bundle.concepts.map((concept) => buildConceptSummary(concept));
+  const topConceptSummaries = conceptSummaries.slice(0, Math.max(0, topLimit));
 
   return {
     state: bundle.state,
     headline: bundle.summary.headline,
     detail: bundle.summary.detail,
     generatedAt: bundle.generatedAt,
+    conceptSummaries,
     topConceptSummaries,
     highlightedConcept: topConceptSummaries[0],
-    highPriorityCount,
+    highPriorityCount: conceptSummaries.filter((concept) => concept.priority === "high").length,
   };
+}
+
+export function findCalibrationSurfaceConcept(
+  surface: CalibrationSurfaceAdapter | null | undefined,
+  conceptKey: string | null | undefined,
+): CalibrationSurfaceConceptSummary | undefined {
+  if (!surface || !conceptKey) {
+    return undefined;
+  }
+  return surface.conceptSummaries.find((concept) => concept.conceptKey === conceptKey);
 }
 
 function buildConceptSummary(concept: CalibrationOutcomeEntry): CalibrationSurfaceConceptSummary {
