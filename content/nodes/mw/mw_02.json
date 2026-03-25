@@ -1,0 +1,13 @@
+{
+  "node_id": "mw_02",
+  "name": "Multiway Turn Discipline — Barrel or Give Up",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 3,
+    "position": "IP",
+    "street": "turn",
+    "pot_type": "multiway"
+  },
+  "triggers": ["multiway_turn_discipline", "multiway_context", "turn_give_up"],
+  "defaults": { "population_toggle": "B" }
+}

@@ -1,4 +1,4 @@
-/** All valid rule tags for v1 + v1.1 */
+/** All valid rule tags for v1 + v1.1 + v1.2 (Live Cash Pack 2) */
 export const VALID_TAGS = [
   "paired_top_river",
   "scare_river_ace",
@@ -22,6 +22,14 @@ export const VALID_TAGS = [
   "3bet_pot_cbet",
   "preflop_3bet",
   "turn_give_up",
+  // v1.2 — Live Cash Pack 2
+  "iso_raise_live",
+  "bb_defend_live",
+  "delayed_cbet",
+  "river_thin_value",
+  "multiway_turn_discipline",
+  // v1.2 — Live Cash Pack 2 — Exploit Framing
+  "live_exploit_framing",
 ] as const;
 
 export type RuleTag = (typeof VALID_TAGS)[number];
@@ -55,6 +63,12 @@ export function tagLabel(tag: RuleTag): string {
     "3bet_pot_cbet": "C-bet in 3-bet pot",
     preflop_3bet: "Preflop 3-bet decision",
     turn_give_up: "Turn give-up as aggressor",
+    iso_raise_live: "Iso-raising live limpers",
+    bb_defend_live: "BB defend in live pool",
+    delayed_cbet: "Delayed c-bet / turn stab after flop skip",
+    river_thin_value: "River thin value vs capped ranges",
+    multiway_turn_discipline: "Turn discipline in multiway pots",
+    live_exploit_framing: "Live pool exploit framing — population-adjusted decisions",
   };
   return labels[tag];
 }
