@@ -1,0 +1,13 @@
+{
+  "node_id": "river_02",
+  "name": "River Sizing vs Sticky Passive Pools",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP",
+    "street": "river",
+    "pot_type": "SRP"
+  },
+  "triggers": ["river_thin_value", "thin_value_deep", "merge_vs_passive"],
+  "defaults": { "population_toggle": "B" }
+}

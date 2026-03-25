@@ -1,0 +1,13 @@
+{
+  "node_id": "iso_02",
+  "name": "Iso-Raise Post-Flop: IP Discipline vs Limper",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP",
+    "street": "flop",
+    "pot_type": "SRP"
+  },
+  "triggers": ["iso_raise_live", "cbet_dry_flop", "turn_give_up"],
+  "defaults": { "population_toggle": "B" }
+}
