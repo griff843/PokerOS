@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { PlayerIntelligenceSnapshot } from "@poker-coach/core/browser";
+import type { ConceptTransferEvaluation, PlayerIntelligenceSnapshot } from "@poker-coach/core/browser";
 import {
   buildDailyStudyPlanBundle,
   DAILY_SESSION_LENGTHS,
   type DailyStudyPlanInput,
 } from "./daily-study-plan";
+import type { CalibrationSurfaceAdapter, CalibrationSurfaceConceptSummary } from "./calibration-surface";
 
 function makeIntelligence(
   overrides: Partial<PlayerIntelligenceSnapshot> = {},
@@ -1355,5 +1356,177 @@ describe("buildDailyStudyPlanBundle — v4: improved no_history / sparse_history
     );
     const block = result.plan20.blocks.find((b) => b.kind === "focus_concept");
     expect(block?.reason).toContain("sharpens");
+  });
+});
+
+// ─── v5: assignment quality helpers ──────────────────────────────────────────
+
+function makeTransferMap(
+  pressureByKey: Record<string, ConceptTransferEvaluation["pressure"]>,
+): Map<string, ConceptTransferEvaluation> {
+  const map = new Map<string, ConceptTransferEvaluation>();
+  for (const [conceptKey, pressure] of Object.entries(pressureByKey)) {
+    map.set(conceptKey, {
+      conceptKey,
+      label: conceptKey,
+      status: "no_real_play_evidence",
+      confidence: "low",
+      evidenceSufficiency: "none",
+      pressure,
+      supportingEvidence: [],
+      riskFlags: [],
+      summary: "",
+      coachExplanation: "",
+      realPlayEvidence: { occurrences: 0, reviewSpotCount: 0 },
+    });
+  }
+  return map;
+}
+
+function makeCalibrationSurface(
+  priorityByKey: Record<string, CalibrationSurfaceConceptSummary["priority"]>,
+): CalibrationSurfaceAdapter {
+  const conceptSummaries: CalibrationSurfaceConceptSummary[] = Object.entries(priorityByKey).map(
+    ([conceptKey, priority]) => ({
+      conceptKey,
+      label: conceptKey,
+      priority,
+      interventionState: "helping" as const,
+      evidenceState: "partial_evidence" as const,
+      trustLevel: "medium" as const,
+      whyThisStillMatters: `${conceptKey} calibration still matters`,
+      retentionSummary: "stable",
+      destination: `/app/concepts/${conceptKey}`,
+    }),
+  );
+  return {
+    state: "partial_evidence",
+    headline: "test",
+    detail: "test",
+    conceptSummaries,
+    topConceptSummaries: conceptSummaries.slice(0, 3),
+    highPriorityCount: conceptSummaries.filter((c) => c.priority === "high").length,
+  };
+}
+
+describe("buildDailyStudyPlanBundle — v5: assignment quality", () => {
+  // Baseline: no v5 fields → same behaviour as before (concept_0 is primary)
+  it("without v5 fields, primary block uses top recommendation unchanged", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({ totalAttempts: 30, playerIntelligence: makeReadyIntelligence() }),
+    );
+    const focusBlock = result.plan45.blocks.find((b) => b.kind === "focus_concept");
+    expect(focusBlock?.conceptKey).toBe("concept_0");
+  });
+
+  // Variety control: recently studied concept is deprioritized
+  // concept_0 score: 10 - 3 = 7; concept_1 score: 8 → concept_1 wins
+  it("variety control: recently studied concept is deprioritized; next-ranked concept becomes primary", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        recentlyStudiedConceptKeys: ["concept_0"],
+      }),
+    );
+    const focusBlock = result.plan45.blocks.find((b) => b.kind === "focus_concept");
+    expect(focusBlock?.conceptKey).toBe("concept_1");
+  });
+
+  // Variety + transfer recovery: recently studied AND high transfer pressure
+  // concept_0 score: 10 - 3 + 2 = 9; concept_1 score: 8 → concept_0 still wins
+  it("variety control: high transfer pressure on recently studied concept keeps it as primary", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        recentlyStudiedConceptKeys: ["concept_0"],
+        transferEvaluationMap: makeTransferMap({ concept_0: "high" }),
+      }),
+    );
+    const focusBlock = result.plan45.blocks.find((b) => b.kind === "focus_concept");
+    // concept_0: 10 - 3 + 2 = 9 > concept_1: 8 → concept_0 is retained as primary
+    expect(focusBlock?.conceptKey).toBe("concept_0");
+  });
+
+  // Transfer pressure: high pressure enriches focus block reason
+  it("transfer pressure high: focus block reason mentions real-play confirmation gap", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        transferEvaluationMap: makeTransferMap({ concept_0: "high" }),
+      }),
+    );
+    const focusBlock = result.plan45.blocks.find((b) => b.kind === "focus_concept");
+    expect(focusBlock?.reason).toContain("not yet confirmed in real play");
+  });
+
+  // Transfer pressure medium: no enrichment appended
+  it("transfer pressure medium: focus block reason is not enriched with transfer language", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        transferEvaluationMap: makeTransferMap({ concept_0: "medium" }),
+      }),
+    );
+    const focusBlock = result.plan45.blocks.find((b) => b.kind === "focus_concept");
+    expect(focusBlock?.reason).not.toContain("not yet confirmed in real play");
+  });
+
+  // Calibration urgency: high-priority calibration enriches focus block reason
+  it("calibration high priority: focus block reason includes whyThisStillMatters text", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        calibrationSurface: makeCalibrationSurface({ concept_0: "high" }),
+      }),
+    );
+    const focusBlock = result.plan45.blocks.find((b) => b.kind === "focus_concept");
+    expect(focusBlock?.reason).toContain("concept_0 calibration still matters");
+  });
+
+  // Calibration boost: high-priority calibration on recs[1] can overtake recs[0]
+  // concept_0 score: 10; concept_1 score: 8 + 2 = 10 → tied, stable sort keeps concept_0
+  // But if concept_0 recently studied: 10-3=7 vs concept_1: 8+2=10 → concept_1 wins
+  it("calibration boost combined with recency: high-calibration concept overtakes recently studied primary", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        recentlyStudiedConceptKeys: ["concept_0"],
+        calibrationSurface: makeCalibrationSurface({ concept_1: "high" }),
+      }),
+    );
+    const focusBlock = result.plan45.blocks.find((b) => b.kind === "focus_concept");
+    // concept_0: 10 - 3 = 7; concept_1: 8 + 2 = 10 → concept_1 wins
+    expect(focusBlock?.conceptKey).toBe("concept_1");
+  });
+
+  // Secondary block also uses enriched reason when transfer is high
+  it("secondary block reason is enriched with transfer language when secondary concept has high pressure", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({
+        totalAttempts: 30,
+        playerIntelligence: makeReadyIntelligence(),
+        transferEvaluationMap: makeTransferMap({ concept_1: "high" }),
+      }),
+    );
+    const secondaryBlock = result.plan90.blocks.find((b) => b.kind === "secondary_concept");
+    expect(secondaryBlock?.conceptKey).toBe("concept_1");
+    expect(secondaryBlock?.reason).toContain("not yet confirmed in real play");
+  });
+
+  // No transfer data → reason is unchanged (no extra sentences appended)
+  it("no transfer or calibration data: reason is exactly the base rationale", () => {
+    const result = buildDailyStudyPlanBundle(
+      makeInput({ totalAttempts: 30, playerIntelligence: makeReadyIntelligence() }),
+    );
+    const focusBlock = result.plan45.blocks.find((b) => b.kind === "focus_concept");
+    expect(focusBlock?.reason).toContain("Concept 0");
+    expect(focusBlock?.reason).not.toContain("not yet confirmed");
+    expect(focusBlock?.reason).not.toContain("calibration still matters");
   });
 });

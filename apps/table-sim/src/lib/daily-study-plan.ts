@@ -1,6 +1,7 @@
-import type { PlayerIntelligenceSnapshot } from "@poker-coach/core/browser";
+import type { ConceptTransferEvaluation, PlayerIntelligenceSnapshot } from "@poker-coach/core/browser";
 import type { RealHandBridgeBundle } from "./real-hand-bridge";
 import { buildDailyPlanBridgeIntegration, findDailyPlanBridgeContext, type DailyPlanBridgeIntegration } from "./daily-plan-bridge-integration";
+import { findCalibrationSurfaceConcept, type CalibrationSurfaceAdapter } from "./calibration-surface";
 
 export type DailyPlanState = "ready" | "sparse_history" | "no_history";
 export type DailySessionLength = 20 | 45 | 90;
@@ -76,6 +77,12 @@ export interface DailyStudyPlanInput {
   now?: Date;
   /** v3: real-hand bridge bundle for enriching plan blocks and explanations */
   bridgeBundle?: RealHandBridgeBundle | null;
+  /** v5: per-concept transfer evaluation for boosting high-pressure concepts */
+  transferEvaluationMap?: Map<string, ConceptTransferEvaluation> | null;
+  /** v5: calibration surface for boosting high-priority regressing concepts */
+  calibrationSurface?: CalibrationSurfaceAdapter | null;
+  /** v5: recently studied concept keys — deprioritized for variety control */
+  recentlyStudiedConceptKeys?: string[];
 }
 
 function derivePlanState(input: DailyStudyPlanInput): DailyPlanState {
@@ -203,6 +210,75 @@ function buildFinishingCondition(blocks: DailyPlanBlock[], state: DailyPlanState
   return `When all ${blocks.length} blocks are marked done.`;
 }
 
+// ─── v5: assignment weight scoring ────────────────────────────────────────────
+
+/** Base scores for concept rank 0–4 in recommendations[]. 2-point gap between ranks. */
+const RANK_BASE_SCORES: readonly number[] = [10.0, 8.0, 6.0, 4.0, 2.0];
+
+/**
+ * Score a candidate recommendation for assignment selection.
+ * Higher score = stronger candidate for focus/secondary block.
+ *
+ * Boosts:  high transfer pressure +2.0, medium +0.5
+ *          high calibration priority +2.0, medium +0.5
+ * Penalty: recently studied concept -3.0
+ *
+ * The -3.0 penalty drops the top-ranked concept below the next rank (gap is 2pt),
+ * unless a +2.0 boost partially recovers it (net: penalised concept scores -1.0
+ * vs untouched next rank — next rank still wins by 1pt).
+ */
+function scoreConceptForAssignment(
+  conceptKey: string,
+  rankIndex: number,
+  transferEvaluationMap: Map<string, ConceptTransferEvaluation> | null | undefined,
+  calibrationSurface: CalibrationSurfaceAdapter | null | undefined,
+  recentlyStudiedConceptKeys: string[] | undefined,
+): number {
+  let score = RANK_BASE_SCORES[rankIndex] ?? 1.0;
+
+  // Transfer pressure boost: drill gains not yet confirming in real play
+  const transfer = transferEvaluationMap?.get(conceptKey);
+  if (transfer?.pressure === "high") score += 2.0;
+  else if (transfer?.pressure === "medium") score += 0.5;
+
+  // Calibration urgency boost: concept is regressing or inconclusive in calibration
+  const calibration = findCalibrationSurfaceConcept(calibrationSurface, conceptKey);
+  if (calibration?.priority === "high") score += 2.0;
+  else if (calibration?.priority === "medium") score += 0.5;
+
+  // Recency penalty: deprioritize concepts worked on recently for variety
+  if (recentlyStudiedConceptKeys?.includes(conceptKey)) score -= 3.0;
+
+  return score;
+}
+
+/**
+ * Enrich a block reason with transfer pressure and calibration urgency signals.
+ * Returns the base reason unchanged when no additional context is available.
+ */
+function enrichBlockReason(
+  baseReason: string,
+  conceptKey: string,
+  transferEvaluationMap: Map<string, ConceptTransferEvaluation> | null | undefined,
+  calibrationSurface: CalibrationSurfaceAdapter | null | undefined,
+): string {
+  const parts: string[] = [baseReason];
+
+  const transfer = transferEvaluationMap?.get(conceptKey);
+  if (transfer?.pressure === "high") {
+    parts.push(
+      "Drill gains on this concept are not yet confirmed in real play — sustained direct practice is the priority.",
+    );
+  }
+
+  const calibration = findCalibrationSurfaceConcept(calibrationSurface, conceptKey);
+  if (calibration?.priority === "high" && calibration.whyThisStillMatters) {
+    parts.push(calibration.whyThisStillMatters);
+  }
+
+  return parts.join(" ");
+}
+
 // ─── candidate block builders ─────────────────────────────────────────────────
 
 function buildCandidateBlocks(
@@ -294,6 +370,21 @@ function buildCandidateBlocks(
   const conceptMap = new Map(input.playerIntelligence.concepts.map((c) => [c.conceptKey, c]));
   const recommendations = input.playerIntelligence.recommendations;
 
+  // v5: score and re-rank recommendations using transfer pressure, calibration urgency,
+  // and recency penalty for variety control.
+  const scoredRecs = recommendations
+    .map((rec, index) => ({
+      rec,
+      score: scoreConceptForAssignment(
+        rec.conceptKey,
+        index,
+        input.transferEvaluationMap,
+        input.calibrationSurface,
+        input.recentlyStudiedConceptKeys,
+      ),
+    }))
+    .sort((a, b) => b.score - a.score);
+
   // Active intervention block (highest priority)
   // v3: enriched with real-hand evidence when bridge has a matching candidate
   if (input.activeInterventionConceptKey) {
@@ -341,15 +432,20 @@ function buildCandidateBlocks(
     });
   }
 
-  // Primary focus concept
-  const primaryRec = recommendations[0];
+  // Primary focus concept — v5: selected by assignment score, not raw rank
+  const primaryRec = scoredRecs[0]?.rec ?? null;
   if (primaryRec) {
     const basePriority = input.activeInterventionConceptKey ? 7 : 9;
     blocks.push({
       kind: "focus_concept",
       title: `Focus Concept: ${primaryRec.label}`,
       estimatedMinutes: 15,
-      reason: `${primaryRec.label} is your top-priority weakness. ${primaryRec.rationale}`,
+      reason: enrichBlockReason(
+        `${primaryRec.label} is your top-priority weakness. ${primaryRec.rationale}`,
+        primaryRec.conceptKey,
+        input.transferEvaluationMap,
+        input.calibrationSurface,
+      ),
       conceptKey: primaryRec.conceptKey,
       conceptLabel: primaryRec.label,
       destination: `/app/concepts/${encodeURIComponent(primaryRec.conceptKey)}`,
@@ -411,14 +507,19 @@ function buildCandidateBlocks(
     });
   }
 
-  // Secondary concept
-  const secondaryRec = recommendations[1];
+  // Secondary concept — v5: selected by assignment score, not raw rank
+  const secondaryRec = scoredRecs[1]?.rec ?? null;
   if (secondaryRec) {
     blocks.push({
       kind: "secondary_concept",
       title: `Secondary Concept: ${secondaryRec.label}`,
       estimatedMinutes: 10,
-      reason: `${secondaryRec.label} is your second-priority weakness. Adding breadth alongside depth work reinforces your overall game.`,
+      reason: enrichBlockReason(
+        `${secondaryRec.label} is your second-priority weakness. Adding breadth alongside depth work reinforces your overall game.`,
+        secondaryRec.conceptKey,
+        input.transferEvaluationMap,
+        input.calibrationSurface,
+      ),
       conceptKey: secondaryRec.conceptKey,
       conceptLabel: secondaryRec.label,
       destination: `/app/concepts/${encodeURIComponent(secondaryRec.conceptKey)}`,
