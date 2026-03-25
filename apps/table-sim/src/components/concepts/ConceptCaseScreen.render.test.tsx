@@ -5,6 +5,7 @@ import { ConceptCaseScreen } from "./ConceptCaseScreen";
 import type { ConceptCaseResponse } from "@/lib/concept-case";
 import type { EngineReplaySummary } from "@/lib/input-snapshots";
 import type { ConceptTransferEvaluation } from "@poker-coach/core/browser";
+import type { CalibrationSurfaceAdapter } from "@/lib/calibration-surface";
 
 function makeReplaySummary(): EngineReplaySummary {
   return {
@@ -228,6 +229,39 @@ function makeConceptCaseResponse(): ConceptCaseResponse {
   };
 }
 
+function makeCalibrationSurface(
+  overrides: Partial<CalibrationSurfaceAdapter> = {},
+): CalibrationSurfaceAdapter {
+  return {
+    state: "strong_evidence",
+    headline: "Calibration outcomes include strong evidence.",
+    detail: "Trust signals are now stable enough to summarize.",
+    generatedAt: "2026-03-25T01:00:00.000Z",
+    conceptSummaries: [
+      {
+        conceptKey: "river_bluff_catching",
+        label: "River Bluff Catching",
+        priority: "high",
+        interventionState: "regressing",
+        evidenceState: "strong_evidence",
+        trustLevel: "medium",
+        whyThisStillMatters: "Transfer has slipped after earlier progress, so this concept remains trust-critical.",
+        transferSummary: "Transfer has regressed in recent hands.",
+        retentionSummary: "Recent retention validation failed, so the concept is not holding cleanly.",
+        suggestedAction: {
+          label: "Repair Transfer Gap",
+          detail: "Replay and repair the transfer leak before the next session.",
+        },
+        destination: "/app/concepts/river_bluff_catching",
+      },
+    ],
+    topConceptSummaries: [],
+    highlightedConcept: undefined,
+    highPriorityCount: 1,
+    ...overrides,
+  };
+}
+
 describe("ConceptCaseScreen", () => {
   it("renders canonical concept-case data without re-deriving explanation text", () => {
     const html = renderToStaticMarkup(<ConceptCaseScreen state={{ loading: false, data: makeConceptCaseResponse() }} />);
@@ -332,6 +366,48 @@ describe("ConceptCaseScreen", () => {
 
     expect(html).toContain("Decision Audit");
     expect(html).toContain("No intervention decision snapshots are stored yet");
+  });
+
+  it("renders concept-specific calibration trust support when available", () => {
+    const calibration = makeCalibrationSurface();
+    const html = renderToStaticMarkup(
+      <ConceptCaseScreen
+        state={{
+          loading: false,
+          data: makeConceptCaseResponse(),
+          calibration,
+          conceptCalibration: calibration.conceptSummaries[0],
+        }}
+      />
+    );
+
+    expect(html).toContain("Calibration Trust");
+    expect(html).toContain("River Bluff Catching calibration");
+    expect(html).toContain("Transfer has regressed in recent hands.");
+  });
+
+  it("renders sparse calibration copy when only bundle-level calibration is available", () => {
+    const html = renderToStaticMarkup(
+      <ConceptCaseScreen
+        state={{
+          loading: false,
+          data: makeConceptCaseResponse(),
+          calibration: makeCalibrationSurface({
+            state: "no_meaningful_history",
+            headline: "Calibration outcomes do not yet have meaningful history.",
+            detail: "The adapter did not find enough persisted outcome history to make strong trust claims yet.",
+            conceptSummaries: [],
+            topConceptSummaries: [],
+            highlightedConcept: undefined,
+            highPriorityCount: 0,
+          }),
+          conceptCalibration: null,
+        }}
+      />
+    );
+
+    expect(html).toContain("Calibration outcomes do not yet have meaningful history.");
+    expect(html).toContain("make strong trust claims yet");
   });
 
   it("renders a loading state cleanly", () => {

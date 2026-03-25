@@ -7,11 +7,17 @@ import type { ConceptTransferEvaluation } from "@poker-coach/core/browser";
 import type { TransferAuditSummary } from "@/lib/transfer-audit";
 import type { RetentionSummary } from "@/lib/retention-scheduling";
 import type { InterventionDecisionAuditSummary } from "@/lib/intervention-decision-audit";
+import type {
+  CalibrationSurfaceAdapter,
+  CalibrationSurfaceConceptSummary,
+} from "@/lib/calibration-surface";
 
 export interface ConceptCaseScreenState {
   loading: boolean;
   error?: string | null;
   data?: ConceptCaseResponse | null;
+  calibration?: CalibrationSurfaceAdapter | null;
+  conceptCalibration?: CalibrationSurfaceConceptSummary | null;
 }
 
 export function ConceptCaseScreen({ state }: { state: ConceptCaseScreenState }) {
@@ -53,6 +59,10 @@ export function ConceptCaseScreen({ state }: { state: ConceptCaseScreenState }) 
     <ConceptPageFrame>
       <div className="space-y-6">
         <ConceptCaseHeader data={state.data} />
+        <ConceptCalibrationPanel
+          calibration={state.calibration}
+          conceptCalibration={state.conceptCalibration}
+        />
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1.02fr)_minmax(320px,0.98fr)]">
           <ConceptStatusCard data={state.data} />
@@ -135,6 +145,54 @@ export function ConceptCaseScreen({ state }: { state: ConceptCaseScreenState }) 
         </section>
       </div>
     </ConceptPageFrame>
+  );
+}
+
+function ConceptCalibrationPanel({
+  calibration,
+  conceptCalibration,
+}: {
+  calibration?: CalibrationSurfaceAdapter | null;
+  conceptCalibration?: CalibrationSurfaceConceptSummary | null;
+}) {
+  if (!calibration || calibration.state === "no_calibration") {
+    return null;
+  }
+
+  const summary = conceptCalibration ?? calibration.highlightedConcept;
+  const title = conceptCalibration
+    ? `${conceptCalibration.label} calibration`
+    : "Calibration summary";
+  const tone = summary?.priority === "high"
+    ? "warning"
+    : calibration.state === "strong_evidence"
+      ? "good"
+      : "neutral";
+
+  return (
+    <ConceptPanel tone={tone} title={title} eyebrow="Calibration Trust">
+      <div className="space-y-4">
+        <div className="flex flex-wrap gap-2">
+          <HeaderChip label={calibration.state.replace(/_/g, " ")} />
+          {summary && <HeaderChip label={summary.interventionState.replace(/_/g, " ")} subtle />}
+          {summary && <HeaderChip label={`${summary.trustLevel} trust`} subtle />}
+          {summary && <HeaderChip label={`${summary.priority} priority`} subtle />}
+        </div>
+        <InfoBlock title="Calibration read" detail={summary?.whyThisStillMatters ?? calibration.detail} />
+        {summary && (
+          <div className="grid gap-3 md:grid-cols-2">
+            <HistoryStat title="Retention trend" detail={summary.retentionSummary} />
+            <HistoryStat title="Transfer confirmation" detail={summary.transferSummary ?? "No transfer confirmation summary is attached yet."} />
+          </div>
+        )}
+        {!summary && (
+          <div className="rounded-[22px] border border-white/8 bg-black/20 p-4">
+            <p className="text-sm leading-6 text-slate-200">{calibration.headline}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">{calibration.detail}</p>
+          </div>
+        )}
+      </div>
+    </ConceptPanel>
   );
 }
 
