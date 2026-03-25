@@ -1,0 +1,13 @@
+{
+  "node_id": "squeeze_02",
+  "name": "Cold-Call / Overcall Discipline — Live Multiway Preflop",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 3,
+    "position": "IP",
+    "street": "preflop",
+    "pot_type": "SRP"
+  },
+  "triggers": ["cold_call_live", "preflop_3bet", "multiway_context"],
+  "defaults": { "population_toggle": "B" }
+}

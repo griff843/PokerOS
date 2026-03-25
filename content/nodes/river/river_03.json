@@ -1,0 +1,13 @@
+{
+  "node_id": "river_03",
+  "name": "River Bet-Fold Discipline — Facing Donk Bets and Raises",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP",
+    "street": "river",
+    "pot_type": "SRP"
+  },
+  "triggers": ["river_bet_fold", "river_thin_value", "blocker_effect"],
+  "defaults": { "population_toggle": "B" }
+}

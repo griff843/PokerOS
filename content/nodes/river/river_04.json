@@ -1,0 +1,13 @@
+{
+  "node_id": "river_04",
+  "name": "River Bet-Fold vs Scare Card Re-raises — Live Discipline",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "IP",
+    "street": "river",
+    "pot_type": "SRP"
+  },
+  "triggers": ["river_bet_fold", "scare_river_ace", "polar_turn_big_bet"],
+  "defaults": { "population_toggle": "B" }
+}

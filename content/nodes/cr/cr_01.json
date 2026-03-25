@@ -1,0 +1,13 @@
+{
+  "node_id": "cr_01",
+  "name": "Flop Check-Raise Discipline — Live Pool Thresholds",
+  "version": "1.0.0",
+  "context": {
+    "player_count_flop": 2,
+    "position": "OOP",
+    "street": "flop",
+    "pot_type": "SRP"
+  },
+  "triggers": ["check_raise_live", "equity_denial", "range_advantage_ip"],
+  "defaults": { "population_toggle": "B" }
+}
