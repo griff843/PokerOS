@@ -52,13 +52,14 @@ The initial backlog is useful, but several items are stale, oversized, or overla
 
 ### Split, merge, or resequence
 
-- Initial Issue 2 (`Harden play session -> DB write path`) is stale.
-  - `apps/table-sim/src/lib/session-context.tsx` already POSTs attempts to `/api/attempts`.
-  - `apps/table-sim/src/app/api/attempts/route.ts` already persists attempts.
-  - Do not recreate this issue.
+- Initial Issue 2 (`Harden play session -> DB write path`) is **partially stale but the SQLite gap is real**.
+  - `apps/table-sim/src/app/api/attempts/route.ts` exists and play page POSTs to it. Attempts are written to **local JSON** via `persistAttempt()`.
+  - `insertAttempt()` exists in `packages/db/src/repository.ts` but is **not called** from the web app. SQLite write path is not connected.
+  - **Do not recreate as written.** File a narrow lane: "Wire `insertAttempt()` from the attempt POST route." (Issue #15 audit — 2026-03-28)
 
-- Initial Issue 8 (`Verify and harden SRS update path from web sessions`) overlaps with the already-wired attempt path and should only return if a truth audit finds a regression.
-  - Do not open as a first-wave lane.
+- Initial Issue 8 (`Verify and harden SRS update path from web sessions`) is a **confirmed real gap**.
+  - `upsertSrs()` exists in `packages/db/src/repository.ts` but is **never called** from the web app. `getAllSrs()` is read but never written back.
+  - This is a genuine first-wave lane, not a duplicate. Wire `upsertSrs()` from the attempt POST route after the attempt write path is confirmed. (Issue #15 audit — 2026-03-28)
 
 - Initial Issue 3 (`Verify and wire intervention surface end-to-end`) is too broad.
   - Current repo already has `/app/concepts/[conceptId]/execution`, `/app/training/session/[id]`, intervention APIs, and Command Center integration.
@@ -72,9 +73,10 @@ The initial backlog is useful, but several items are stale, oversized, or overla
   - The repo already has a large gold live-cash file at [live_cash_gold_btn_bb_river.json](/C:/Users/griff/poker-coach-os/content/drills/live_cash_gold_btn_bb_river.json) with rich coaching fields and sibling turn-to-river families.
   - Replace with an audit of non-gold active-lane content coverage, then a bounded fill lane.
 
-- Initial Issue 6 (`Surface diagnostic reasoning prompts in the play UI`) is stale.
-  - `apps/table-sim/src/components/play/CoachingPanel.tsx` already renders a diagnostic follow-up and writes results back through `setDiagnostic`.
-  - Do not recreate this issue without an audit that proves a persistence gap.
+- Initial Issue 6 (`Surface diagnostic reasoning prompts in the play UI`) is **partially stale but the core gap is real**.
+  - `CoachingPanel.tsx` has a generic `setDiagnostic()` callback that captures user-selected coaching frames.
+  - However, `drill.diagnostic_prompts[]` (authored per-drill reasoning prompts) are **never rendered** in the play UI. The `setDiagnostic()` path is unrelated to authored drill data.
+  - **Do not recreate as written.** File a narrow lane: "Wire `drill.diagnostic_prompts[]` into the play feedback step." (Issue #15 audit — 2026-03-28)
 
 - Initial Issue 10 (`Align roadmap phase numbering`) is valid but low priority.
   - Keep it late; do not let it outrank execution lanes tied to coaching depth.

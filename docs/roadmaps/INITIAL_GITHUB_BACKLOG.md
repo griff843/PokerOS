@@ -8,6 +8,28 @@ Issues 1–4 are required by the PM system spec. Issues 5–11 are the next logi
 
 ---
 
+## Post-Audit Status (Issue #15 — 2026-03-28)
+
+Issue #15 truth audit reconciled all 11 issues against current repo code. See `out/reports/issue-15-truth-audit.md` for full evidence. The canonical forward-looking issue set is now in `GITHUB_ISSUE_CREATION_PACKET.md`.
+
+| # | Title | Audit Status |
+|---|-------|-------------|
+| 1 | Truth audit — gap tracker reconciliation | **EXECUTED** — completed as Issue #15 |
+| 2 | Harden play session → DB write path | **NARROWED** — `/api/attempts` POST exists; attempts persist to local JSON. `insertAttempt()` in repository.ts not called from web app. Real gap: wire SQLite write path. |
+| 3 | Verify and wire intervention surface end-to-end | **NARROWED** — routes, pages, and DB tables exist. Real gap: play session → `coaching_diagnoses` write chain not wired. |
+| 4 | Real-hand loop audit | **SUPERSEDED** — pipeline substantially implemented. Follow-up session writes to `follow_up_assignment_audits`. See Issue 7 in creation packet. |
+| 5 | Content depth uplift — gold-lane drills | **SUPERSEDED** — gold lane already has `action_history` and `coaching_context`. Gap is non-gold lanes. See Issues 3+4 in creation packet. |
+| 6 | Surface diagnostic reasoning prompts in play UI | **VALID** — `drill.diagnostic_prompts[]` never rendered. `CoachingPanel.tsx` has generic `setDiagnostic()` unrelated to authored prompts. Confirmed real gap. |
+| 7 | Daily study plan → session plan bridge | **VALID** — confirmed gap. Maps to Issue 2 in creation packet. |
+| 8 | Verify and harden SRS update path | **VALID** — `upsertSrs()` exists in repository.ts but never called from web app. Confirmed real gap. |
+| 9 | Gold lane expansion — adjacent turn/river | **SUPERSEDED** — adjacent families already exist. See Issues 3+4 in creation packet. |
+| 10 | Align roadmap phase numbering | **VALID, low priority** — doc alignment, no code impact. |
+| 11 | Follow-up audit persistence | **SUPERSEDED** — `createFollowUpAssignmentAudit()` called from `/api/real-hands/follow-up-session`. Write path confirmed. |
+
+**Forward-looking execution order:** Use `GITHUB_ISSUE_CREATION_PACKET.md` as the active backlog.
+
+---
+
 ## Issue 1 — [AUDIT] Reconcile gap tracker against route and DB truth
 
 **Template:** truth_audit
