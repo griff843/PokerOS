@@ -1,0 +1,53 @@
+name: Truth audit
+description: Reconcile roadmap/docs/product claims against actual repo truth.
+title: "[Truth Audit] "
+labels:
+  - truth-audit
+  - docs-sync
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form when docs, roadmap status, or product claims may be out of sync with code truth.
+  - type: input
+    id: area
+    attributes:
+      label: Area being audited
+      placeholder: Daily Study Plan persistence / intervention planning / real-hand loop
+    validations:
+      required: true
+  - type: textarea
+    id: claimed_truth
+    attributes:
+      label: Claimed truth
+      description: What do docs, roadmap, or prior summaries currently claim?
+    validations:
+      required: true
+  - type: textarea
+    id: observed_truth
+    attributes:
+      label: Observed repo truth
+      description: What does the current code, route layer, DB layer, or UI actually do?
+    validations:
+      required: true
+  - type: textarea
+    id: drift
+    attributes:
+      label: Drift / mismatch
+      description: Summarize the specific conflict or overstatement/understatement.
+    validations:
+      required: true
+  - type: textarea
+    id: action
+    attributes:
+      label: Required action
+      description: Doc correction, implementation follow-up, or both.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: File paths, routes, PRs, or screenshots that support the audit.
+    validations:
+      required: true
