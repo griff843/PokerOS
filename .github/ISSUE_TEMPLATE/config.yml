@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Poker OS roadmap
+    url: https://github.com/griff843/PokerOS/blob/main/docs/roadmaps/MASTER_ROADMAP.md
+    about: Check the canonical roadmap before opening a new issue.
+  - name: Coach equivalence gap tracker
+    url: https://github.com/griff843/PokerOS/blob/main/docs/roadmaps/COACH_EQUIVALENCE_GAP_TRACKER.md
+    about: Review current capability gaps before filing new work.
