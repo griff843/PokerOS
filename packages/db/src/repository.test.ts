@@ -8,6 +8,7 @@ import {
   completeIntervention,
   completeRetentionSchedule,
   createDiagnosis,
+  createFollowUpAssignmentAudit,
   createCoachingInputSnapshot,
   createIntervention,
   createInterventionDecisionSnapshot,
@@ -16,6 +17,7 @@ import {
   createReflection,
   getAllAttempts,
   getAllImportedHands,
+  getUserFollowUpAssignmentAudits,
   getConceptRetentionSchedules,
   getDueRetentionSchedules,
   getInterventionOutcome,
@@ -615,5 +617,44 @@ describe("coaching input snapshots", () => {
     expect(userSnapshots.map((entry) => entry.id)).toEqual(["input-2", "input-1"]);
     expect(conceptSnapshots[0]?.linked_transfer_snapshot_id).toBeNull();
     expect(conceptSnapshots[0]?.engine_version).toBe("1.0.0");
+  });
+});
+
+describe("follow-up assignment audits", () => {
+  it("stores and reads recent follow-up assignment audits in newest-first order", () => {
+    const db = openDatabase(createTempDbPath());
+
+    createFollowUpAssignmentAudit(db, {
+      id: "audit-1",
+      user_id: "local_user",
+      concept_key: "blocker_effect",
+      hand_title: "Manual river bluff-catch",
+      hand_source: "manual",
+      parse_status: "partial",
+      uncertainty_profile: "turn_line_fuzzy",
+      created_at: "2026-03-27T22:00:00.000Z",
+      bucket_mix_json: JSON.stringify([{ bucket: "bridge_reconstruction", count: 2 }]),
+      selected_drill_ids_json: JSON.stringify(["gold_bc_tr_01", "gold_bc_05"]),
+    });
+
+    createFollowUpAssignmentAudit(db, {
+      id: "audit-2",
+      user_id: "local_user",
+      concept_key: "turn_defense",
+      hand_title: "Turn memory decisive hand",
+      hand_source: "manual",
+      parse_status: "partial",
+      uncertainty_profile: "memory_decisive",
+      created_at: "2026-03-27T23:00:00.000Z",
+      bucket_mix_json: JSON.stringify([{ bucket: "memory_decisive", count: 2 }]),
+      selected_drill_ids_json: JSON.stringify(["gold_bc_tr2_09"]),
+    });
+
+    const audits = getUserFollowUpAssignmentAudits(db, "local_user", 10);
+    db.close();
+
+    expect(audits.map((entry) => entry.id)).toEqual(["audit-2", "audit-1"]);
+    expect(audits[0]?.uncertainty_profile).toBe("memory_decisive");
+    expect(audits[1]?.bucket_mix_json).toContain("bridge_reconstruction");
   });
 });

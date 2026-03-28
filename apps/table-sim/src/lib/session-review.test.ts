@@ -15,6 +15,8 @@ interface AttemptOptions {
   confidence?: DrillAttempt["confidence"];
   missedTags?: string[];
   matchedTags?: string[];
+  assignmentBucket?: "exact_match" | "turn_line_transfer" | "sizing_stability" | "bridge_reconstruction" | "memory_decisive";
+  assignmentRationale?: string;
 }
 
 function makeAttempt(options: AttemptOptions): DrillAttempt {
@@ -68,7 +70,13 @@ function makeAttempt(options: AttemptOptions): DrillAttempt {
       kind: options.kind ?? "review",
       reason: options.reason ?? "weakness_review",
       matchedWeaknessTargets: options.kind === "new" ? [] : ["overall:classification_tag:concept:blocker_effect"],
-      metadata: { priorAttempts: options.kind === "new" ? 0 : 2, lastScore: 0.4, weaknessPriority: 0.8 },
+      metadata: {
+        priorAttempts: options.kind === "new" ? 0 : 2,
+        lastScore: 0.4,
+        weaknessPriority: 0.8,
+        assignmentBucket: options.assignmentBucket,
+        assignmentRationale: options.assignmentRationale,
+      },
     },
     activePool: "B",
     resolvedAnswer: {
@@ -153,6 +161,83 @@ describe("session review snapshot", () => {
 
     expect(snapshot.nextAction.primary.action).toBe("open_intervention");
     expect(snapshot.importantDrills).toHaveLength(2);
+  });
+
+  it("surfaces follow-up context and assignment rationale when the session came from uncertainty-aware follow-up planning", () => {
+    const snapshot = buildSessionReviewSnapshot({
+      ...makeState([
+        makeAttempt({
+          drillId: "d-followup-1",
+          score: 0.38,
+          correct: false,
+          assignmentBucket: "memory_decisive",
+          assignmentRationale: "Chosen because this rep forces you to resolve which turn version actually happened before trusting the river answer.",
+          missedTags: ["paired_top_river"],
+        }),
+        makeAttempt({
+          drillId: "d-followup-2",
+          nodeId: "hu_river_02",
+          title: "Follow-Up 2",
+          score: 0.44,
+          correct: false,
+          assignmentBucket: "memory_decisive",
+          assignmentRationale: "Chosen because this rep exposes spots where memory uncertainty itself can flip the final river decision.",
+          missedTags: ["paired_top_river"],
+        }),
+      ]),
+      planMetadata: {
+      ...makeState([]).planMetadata!,
+      notes: ["Memory-decisive follow-up: prioritize drills where the river answer can flip depending on which turn version actually happened."],
+      followUpAudit: {
+        conceptKey: "blocker_effects",
+        handTitle: "Table Alpha",
+        handSource: "manual",
+        parseStatus: "partial",
+        uncertaintyProfile: "memory_decisive",
+        bucketMix: [{ bucket: "memory_decisive", count: 2 }],
+        selectedDrillIds: ["d-followup-1", "d-followup-2"],
+      },
+    },
+  });
+
+    expect(snapshot.planningContext?.detail).toContain("Memory-decisive follow-up");
+    expect(snapshot.followUpContext?.title).toBe("Memory-Decisive Follow-Up");
+    expect(snapshot.assignmentAudit?.title).toBe("Assignment Audit");
+    expect(snapshot.assignmentAudit?.bucketMix[0]?.label).toBe("Memory Decisive");
+    expect(snapshot.assignmentAudit?.selectedDrillIds).toContain("d-followup-1");
+    expect(snapshot.importantDrills[0]?.assignmentBucket).toBe("memory_decisive");
+    expect(snapshot.importantDrills[0]?.assignmentRationale).toContain("turn version");
+  });
+
+  it("flags audit warnings when the follow-up mix does not match the uncertainty profile", () => {
+    const snapshot = buildSessionReviewSnapshot({
+      ...makeState([
+        makeAttempt({
+          drillId: "d-fuzzy-1",
+          score: 0.41,
+          correct: false,
+          assignmentBucket: "exact_match",
+          assignmentRationale: "Chosen as a direct transfer rep.",
+          missedTags: ["paired_top_river"],
+        }),
+      ]),
+      planMetadata: {
+        ...makeState([]).planMetadata!,
+        notes: ["Memory-ambiguous follow-up: prioritize bridge drills over exact sizing assumptions."],
+        followUpAudit: {
+          conceptKey: "blocker_effects",
+          handTitle: "Table Beta",
+          handSource: "manual",
+          parseStatus: "partial",
+          uncertaintyProfile: "turn_line_fuzzy",
+          bucketMix: [{ bucket: "exact_match", count: 1 }],
+          selectedDrillIds: ["d-fuzzy-1"],
+        },
+      },
+    });
+
+    expect(snapshot.assignmentAudit?.warnings.length).toBeGreaterThan(0);
+    expect(snapshot.assignmentAudit?.warnings[0]).toContain("bridge reconstruction");
   });
 });
 

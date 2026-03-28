@@ -7,11 +7,14 @@ import { buildMomentumSignal, extractConceptLabel, extractDecisionLabel } from "
 interface SessionRailProps {
   drill: TableSimDrill;
   attempts: DrillAttempt[];
+  assignmentBucket?: "exact_match" | "turn_line_transfer" | "sizing_stability" | "bridge_reconstruction" | "memory_decisive";
+  assignmentRationale?: string;
   onExit: () => void;
 }
 
-export function SessionRail({ drill, attempts, onExit }: SessionRailProps) {
+export function SessionRail({ drill, attempts, assignmentBucket, assignmentRationale, onExit }: SessionRailProps) {
   const momentum = buildMomentumSignal(attempts);
+  const assignmentLabel = assignmentBucket ? formatAssignmentBucket(assignmentBucket) : null;
 
   return (
     <div className="sticky top-0 z-20 rounded-[26px] border border-white/8 bg-gray-950/80 px-4 py-3 shadow-[0_18px_60px_rgba(0,0,0,0.26)] backdrop-blur-xl">
@@ -27,6 +30,16 @@ export function SessionRail({ drill, attempts, onExit }: SessionRailProps) {
             <span className="truncate font-semibold text-white">{extractConceptLabel(drill)}</span>
             <span className="hidden text-sm text-gray-500 lg:inline">{extractDecisionLabel(drill)}</span>
           </div>
+          {assignmentLabel ? (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-sky-500/18 bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-100">
+                {assignmentLabel}
+              </span>
+              {assignmentRationale ? (
+                <span className="max-w-[48rem] text-xs leading-5 text-gray-400">{assignmentRationale}</span>
+              ) : null}
+            </div>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -47,4 +60,19 @@ export function SessionRail({ drill, attempts, onExit }: SessionRailProps) {
       </div>
     </div>
   );
+}
+
+function formatAssignmentBucket(bucket: NonNullable<SessionRailProps["assignmentBucket"]>) {
+  switch (bucket) {
+    case "exact_match":
+      return "Exact Match";
+    case "turn_line_transfer":
+      return "Turn-Line Transfer";
+    case "sizing_stability":
+      return "Sizing Stability";
+    case "bridge_reconstruction":
+      return "Bridge Reconstruction";
+    case "memory_decisive":
+      return "Memory Decisive";
+  }
 }

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { TableSimDrillSchema, type TableSimDrill } from "./drill-schema";
+import type { FollowUpUncertaintyProfile } from "./real-hands";
 
 export const TableSimActivePoolSchema = z.enum(["baseline", "A", "B", "C"]);
 export const TableSimSelectionKindSchema = z.enum(["review", "new"]);
@@ -56,6 +57,14 @@ export const TableSimSelectedDrillSchema = z.object({
     priorAttempts: z.number().int().nonnegative(),
     lastScore: z.number().min(0).max(1).optional(),
     weaknessPriority: z.number().nonnegative().optional(),
+    assignmentRationale: z.string().optional(),
+    assignmentBucket: z.enum([
+      "exact_match",
+      "turn_line_transfer",
+      "sizing_stability",
+      "bridge_reconstruction",
+      "memory_decisive",
+    ]).optional(),
     interventionConceptKey: z.string().optional(),
     interventionConceptLabel: z.string().optional(),
     interventionRole: z.enum(["repair", "retest", "calibration"]).optional(),
@@ -76,6 +85,30 @@ export const TableSimSessionPlanMetadataSchema = z.object({
   generatedAt: z.string(),
   weaknessTargets: z.array(TableSimWeaknessTargetSchema),
   notes: z.array(z.string()),
+  followUpAudit: z.object({
+    conceptKey: z.string(),
+    handTitle: z.string().nullable().optional(),
+    handSource: z.enum(["paste", "file", "manual"]).optional(),
+    parseStatus: z.enum(["parsed", "partial", "unsupported"]).optional(),
+    uncertaintyProfile: z.enum([
+      "precise_history",
+      "turn_line_clear",
+      "sizing_fuzzy_line_clear",
+      "turn_line_fuzzy",
+      "memory_decisive",
+    ]).optional(),
+    bucketMix: z.array(z.object({
+      bucket: z.enum([
+        "exact_match",
+        "turn_line_transfer",
+        "sizing_stability",
+        "bridge_reconstruction",
+        "memory_decisive",
+      ]),
+      count: z.number().int().nonnegative(),
+    })),
+    selectedDrillIds: z.array(z.string()),
+  }).optional(),
   intervention: z.object({
     id: z.string(),
     title: z.string(),
@@ -119,6 +152,38 @@ export async function loadSessionPlan(
   }
   const res = await fetch(`/api/session-plan?${params.toString()}`);
   if (!res.ok) throw new Error("Failed to load session plan");
+
+  const raw = await res.json();
+  return TableSimSessionPlanSchema.parse(raw);
+}
+
+export async function loadRealHandFollowUpSessionPlan(args: {
+  conceptKey: string;
+  activePool?: TableSimActivePool;
+  preferredDrillIds?: string[];
+  correctiveBuckets?: Array<"exact_match" | "turn_line_transfer" | "sizing_stability" | "bridge_reconstruction" | "memory_decisive">;
+  handTitle?: string | null;
+  handSource?: "paste" | "file" | "manual";
+  parseStatus?: "parsed" | "partial" | "unsupported";
+  uncertaintyProfile?: FollowUpUncertaintyProfile;
+  count?: number;
+}): Promise<TableSimSessionPlan> {
+  const res = await fetch("/api/real-hands/follow-up-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      conceptKey: args.conceptKey,
+      activePool: args.activePool ?? "baseline",
+      preferredDrillIds: args.preferredDrillIds ?? [],
+      correctiveBuckets: args.correctiveBuckets ?? [],
+      handTitle: args.handTitle ?? null,
+      handSource: args.handSource,
+      parseStatus: args.parseStatus,
+      uncertaintyProfile: args.uncertaintyProfile,
+      count: args.count,
+    }),
+  });
+  if (!res.ok) throw new Error("Failed to load real-hand follow-up session");
 
   const raw = await res.json();
   return TableSimSessionPlanSchema.parse(raw);

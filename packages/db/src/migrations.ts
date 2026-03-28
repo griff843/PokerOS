@@ -243,6 +243,20 @@ const MIGRATIONS: string[] = [
     created_at TEXT NOT NULL
   )`,
 
+  `CREATE TABLE IF NOT EXISTS follow_up_assignment_audits (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    concept_key TEXT NOT NULL,
+    hand_title TEXT,
+    hand_source TEXT,
+    parse_status TEXT,
+    uncertainty_profile TEXT,
+    active_pool TEXT,
+    created_at TEXT NOT NULL,
+    bucket_mix_json TEXT NOT NULL DEFAULT '[]',
+    selected_drill_ids_json TEXT NOT NULL DEFAULT '[]'
+  )`,
+
   `CREATE INDEX IF NOT EXISTS idx_drills_node ON drills(node_id)`,
   `CREATE INDEX IF NOT EXISTS idx_attempts_drill ON attempts(drill_id)`,
   `CREATE INDEX IF NOT EXISTS idx_attempts_ts ON attempts(ts DESC)`,
@@ -263,6 +277,8 @@ const MIGRATIONS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_hand_imports_created ON hand_imports(created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_imported_hands_played ON imported_hands(played_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_imported_hands_import ON imported_hands(import_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_follow_up_assignment_audits_created ON follow_up_assignment_audits(user_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_follow_up_assignment_audits_concept ON follow_up_assignment_audits(user_id, concept_key, created_at DESC)`,
 ];
 
 function columnExists(db: Database.Database, tableName: string, columnName: string): boolean {
@@ -321,6 +337,12 @@ export function runMigrations(db: Database.Database): void {
       }
       if (!columnExists(db, "imported_hands", "review_spots_json")) {
         db.exec("ALTER TABLE imported_hands ADD COLUMN review_spots_json TEXT NOT NULL DEFAULT '[]'");
+      }
+    }
+
+    if (tableExists(db, "follow_up_assignment_audits")) {
+      if (!columnExists(db, "follow_up_assignment_audits", "active_pool")) {
+        db.exec("ALTER TABLE follow_up_assignment_audits ADD COLUMN active_pool TEXT");
       }
     }
   });

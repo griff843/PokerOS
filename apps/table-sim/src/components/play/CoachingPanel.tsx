@@ -6,7 +6,7 @@ import { buildDrillCoachingSnapshotFromAttempt } from "@/lib/drill-coach-view";
 import { buildTransparencySnapshot } from "@/lib/learning-transparency";
 import type { DrillAttempt } from "@/lib/session-types";
 import { formatActionLine, formatDecisionConfidence, getPoolContextBadge } from "@/lib/study-session-ui";
-import { CoachDiagnosisCard, RangeSupportCard, StrategyFrequencyCard, TransparencyVerdictCard } from "@/components/review/LearningTransparency";
+import { CoachDiagnosisCard, RangeSupportCard, StreetHistoryCard, StrategyFrequencyCard, TransparencyVerdictCard } from "@/components/review/LearningTransparency";
 import { DrillCoachingSummary } from "@/components/review/DrillCoachingSummary";
 
 interface CoachingPanelProps {
@@ -63,6 +63,8 @@ export function CoachingPanel({ attempt, onAdvance, onCaptureDiagnostic, isLast,
       </div>
 
       <TransparencyVerdictCard verdict={transparency.verdict} />
+
+      <StreetHistoryCard history={transparency.history} />
 
       <DrillCoachingSummary snapshot={snapshot} activePool={attempt.activePool} />
 

@@ -205,6 +205,9 @@ export function CommandCenter() {
     snapshot
       ? { label: "Open growth profile", detail: "See whether the larger profile is strengthening, flat, or slipping over time.", onClick: () => router.push("/app/growth") }
       : null,
+    snapshot?.followUpMonitor
+      ? { label: "Open follow-up audits", detail: "Inspect recent assignment audits and see whether the follow-up mix is staying aligned.", onClick: () => router.push("/app/follow-up-audits") }
+      : null,
     { label: "Review imported hands", detail: "Bring real-play hands into the coaching loop or review the ones already mapped.", onClick: () => router.push("/app/hands") },
   ].filter((action): action is { label: string; detail: string; onClick: () => void } => Boolean(action));
 
@@ -250,6 +253,8 @@ export function CommandCenter() {
           <MomentumCard signals={momentumSignals} />
           <CoachBriefingCard loading={snapshotLoading} snapshot={snapshot} />
         </div>
+
+        <FollowUpMonitorCard snapshot={snapshot} />
 
         <LeadConceptCaseCard snapshot={snapshot} />
 
@@ -519,6 +524,108 @@ function LeadConceptCaseCard({ snapshot }: { snapshot: CommandCenterSnapshot | n
             <p className="mt-3 text-xs uppercase tracking-[0.18em] text-emerald-200">Next move: {lead.nextAction}</p>
           </>
         )}
+      </div>
+    </section>
+  );
+}
+
+function FollowUpMonitorCard({ snapshot }: { snapshot: CommandCenterSnapshot | null }) {
+  const monitor = snapshot?.followUpMonitor;
+
+  if (!monitor) {
+    return null;
+  }
+
+  return (
+    <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Follow-Up Monitor</p>
+          <p className="mt-2 text-sm leading-6 text-slate-400">A preview of how the latest real-hand follow-up block is being composed before you launch it.</p>
+        </div>
+        <Link
+          href="/app/hands"
+          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/20 hover:bg-white/10"
+        >
+          Open hands
+        </Link>
+        <Link
+          href="/app/follow-up-audits"
+          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-white/20 hover:bg-white/10"
+        >
+          Open audits
+        </Link>
+      </div>
+
+      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.92fr)]">
+        <div className="rounded-[24px] border border-white/8 bg-black/20 p-4">
+          <p className="text-base font-semibold text-white">{monitor.title}</p>
+          <p className="mt-3 text-sm leading-6 text-slate-300">{monitor.detail}</p>
+          <div className="mt-4 rounded-[20px] border border-emerald-500/16 bg-emerald-500/8 p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-200">Planning Bias</p>
+            <p className="mt-2 text-sm leading-6 text-emerald-50">{monitor.planningBias}</p>
+          </div>
+          {monitor.warnings.length > 0 ? (
+            <div className="mt-4 rounded-[20px] border border-amber-500/18 bg-amber-500/8 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-100">Mix Warnings</p>
+              <div className="mt-2 space-y-2">
+                {monitor.warnings.map((warning) => (
+                  <p key={warning} className="text-sm leading-6 text-amber-50/90">{warning}</p>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 rounded-[20px] border border-emerald-500/18 bg-emerald-500/8 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100">Mix Health</p>
+              <p className="mt-2 text-sm leading-6 text-emerald-50">The previewed block mix is aligned with the hand’s uncertainty profile.</p>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-4 rounded-[24px] border border-white/8 bg-black/20 p-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Bucket Mix</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {monitor.bucketMix.map((bucket) => (
+                <div key={bucket.label} className="rounded-full border border-white/8 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200">
+                  {bucket.label}: {bucket.count}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Previewed Drill IDs</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {monitor.selectedDrillIds.slice(0, 6).map((drillId) => (
+                <code key={drillId} className="rounded-full border border-white/8 bg-slate-950/70 px-3 py-1.5 text-xs text-slate-300">
+                  {drillId}
+                </code>
+              ))}
+            </div>
+          </div>
+
+          {monitor.recentHistory.length > 0 ? (
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Recent Audit History</p>
+              <div className="mt-3 space-y-2">
+                {monitor.recentHistory.map((entry) => (
+                  <div key={`${entry.createdAtLabel}:${entry.handTitle}:${entry.concept}`} className="rounded-[18px] border border-white/8 bg-white/5 p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-semibold text-white">{entry.handTitle}</p>
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">{entry.createdAtLabel}</span>
+                    </div>
+                    <p className="mt-1 text-xs text-slate-400">{entry.concept} - {entry.uncertaintyLabel}</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-300">{entry.bucketMix}</p>
+                    <p className={`mt-2 text-xs font-semibold uppercase tracking-[0.16em] ${entry.warningCount > 0 ? "text-amber-200" : "text-emerald-200"}`}>
+                      {entry.warningCount > 0 ? `${entry.warningCount} mix warnings` : "Mix aligned"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
     </section>
   );

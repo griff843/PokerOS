@@ -3,7 +3,7 @@ import { BoardSchema, CardSchema, StreetSchema, type Board, type CanonicalDrill 
 import { buildConceptGraph, getSupportingConcepts, mapSignalToConceptKeys } from "./concept-graph";
 import type { WeaknessPool } from "./weakness-analytics";
 
-export const ImportedHandSourceSchema = z.enum(["paste", "file"]);
+export const ImportedHandSourceSchema = z.enum(["paste", "file", "manual"]);
 export type ImportedHandSource = z.infer<typeof ImportedHandSourceSchema>;
 
 export const ImportedHandParseStatusSchema = z.enum(["parsed", "partial", "unsupported"]);
@@ -114,10 +114,13 @@ export interface RealHandRecommendation {
   label: string;
   reason: string;
   recommendedPool: WeaknessPool;
+  laneLabel?: string;
+  laneReason?: string;
   relatedDrills: Array<{
     drillId: string;
     title: string;
     nodeId: string;
+    whyPicked: string;
   }>;
 }
 
@@ -238,12 +241,18 @@ export function buildRealHandRecommendations(args: {
         }
         return drillConcepts.has(signal.conceptKey) || (supporting ? drillConcepts.has(supporting.key) : false);
       })
+      .sort((left, right) => compareRecommendationDrills(left, right, signal.conceptKey))
       .slice(0, 3)
       .map((drill) => ({
         drillId: drill.drill_id,
         title: drill.title,
         nodeId: drill.node_id,
+        whyPicked: buildDrillWhyPicked(drill, signal.conceptKey),
       }));
+    const hasGoldLaneMatch = relatedDrills.some((drill) => {
+      const fullDrill = args.drills.find((candidate) => candidate.drill_id === drill.drillId);
+      return fullDrill ? isGoldRiverBluffCatchLane(fullDrill) : false;
+    });
 
     return {
       conceptKey: signal.conceptKey,
@@ -252,9 +261,105 @@ export function buildRealHandRecommendations(args: {
         ? `${signal.label} is appearing in real hands, but ${supporting.label.toLowerCase()} may be the cleaner upstream repair.`
         : `${signal.label} is appearing in actual imported hands, so it now deserves training priority beyond authored drills alone.`,
       recommendedPool: "baseline",
+      laneLabel: hasGoldLaneMatch
+        ? "Gold Lane: BTN vs BB SRP River Bluff-Catch"
+        : undefined,
+      laneReason: hasGoldLaneMatch
+        ? "This hand maps into the strongest authored live-cash lane, so follow-up reps should stay inside that lane first."
+        : undefined,
       relatedDrills,
     };
   });
+}
+
+function compareRecommendationDrills(
+  left: CanonicalDrill,
+  right: CanonicalDrill,
+  conceptKey: string,
+): number {
+  const scoreDelta = scoreRecommendationDrill(right, conceptKey) - scoreRecommendationDrill(left, conceptKey);
+  if (scoreDelta !== 0) {
+    return scoreDelta;
+  }
+
+  return left.title.localeCompare(right.title);
+}
+
+function scoreRecommendationDrill(drill: CanonicalDrill, conceptKey: string): number {
+  let score = 0;
+  const tags = new Set(drill.tags);
+  const answerTags = new Set(drill.answer.required_tags ?? []);
+
+  if (isGoldRiverBluffCatchLane(drill)) {
+    score += 12;
+  }
+  if (tags.has("decision:bluff_catch")) {
+    score += 4;
+  }
+  if (drill.scenario.street === "river") {
+    score += 3;
+  }
+  if (drill.scenario.pot_type === "SRP") {
+    score += 2;
+  }
+  if (drill.scenario.hero_position === "BB" && drill.scenario.villain_position === "BTN") {
+    score += 2;
+  }
+  if (matchesConceptFamily(drill, conceptKey)) {
+    score += 4;
+  }
+  if (answerTags.has("bluff_catch_live")) {
+    score += 1;
+  }
+
+  return score;
+}
+
+function isGoldRiverBluffCatchLane(drill: CanonicalDrill): boolean {
+  const tags = new Set(drill.tags);
+  return drill.scenario.street === "river"
+    && drill.scenario.pot_type === "SRP"
+    && drill.scenario.hero_position === "BB"
+    && drill.scenario.villain_position === "BTN"
+    && tags.has("decision:bluff_catch")
+    && tags.has("spot:btn_vs_bb");
+}
+
+function buildDrillWhyPicked(drill: CanonicalDrill, conceptKey: string): string {
+  if (isGoldRiverBluffCatchLane(drill)) {
+    return "Closest gold-lane match for BTN vs BB SRP river bluff-catching.";
+  }
+  if (matchesConceptFamily(drill, conceptKey)) {
+    return "Direct concept match for the real-hand leak.";
+  }
+  if (drill.steps?.length) {
+    return "Useful bridge rep because it carries the mistake across multiple streets.";
+  }
+
+  return "Related follow-up rep for this real-hand concept.";
+}
+
+function matchesConceptFamily(drill: CanonicalDrill, conceptKey: string): boolean {
+  if (conceptKey === "bluff_catching") {
+    return drill.tags.includes("decision:bluff_catch");
+  }
+  if (conceptKey === "blocker_effects") {
+    return drill.tags.includes("concept:blocker_effect");
+  }
+  if (conceptKey === "river_defense") {
+    return drill.scenario.street === "river" && drill.tags.includes("decision:bluff_catch");
+  }
+  if (conceptKey === "polarization") {
+    return drill.tags.includes("decision:bluff_catch") || drill.answer.required_tags.includes("overbluff_punish");
+  }
+  if (conceptKey === "pool_reading" || conceptKey === "player_pool_adjustment") {
+    return drill.tags.some((tag) => tag.startsWith("pool:")) || Boolean(drill.answer_by_pool);
+  }
+  if (conceptKey === "street_transition") {
+    return Boolean(drill.coaching_context?.what_changed_by_street?.length) || Boolean(drill.steps?.length);
+  }
+
+  return false;
 }
 
 function parseSingleHand(args: {

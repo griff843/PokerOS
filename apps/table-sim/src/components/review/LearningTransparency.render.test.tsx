@@ -13,6 +13,24 @@ describe("LearningTransparency cards", () => {
         "Calling works only if enough missed draws survive to river.",
         "What makes it difficult: the same card improves both ranges differently.",
       ],
+      streetShifts: [
+        {
+          street: "turn",
+          label: "Turn",
+          summary: "The turn check removed clean double-barrel value and preserved delayed floats.",
+          board: "Js 7c 3d 2h",
+          availability: "structured",
+          isDecisionStreet: false,
+        },
+        {
+          street: "river",
+          label: "River",
+          summary: "The paired river tightened value but left enough air to defend trips.",
+          board: "Js 7c 3d 2h Jd",
+          availability: "structured",
+          isDecisionStreet: true,
+        },
+      ],
       sections: [
         {
           title: "Villain Value Region",
@@ -50,6 +68,8 @@ describe("LearningTransparency cards", () => {
     expect(html).toContain("Villain Value Region");
     expect(html).toContain("Hero Bluff Catchers");
     expect(html).toContain("High-end bluff catcher");
+    expect(html).toContain("Street Shift Logic");
+    expect(html).toContain("The turn check removed clean double-barrel value and preserved delayed floats.");
     expect(html).toContain("Blocker Logic");
     expect(html).toContain("Threshold Logic");
     expect(html).toContain("Mostly call");
@@ -62,6 +82,10 @@ describe("LearningTransparency cards", () => {
       detail: "You found the right hand class, but the combo still landed on the wrong side of the calling threshold.",
       nextFocus: "Revisit river defense thresholds with more attention on which bluff catchers survive.",
       tags: ["threshold error", "river bluff catching"],
+      promptType: "threshold",
+      prompt: "Why is this still a candidate bluff-catcher?",
+      selectedReasoning: "Second pair is simply too weak versus the overbet.",
+      expectedReasoning: "Some second-pair hands must continue because the line still contains enough missed air.",
     };
 
     const html = renderToStaticMarkup(<CoachDiagnosisCard diagnosis={diagnosis} />);
@@ -69,5 +93,9 @@ describe("LearningTransparency cards", () => {
     expect(html).toContain("Coach Diagnosis");
     expect(html).toContain("threshold error");
     expect(html).toContain("river bluff catching");
+    expect(html).toContain("Reasoning Check");
+    expect(html).toContain("Your Reasoning");
+    expect(html).toContain("Expected Reasoning");
+    expect(html).toContain("threshold");
   });
 });

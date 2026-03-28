@@ -1,0 +1,17 @@
+{
+  "out": "out/reports/gold-lane-reviews/pending/example_lane_batch.json",
+  "count": 10,
+  "prefix": "example_lane",
+  "title": "Example Lane Batch",
+  "node": "bluff_catch_01",
+  "laneFamily": "BTN vs BB SRP turn-to-river",
+  "promptTemplate": "$2/$5 live. BB vs BTN SRP. {{laneFamily}}. Template prompt {{number}}.",
+  "metadataNotes": [
+    "Lane family: BTN vs BB SRP",
+    "Focus: turn probe / delayed river decision"
+  ],
+  "metadataTags": [
+    "lane_family:btn_vs_bb_turn_to_river",
+    "batch_type:pending"
+  ]
+}

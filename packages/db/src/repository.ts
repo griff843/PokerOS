@@ -1140,6 +1140,20 @@ export interface ImportedHandRow {
   created_at: string;
 }
 
+export interface FollowUpAssignmentAuditRow {
+  id: string;
+  user_id: string;
+  concept_key: string;
+  hand_title?: string | null;
+  hand_source?: string | null;
+  parse_status?: string | null;
+  uncertainty_profile?: string | null;
+  active_pool?: AttemptPool;
+  created_at: string;
+  bucket_mix_json: string;
+  selected_drill_ids_json: string;
+}
+
 export function insertHandImport(db: Database.Database, row: HandImportRow): void {
   db.prepare(`
     INSERT INTO hand_imports (
@@ -1262,6 +1276,57 @@ export function getImportedHand(db: Database.Database, importedHandId: string): 
 
 export function getImportedHandsByImportId(db: Database.Database, importId: string): ImportedHandRow[] {
   return db.prepare("SELECT * FROM imported_hands WHERE import_id = ? ORDER BY COALESCE(played_at, created_at) DESC").all(importId) as ImportedHandRow[];
+}
+
+export function createFollowUpAssignmentAudit(db: Database.Database, row: FollowUpAssignmentAuditRow): void {
+  db.prepare(`
+    INSERT INTO follow_up_assignment_audits (
+      id,
+      user_id,
+      concept_key,
+      hand_title,
+      hand_source,
+      parse_status,
+      uncertainty_profile,
+      active_pool,
+      created_at,
+      bucket_mix_json,
+      selected_drill_ids_json
+    )
+    VALUES (
+      @id,
+      @user_id,
+      @concept_key,
+      @hand_title,
+      @hand_source,
+      @parse_status,
+      @uncertainty_profile,
+      @active_pool,
+      @created_at,
+      @bucket_mix_json,
+      @selected_drill_ids_json
+    )
+  `).run({
+    ...row,
+    hand_title: row.hand_title ?? null,
+    hand_source: row.hand_source ?? null,
+    parse_status: row.parse_status ?? null,
+    uncertainty_profile: row.uncertainty_profile ?? null,
+    active_pool: row.active_pool ?? null,
+  });
+}
+
+export function getUserFollowUpAssignmentAudits(
+  db: Database.Database,
+  userId: string,
+  limit = 50
+): FollowUpAssignmentAuditRow[] {
+  return db.prepare(`
+    SELECT * FROM follow_up_assignment_audits
+    WHERE user_id = ?
+    ORDER BY created_at DESC, id DESC
+    LIMIT ?
+  `).all(userId, limit) as FollowUpAssignmentAuditRow[];
 }
 
 // Settings operations

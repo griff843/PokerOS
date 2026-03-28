@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildAttemptInsights, ImportedHandSourceSchema, type WeaknessPool } from "@poker-coach/core/browser";
 import { loadLocalStudyData } from "../../../lib/local-study-data";
-import { persistImportedHandText } from "../../../lib/real-hand-persistence";
+import { ManualLiveHandInputSchema, persistImportedHandText, persistManualLiveHand } from "../../../lib/real-hand-persistence";
 import { buildRealHandsSnapshot } from "../../../lib/real-hands";
 
 export async function GET(request: NextRequest) {
@@ -32,12 +32,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as { text?: string; source?: string };
+    const body = await request.json() as { text?: string; source?: string; mode?: string; manual?: unknown };
+    if (body.mode === "manual") {
+      const input = ManualLiveHandInputSchema.parse(body.manual);
+      const result = persistManualLiveHand({ input, importedAt: new Date() });
+      return NextResponse.json(result, { status: 201 });
+    }
+
     const text = body.text?.trim() ?? "";
     if (!text) {
       return NextResponse.json({ error: "Hand history text is required" }, { status: 400 });
     }
-
     const source = ImportedHandSourceSchema.parse(body.source ?? "paste");
     const result = persistImportedHandText({ text, source, importedAt: new Date() });
     return NextResponse.json(result, { status: 201 });

@@ -60,6 +60,7 @@ export interface TransparencyRangeView {
   subtitle: string;
   points: string[];
   sections: TransparencyRangeSection[];
+  streetShifts: TransparencyHistoryLine[];
   handFocus?: TransparencyRangeSpotlight;
   blockerNotes: string[];
   thresholdNotes: string[];
@@ -72,6 +73,10 @@ export interface TransparencyDiagnosisView {
   detail: string;
   nextFocus?: string;
   tags: string[];
+  promptType?: string;
+  prompt?: string;
+  selectedReasoning?: string;
+  expectedReasoning?: string;
 }
 
 export interface TransparencySnapshot {
@@ -293,6 +298,7 @@ function buildRangeView(attempt: DrillAttempt): TransparencyRangeView {
   const context = attempt.drill.coaching_context;
   const rangeSupport = context?.range_support;
   const points = buildRangeSummaryPoints(attempt);
+  const streetShifts = buildRangeStreetShiftLines(attempt.drill);
   const sections = [
     buildRangeSection("Villain Value Region", rangeSupport?.value_buckets),
     buildRangeSection("Villain Bluff Region", rangeSupport?.bluff_buckets),
@@ -307,6 +313,7 @@ function buildRangeView(attempt: DrillAttempt): TransparencyRangeView {
       : "Range-aware support built from the published explanation and available coaching context.",
     points,
     sections,
+    streetShifts,
     handFocus: rangeSupport?.hero_hand_bucket
       ? {
           label: rangeSupport.hero_hand_bucket.label,
@@ -317,10 +324,37 @@ function buildRangeView(attempt: DrillAttempt): TransparencyRangeView {
     blockerNotes: [...(rangeSupport?.blocker_notes ?? [])],
     thresholdNotes: [...(rangeSupport?.threshold_notes ?? [])],
     available: sections.length > 0
+      || streetShifts.length > 0
       || !!rangeSupport?.hero_hand_bucket
       || (rangeSupport?.blocker_notes?.length ?? 0) > 0
       || (rangeSupport?.threshold_notes?.length ?? 0) > 0,
   };
+}
+
+function buildRangeStreetShiftLines(drill: TableSimDrill): TransparencyHistoryLine[] {
+  const boardByStreet = buildBoardByStreet(drill);
+  const streetNotes = buildStreetNoteMap(drill);
+  const decisionStreet = getDecisionStreet(drill);
+
+  const shifts: Array<TransparencyHistoryLine | null> = getReplayStreets(drill)
+    .map((street) => {
+      const detail = streetNotes.get(street);
+      if (!detail) {
+        return null;
+      }
+
+      const board = boardByStreet[street];
+      return {
+        street,
+        label: formatStreet(street),
+        summary: detail,
+        board: board && board.length > 0 ? formatBoard(board) : undefined,
+        availability: "structured" as const,
+        isDecisionStreet: street === decisionStreet,
+      };
+    });
+
+  return shifts.filter((line): line is TransparencyHistoryLine => line !== null);
 }
 
 function buildRangeSummaryPoints(attempt: DrillAttempt): string[] {
@@ -569,5 +603,9 @@ function buildDiagnosisView(attempt: DrillAttempt): TransparencyDiagnosisView {
       ...(diagnostic.confidenceMiscalibration ? ["confidence miscalibration"] : []),
       ...(diagnostic.concept ? [diagnostic.concept] : []),
     ],
+    promptType: attempt.diagnostic?.promptType?.replace(/_/g, " "),
+    prompt: attempt.diagnostic?.prompt,
+    selectedReasoning: attempt.diagnostic?.optionLabel,
+    expectedReasoning: attempt.diagnostic?.expectedReasoning,
   };
 }

@@ -10,6 +10,13 @@ import { formatDecisionConfidence, formatSessionLabel } from "./study-session-ui
 import { buildTableSimPlayerIntelligence } from "./player-intelligence";
 import { buildPatternBriefs } from "./pattern-summaries";
 
+type AssignmentBucket =
+  | "exact_match"
+  | "turn_line_transfer"
+  | "sizing_stability"
+  | "bridge_reconstruction"
+  | "memory_decisive";
+
 export interface SessionReviewSnapshot {
   header: {
     focusLabel: string;
@@ -41,6 +48,21 @@ export interface SessionReviewSnapshot {
     pattern: string;
     nextFocus: string;
   };
+  planningContext?: {
+    title: string;
+    detail: string;
+  };
+  followUpContext?: {
+    title: string;
+    detail: string;
+  };
+  assignmentAudit?: {
+    title: string;
+    detail: string;
+    bucketMix: Array<{ label: string; count: number }>;
+    selectedDrillIds: string[];
+    warnings: string[];
+  };
   importantDrills: Array<{
     drillId: string;
     title: string;
@@ -49,6 +71,8 @@ export interface SessionReviewSnapshot {
     detail: string;
     confidence: string;
     reviewTag: string | null;
+    assignmentRationale?: string;
+    assignmentBucket?: string | null;
   }>;
   importantDrillsEmptyMessage?: string;
   recommendedTrainingBlock?: {
@@ -173,6 +197,15 @@ export function buildSessionReviewSnapshot(
   const adaptive = playerIntelligence.adaptiveProfile;
   const primaryTendency = adaptive.tendencies[0];
   const leadPattern = buildPatternBriefs(playerIntelligence.patterns.topPatterns, 1)[0];
+  const planningContextNote = planMetadata?.notes.find((note) =>
+    note.includes("Memory-ambiguous follow-up")
+    || note.includes("Manual reconstruction with a clear turn-line family")
+    || note.includes("Sizing-fuzzy follow-up")
+    || note.includes("Memory-decisive follow-up")
+    || note.includes("Precise import follow-up"),
+  );
+  const followUpContext = buildFollowUpContext(attempts);
+  const assignmentAudit = buildAssignmentAudit(planMetadata);
 
   return {
     header: {
@@ -253,6 +286,14 @@ export function buildSessionReviewSnapshot(
         ? `${interventionPlan.recommendedSessionTitle}: ${nextFocusSummary.recommendations[0].rationale} ${adaptive.surfaceSignals.sessionReview}`.trim()
         : `${interventionPlan.recommendedSessionTitle}: ${interventionPlan.nextSessionFocus}`,
     },
+    planningContext: planningContextNote
+      ? {
+          title: "Why This Block Was Selected",
+          detail: planningContextNote,
+        }
+      : undefined,
+    followUpContext,
+    assignmentAudit,
     importantDrills: importantDrills.map((attempt) => ({
       drillId: attempt.drill.drill_id,
       title: attempt.drill.title,
@@ -263,6 +304,8 @@ export function buildSessionReviewSnapshot(
       detail: buildImportantDrillDetail(attempt, adaptive.surfaceSignals.review),
       confidence: formatDecisionConfidence(attempt.confidence),
       reviewTag: attempt.missedTags[0] ?? attempt.drill.answer.required_tags[0] ?? null,
+      assignmentRationale: attempt.selection.metadata.assignmentRationale,
+      assignmentBucket: attempt.selection.metadata.assignmentBucket ?? null,
     })),
     importantDrillsEmptyMessage: importantDrills.length === 0
       ? "This block did not produce standout review targets. Return to Command Center to set up the next deliberate session."
@@ -309,6 +352,149 @@ export function buildSessionReviewSnapshot(
       ],
     },
   };
+}
+
+function buildAssignmentAudit(planMetadata: SessionState["planMetadata"]): SessionReviewSnapshot["assignmentAudit"] | undefined {
+  const audit = planMetadata?.followUpAudit;
+  if (!audit) {
+    return undefined;
+  }
+
+  const bucketMix = audit.bucketMix.map((entry) => ({
+    label: formatAssignmentBucketLabel(entry.bucket),
+    count: entry.count,
+  }));
+  const profile = audit.uncertaintyProfile ? formatSessionLabel(audit.uncertaintyProfile) : "Unknown profile";
+  const handLabel = audit.handTitle ? ` for ${audit.handTitle}` : "";
+
+  return {
+    title: "Assignment Audit",
+    detail: `This follow-up block was built from ${formatSessionLabel(audit.conceptKey)}${handLabel} using ${profile}. The mix below shows what kinds of reps the planner actually assigned.`,
+    bucketMix,
+    selectedDrillIds: audit.selectedDrillIds,
+    warnings: buildAssignmentAuditWarnings(audit),
+  };
+}
+
+function buildFollowUpContext(attempts: DrillAttempt[]): { title: string; detail: string } | undefined {
+  const buckets = attempts
+    .map((attempt) => attempt.selection.metadata.assignmentBucket)
+    .filter(isAssignmentBucket);
+
+  if (buckets.length === 0) {
+    return undefined;
+  }
+
+  const counts = new Map<AssignmentBucket, number>();
+  for (const bucket of buckets) {
+    counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
+  }
+
+  const ranked = [...counts.entries()].sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]));
+  const topBucket = ranked[0]?.[0];
+  const topCount = ranked[0]?.[1] ?? 0;
+  const total = buckets.length;
+  const share = Math.round((topCount / total) * 100);
+
+  if (!topBucket) {
+    return undefined;
+  }
+
+  switch (topBucket) {
+    case "memory_decisive":
+      return {
+        title: "Memory-Decisive Follow-Up",
+        detail: `${topCount} of ${total} follow-up reps (${share}%) force a turn-story decision before the river answer can be trusted, so reconstruction itself is part of the training goal.`,
+      };
+    case "bridge_reconstruction":
+      return {
+        title: "Bridge Reconstruction",
+        detail: `${topCount} of ${total} follow-up reps (${share}%) are bridge-style drills that recover the likely turn story before checking the river threshold.`,
+      };
+    case "sizing_stability":
+      return {
+        title: "Sizing-Stable Follow-Up",
+        detail: `${topCount} of ${total} follow-up reps (${share}%) keep the line family stable while testing where sizing pressure can still flip the answer.`,
+      };
+    case "turn_line_transfer":
+      return {
+        title: "Turn-Line Transfer",
+        detail: `${topCount} of ${total} follow-up reps (${share}%) are direct carryover spots where the remembered turn line should shape the river threshold decisively.`,
+      };
+    case "exact_match":
+    default:
+      return {
+        title: "Precise Transfer",
+        detail: `${topCount} of ${total} follow-up reps (${share}%) are close matches to the reviewed hand, so the next work starts from the exact line family before widening out.`,
+      };
+  }
+}
+
+function formatAssignmentBucketLabel(bucket: AssignmentBucket) {
+  switch (bucket) {
+    case "memory_decisive":
+      return "Memory Decisive";
+    case "bridge_reconstruction":
+      return "Bridge Reconstruction";
+    case "sizing_stability":
+      return "Sizing Stability";
+    case "turn_line_transfer":
+      return "Turn-Line Transfer";
+    case "exact_match":
+    default:
+      return "Exact Match";
+  }
+}
+
+function buildAssignmentAuditWarnings(audit: NonNullable<NonNullable<SessionState["planMetadata"]>["followUpAudit"]>) {
+  const counts = new Map(audit.bucketMix.map((entry) => [entry.bucket, entry.count]));
+  const warnings: string[] = [];
+
+  switch (audit.uncertaintyProfile) {
+    case "memory_decisive":
+      if ((counts.get("memory_decisive") ?? 0) === 0) {
+        warnings.push("This block was tagged memory-decisive, but it contains no memory-decisive reps.");
+      }
+      if ((counts.get("bridge_reconstruction") ?? 0) === 0) {
+        warnings.push("Memory-decisive blocks usually still need at least one bridge-style reconstruction rep.");
+      }
+      break;
+    case "turn_line_fuzzy":
+      if ((counts.get("bridge_reconstruction") ?? 0) === 0) {
+        warnings.push("Turn-line-fuzzy follow-ups should usually contain bridge reconstruction reps.");
+      }
+      if ((counts.get("exact_match") ?? 0) === 0) {
+        warnings.push("Turn-line-fuzzy follow-ups may be over-indexed on bridge reps if no exact-match transfer reps appear.");
+      }
+      break;
+    case "sizing_fuzzy_line_clear":
+      if ((counts.get("sizing_stability") ?? 0) === 0) {
+        warnings.push("Sizing-fuzzy follow-ups should include at least one sizing-stability rep.");
+      }
+      break;
+    case "turn_line_clear":
+      if ((counts.get("turn_line_transfer") ?? 0) === 0) {
+        warnings.push("Turn-line-clear follow-ups should usually contain turn-line transfer reps.");
+      }
+      break;
+    case "precise_history":
+      if ((counts.get("exact_match") ?? 0) === 0) {
+        warnings.push("Precise-history follow-ups should stay anchored in exact-match reps first.");
+      }
+      break;
+    default:
+      break;
+  }
+
+  return warnings;
+}
+
+function isAssignmentBucket(value: DrillAttempt["selection"]["metadata"]["assignmentBucket"]): value is AssignmentBucket {
+  return value === "exact_match"
+    || value === "turn_line_transfer"
+    || value === "sizing_stability"
+    || value === "bridge_reconstruction"
+    || value === "memory_decisive";
 }
 
 function buildSessionFocusLabel(attempts: DrillAttempt[]): string {

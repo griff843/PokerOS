@@ -187,11 +187,25 @@ export default function PlayPage() {
   const conceptLabel = extractConceptLabel(drill);
   const decisionLabel = extractDecisionLabel(drill);
   const spotLabel = `${formatSessionLabel(drill.scenario.pot_type)} | ${drill.scenario.hero_position} vs ${drill.scenario.villain_position}`;
+  const assignmentRationale = selectedDrill.metadata.assignmentRationale;
+  const followUpContextNote = state.planMetadata?.notes.find((note) =>
+    note.includes("Memory-ambiguous follow-up")
+    || note.includes("Manual reconstruction with a clear turn-line family")
+    || note.includes("Sizing-fuzzy follow-up")
+    || note.includes("Memory-decisive follow-up")
+    || note.includes("Precise import follow-up"),
+  );
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(20,83,45,0.16),rgba(2,6,23,1)_30%),linear-gradient(180deg,rgba(2,6,23,1),rgba(3,7,18,1))] px-4 py-5 sm:px-5">
       <div className="mx-auto max-w-7xl space-y-5">
-        <SessionRail drill={drill} attempts={state.attempts} onExit={handleExit} />
+        <SessionRail
+          drill={drill}
+          attempts={state.attempts}
+          assignmentBucket={selectedDrill.metadata.assignmentBucket}
+          assignmentRationale={selectedDrill.metadata.assignmentRationale}
+          onExit={handleExit}
+        />
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.75fr)]">
           <div className="space-y-5">
@@ -219,6 +233,22 @@ export default function PlayPage() {
                     : "Read the spot first, then commit to one clean line."}
                 </p>
               </div>
+              {followUpContextNote ? (
+                <div className="mt-4 rounded-[22px] border border-amber-300/18 bg-amber-300/10 px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-100">
+                    Follow-Up Context
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-amber-50/90">{followUpContextNote}</p>
+                </div>
+              ) : null}
+              {assignmentRationale ? (
+                <div className="mt-4 rounded-[22px] border border-sky-500/18 bg-sky-500/8 px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-200/85">
+                    Why This Drill Was Picked
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-200">{assignmentRationale}</p>
+                </div>
+              ) : null}
             </section>
 
             <TableView

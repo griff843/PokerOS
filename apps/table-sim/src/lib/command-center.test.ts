@@ -196,6 +196,29 @@ describe("command center snapshot", () => {
       ],
       interventionHistory: makeInterventionHistory(),
       patternAttempts: makePatternAttempts(),
+      recentFollowUpPreview: {
+        handTitle: "Live BTN vs BB river bluff-catch",
+        conceptKey: "blocker_effect",
+        uncertaintyProfile: "turn_line_fuzzy",
+        planningBias: "Bridge drills first; recover the likely turn story before forcing an exact river answer.",
+        bucketMix: [
+          { bucket: "bridge_reconstruction", count: 3 },
+          { bucket: "exact_match", count: 1 },
+        ],
+        selectedDrillIds: ["gold_bc_tr_01", "gold_bc_tr2_03", "gold_bc_11", "gold_bc_18"],
+      },
+      recentFollowUpAudits: [
+        {
+          conceptKey: "blocker_effect",
+          handTitle: "Recent manual hand",
+          uncertaintyProfile: "memory_decisive",
+          createdAt: "2026-03-10T09:00:00.000Z",
+          bucketMix: [
+            { bucket: "memory_decisive", count: 2 },
+            { bucket: "bridge_reconstruction", count: 1 },
+          ],
+        },
+      ],
       now: new Date("2026-03-10T12:00:00.000Z"),
     });
 
@@ -218,6 +241,10 @@ describe("command center snapshot", () => {
     expect(snapshot.interventions.active[0]?.status).toContain("Assigned");
     expect(snapshot.interventions.completed[0]?.status).toBe("Recovered");
     expect(snapshot.recentWork).toHaveLength(3);
+    expect(snapshot.followUpMonitor?.bucketMix[0]?.label).toBe("Bridge Reconstruction");
+    expect(snapshot.followUpMonitor?.warnings).toHaveLength(0);
+    expect(snapshot.followUpMonitor?.recentHistory[0]?.handTitle).toBe("Recent manual hand");
+    expect(snapshot.recentWork[0]?.detail).toContain(" - ");
   });
 
   it("describes cadence honestly when there is no recent work", () => {

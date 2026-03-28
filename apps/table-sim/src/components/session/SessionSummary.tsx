@@ -54,6 +54,18 @@ export function SessionSummary({ state, dispatch, onNewSession }: SessionSummary
         <CoachDebriefCard debrief={snapshot.coachDebrief} />
       </div>
 
+      {snapshot.planningContext ? (
+        <PlanningContextCard context={snapshot.planningContext} />
+      ) : null}
+
+      {snapshot.followUpContext ? (
+        <PlanningContextCard context={snapshot.followUpContext} />
+      ) : null}
+
+      {snapshot.assignmentAudit ? (
+        <AssignmentAuditCard audit={snapshot.assignmentAudit} />
+      ) : null}
+
       <WhatMovedToday items={snapshot.movedToday.items} />
 
       <ImportantDrillsSection
@@ -176,6 +188,19 @@ function CoachDebriefCard({
   );
 }
 
+function PlanningContextCard({
+  context,
+}: {
+  context: { title: string; detail: string };
+}) {
+  return (
+    <section className="rounded-[30px] border border-amber-300/18 bg-[linear-gradient(180deg,rgba(44,26,8,0.38),rgba(19,14,11,0.88))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-200/85">{context.title}</p>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-amber-50/90">{context.detail}</p>
+    </section>
+  );
+}
+
 function ImportantDrillsSection({
   drills,
   emptyMessage,
@@ -189,6 +214,8 @@ function ImportantDrillsSection({
     detail: string;
     confidence: string;
     reviewTag: string | null;
+    assignmentRationale?: string;
+    assignmentBucket?: string | null;
   }>;
   emptyMessage?: string;
   onReview: (tagFilter: string | null) => void;
@@ -215,6 +242,18 @@ function ImportantDrillsSection({
                   </div>
                   <p className="text-sm font-medium text-amber-200">{drill.outcome}</p>
                   <p className="text-sm leading-6 text-slate-300">{drill.detail}</p>
+                  {drill.assignmentBucket || drill.assignmentRationale ? (
+                    <div className="rounded-[18px] border border-sky-500/14 bg-sky-500/8 px-3 py-2">
+                      {drill.assignmentBucket ? (
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-200/85">
+                          {formatAssignmentBucket(drill.assignmentBucket)}
+                        </p>
+                      ) : null}
+                      {drill.assignmentRationale ? (
+                        <p className="mt-1 text-xs leading-5 text-slate-300">{drill.assignmentRationale}</p>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
                 <div className="flex min-w-[180px] flex-col gap-2">
                   <div className="rounded-[18px] border border-white/8 bg-white/5 px-3 py-2 text-sm text-slate-300">
@@ -235,6 +274,65 @@ function ImportantDrillsSection({
       </div>
     </section>
   );
+}
+
+function AssignmentAuditCard({
+  audit,
+}: {
+  audit: {
+    title: string;
+    detail: string;
+    bucketMix: Array<{ label: string; count: number }>;
+    selectedDrillIds: string[];
+    warnings: string[];
+  };
+}) {
+  return (
+    <section className="rounded-[30px] border border-sky-500/14 bg-[linear-gradient(180deg,rgba(9,25,39,0.92),rgba(8,16,28,0.88))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-sky-200/85">{audit.title}</p>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-200">{audit.detail}</p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {audit.bucketMix.map((entry) => (
+          <span
+            key={entry.label}
+            className="rounded-full border border-sky-500/18 bg-sky-500/8 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-sky-100"
+          >
+            {entry.count} {entry.label}
+          </span>
+        ))}
+      </div>
+      <p className="mt-4 text-xs leading-5 text-slate-400">
+        Drill IDs: {audit.selectedDrillIds.join(", ")}
+      </p>
+      {audit.warnings.length ? (
+        <div className="mt-4 rounded-[18px] border border-amber-400/18 bg-amber-500/8 px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-200/85">Audit Warnings</p>
+          <div className="mt-2 space-y-2">
+            {audit.warnings.map((warning) => (
+              <p key={warning} className="text-xs leading-5 text-amber-50/90">{warning}</p>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function formatAssignmentBucket(bucket: string) {
+  switch (bucket) {
+    case "memory_decisive":
+      return "Assignment: memory decisive";
+    case "bridge_reconstruction":
+      return "Assignment: bridge reconstruction";
+    case "sizing_stability":
+      return "Assignment: sizing stability";
+    case "turn_line_transfer":
+      return "Assignment: turn-line transfer";
+    case "exact_match":
+      return "Assignment: exact match";
+    default:
+      return `Assignment: ${bucket.replace(/_/g, " ")}`;
+  }
 }
 
 function NextActionSection({

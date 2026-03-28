@@ -6,6 +6,7 @@ import {
   getAllAttempts,
   getAllImportedHands,
   getAllSrs,
+  getUserFollowUpAssignmentAudits,
   getRecentHandImports,
   getUserDiagnosisHistory,
   getUserCoachingInputSnapshots,
@@ -58,6 +59,7 @@ export function loadLocalStudyData() {
       retentionSchedules: [],
       transferSnapshots: [],
       inputSnapshots: [],
+      followUpAssignmentAudits: [],
     };
   }
 
@@ -89,6 +91,7 @@ export function loadLocalStudyData() {
       retentionSchedules: getUserRetentionSchedules(db, userId),
       transferSnapshots: getUserTransferEvaluationSnapshots(db, userId),
       inputSnapshots: getUserCoachingInputSnapshots(db, userId),
+      followUpAssignmentAudits: getUserFollowUpAssignmentAudits(db, userId),
     };
   } finally {
     db.close();

@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AttemptRow, SrsRow } from "../../../../packages/db/src/repository";
 import type { CanonicalDrill } from "../../../../packages/core/src/schemas";
-import { createTableSimSessionPlan } from "./session-plan-server";
-import { loadSessionPlan, TableSimSessionPlanSchema, unwrapPlannedDrills } from "./session-plan";
+import { createRealHandFollowUpSessionPlan, createTableSimSessionPlan } from "./session-plan-server";
+import { loadRealHandFollowUpSessionPlan, loadSessionPlan, TableSimSessionPlanSchema, unwrapPlannedDrills } from "./session-plan";
 
 function makeDrill(overrides: Partial<CanonicalDrill> & Pick<CanonicalDrill, "drill_id" | "node_id" | "title">): CanonicalDrill {
   return {
@@ -211,6 +211,498 @@ describe("table-sim session plan integration", () => {
     expect(plan.drills[0].reason).toBe("due_review");
     expect(plan.metadata.reviewCount).toBe(1);
     expect(plan.metadata.activePool).toBe("B");
+
+    vi.unstubAllGlobals();
+  });
+
+  it("creates a targeted real-hand follow-up session with preferred drills first", () => {
+    const drills = [
+      makeDrill({
+        drill_id: "gold-1",
+        node_id: "bluff_catch_01",
+        title: "Gold Follow-Up",
+        tags: ["street:river", "spot:btn_vs_bb", "decision:bluff_catch", "concept:blocker_effect"],
+      }),
+      makeDrill({
+        drill_id: "concept-2",
+        node_id: "bluff_catch_02",
+        title: "Concept Match",
+        tags: ["street:river", "decision:bluff_catch", "concept:blocker_effect"],
+      }),
+      makeDrill({
+        drill_id: "other-3",
+        node_id: "hu_03",
+        title: "Other Concept",
+        tags: ["street:turn", "concept:turn_barrel"],
+      }),
+    ];
+    const attempts = [
+      makeAttempt({ attempt_id: "a1", drill_id: "concept-2", score: 0.25, correct_bool: 0 }),
+    ];
+    const srs = [makeSrs({ drill_id: "gold-1", due_at: "2026-03-09T00:00:00.000Z" })];
+
+    const plan = createRealHandFollowUpSessionPlan({
+      request: {
+        conceptKey: "blocker_effects",
+        preferredDrillIds: ["gold-1"],
+        handTitle: "Table Alpha",
+        handSource: "manual",
+        parseStatus: "partial",
+        uncertaintyProfile: "turn_line_fuzzy",
+        activePool: "baseline",
+        count: 6,
+      },
+      inputs: { drills, attempts, srs, now },
+    });
+
+    expect(plan.drills[0]?.drill.drill_id).toBe("gold-1");
+    expect(plan.metadata.notes.some((note) => note.includes("Table Alpha"))).toBe(true);
+    expect(plan.metadata.notes.some((note) => note.includes("Memory-ambiguous follow-up"))).toBe(true);
+    expect(plan.metadata.followUpAudit?.conceptKey).toBe("blocker_effects");
+    expect(plan.metadata.followUpAudit?.uncertaintyProfile).toBe("turn_line_fuzzy");
+    expect(plan.metadata.followUpAudit?.selectedDrillIds.length).toBe(plan.drills.length);
+    expect(plan.metadata.weaknessTargets[0]?.key).toBe("concept:blocker_effects");
+    expect(plan.metadata.reviewCount).toBeGreaterThan(0);
+    expect(plan.drills[0]?.metadata.assignmentRationale).toContain("closest direct match");
+    expect(plan.drills[0]?.metadata.assignmentBucket).toBe("exact_match");
+  });
+
+  it("prefers bridge drills for turn-line-fuzzy follow-up sessions", () => {
+    const bridgeDrill = makeDrill({
+      drill_id: "gold_bc_tr_bridge",
+      node_id: "bluff_catch_01",
+      title: "Bridge Follow-Up",
+      tags: ["street:river", "spot:btn_vs_bb", "decision:bluff_catch", "concept:blocker_effect"],
+      coaching_context: {
+        what_changed_by_street: [
+          { street: "turn", detail: "Turn line filtered value and preserved delayed bluffs." },
+          { street: "river", detail: "River threshold depends on what survived the turn." },
+        ],
+      },
+      steps: [
+        {
+          step_id: "turn",
+          street: "turn",
+          prompt: "Turn decision.",
+          decision_point: { street: "turn", facing: { action: "check" }, sizing_buttons_enabled: false },
+          options: [
+            { key: "BET", label: "Bet" },
+            { key: "CHECK", label: "Check" },
+          ],
+          answer: {
+            correct: "CHECK",
+            accepted: [],
+            required_tags: ["equity_denial"],
+            explanation: "Check.",
+          },
+        },
+        {
+          step_id: "river",
+          street: "river",
+          prompt: "River decision.",
+          decision_point: { street: "river", facing: { action: "bet", size_pct_pot: 75 }, sizing_buttons_enabled: false },
+          options: [
+            { key: "CALL", label: "Call" },
+            { key: "FOLD", label: "Fold" },
+          ],
+          answer: {
+            correct: "CALL",
+            accepted: [],
+            required_tags: ["paired_top_river"],
+            explanation: "Call.",
+          },
+        },
+      ],
+    });
+    const exactDrill = makeDrill({
+      drill_id: "exact_match",
+      node_id: "bluff_catch_02",
+      title: "Exact Match",
+      tags: ["street:river", "decision:bluff_catch", "concept:blocker_effect"],
+    });
+
+    const plan = createRealHandFollowUpSessionPlan({
+      request: {
+        conceptKey: "blocker_effects",
+        handSource: "manual",
+        parseStatus: "partial",
+        uncertaintyProfile: "turn_line_fuzzy",
+        activePool: "baseline",
+        count: 2,
+      },
+      inputs: { drills: [exactDrill, bridgeDrill], attempts: [], srs: [], now },
+    });
+
+    expect(plan.drills[0]?.drill.drill_id).toBe("gold_bc_tr_bridge");
+    expect(plan.metadata.notes.some((note) => note.includes("Memory-ambiguous follow-up"))).toBe(true);
+    expect(plan.drills[0]?.metadata.assignmentBucket).toBe("bridge_reconstruction");
+  });
+
+  it("keeps some exact-match reps in a turn-line-fuzzy block instead of filling only bridge drills", () => {
+    const bridgeOne = makeDrill({
+      drill_id: "gold_bc_tr_bridge_1",
+      node_id: "bluff_catch_01",
+      title: "Bridge 1",
+      tags: ["street:river", "spot:btn_vs_bb", "decision:bluff_catch", "concept:blocker_effect"],
+      coaching_context: { what_changed_by_street: [{ street: "turn", detail: "Turn line is the main filter." }] },
+      steps: [{
+        step_id: "turn",
+        street: "turn",
+        prompt: "Turn first.",
+        decision_point: { street: "turn", facing: { action: "check" }, sizing_buttons_enabled: false },
+        options: [{ key: "CHECK", label: "Check" }],
+        answer: { correct: "CHECK", accepted: [], required_tags: ["equity_denial"], explanation: "Check." },
+      }],
+    });
+    const bridgeTwo = makeDrill({
+      drill_id: "gold_bc_tr_bridge_2",
+      node_id: "bluff_catch_02",
+      title: "Bridge 2",
+      tags: ["street:river", "spot:btn_vs_bb", "decision:bluff_catch", "concept:blocker_effect"],
+      coaching_context: { what_changed_by_street: [{ street: "turn", detail: "Turn line still matters." }] },
+    });
+    const exactOne = makeDrill({
+      drill_id: "exact_one",
+      node_id: "bluff_catch_01",
+      title: "Exact One",
+      tags: ["street:river", "decision:bluff_catch", "concept:blocker_effect"],
+    });
+    const exactTwo = makeDrill({
+      drill_id: "exact_two",
+      node_id: "bluff_catch_02",
+      title: "Exact Two",
+      tags: ["street:river", "decision:bluff_catch", "concept:blocker_effect"],
+    });
+
+    const plan = createRealHandFollowUpSessionPlan({
+      request: {
+        conceptKey: "blocker_effects",
+        handSource: "manual",
+        parseStatus: "partial",
+        uncertaintyProfile: "turn_line_fuzzy",
+        activePool: "baseline",
+        count: 4,
+      },
+      inputs: { drills: [bridgeOne, bridgeTwo, exactOne, exactTwo], attempts: [], srs: [], now },
+    });
+
+    const buckets = plan.drills.map((entry) => entry.metadata.assignmentBucket);
+    expect(buckets.filter((bucket) => bucket === "bridge_reconstruction").length).toBeGreaterThan(0);
+    expect(buckets.filter((bucket) => bucket === "exact_match").length).toBeGreaterThan(0);
+    expect(plan.metadata.notes.some((note) => note.includes("Follow-up mix:"))).toBe(true);
+    expect(plan.metadata.followUpAudit?.bucketMix.some((entry) => entry.bucket === "bridge_reconstruction")).toBe(true);
+    expect(plan.metadata.followUpAudit?.bucketMix.some((entry) => entry.bucket === "exact_match")).toBe(true);
+  });
+
+  it("adds a sizing-fuzzy note when the line is clear but exact sizing is not", () => {
+    const plan = createRealHandFollowUpSessionPlan({
+      request: {
+        conceptKey: "blocker_effects",
+        handSource: "manual",
+        parseStatus: "partial",
+        uncertaintyProfile: "sizing_fuzzy_line_clear",
+        activePool: "baseline",
+        count: 2,
+      },
+      inputs: {
+        drills: [makeDrill({
+          drill_id: "gold_bc_tr_size",
+          node_id: "bluff_catch_01",
+          title: "Sizing Fuzzy Bridge",
+          tags: ["street:river", "spot:btn_vs_bb", "decision:bluff_catch", "concept:blocker_effect"],
+          coaching_context: {
+            what_changed_by_street: [
+              { street: "turn", detail: "Turn line preserved bluffs while capping some thin value." },
+            ],
+          },
+          answer_by_pool: {
+            B: {
+              correct: "FOLD",
+              accepted: [],
+              required_tags: ["paired_top_river"],
+              explanation: "Fold in tighter pools.",
+            },
+          },
+        })],
+        attempts: [],
+        srs: [],
+        now,
+      },
+    });
+
+    expect(plan.metadata.notes.some((note) => note.includes("Sizing-fuzzy follow-up"))).toBe(true);
+    expect(plan.drills[0]?.metadata.assignmentBucket).toBe("sizing_stability");
+  });
+
+  it("adds a memory-decisive note when the recalled turn story may flip the answer", () => {
+    const plan = createRealHandFollowUpSessionPlan({
+      request: {
+        conceptKey: "blocker_effects",
+        handSource: "manual",
+        parseStatus: "partial",
+        uncertaintyProfile: "memory_decisive",
+        activePool: "baseline",
+        count: 2,
+      },
+      inputs: {
+        drills: [makeDrill({
+          drill_id: "gold_bc_tr_memory",
+          node_id: "bluff_catch_02",
+          title: "Memory Decisive",
+          tags: ["street:river", "spot:btn_vs_bb", "decision:bluff_catch", "concept:blocker_effect"],
+          steps: [{
+            step_id: "resolve_memory",
+            street: "turn",
+            prompt: "Resolve memory.",
+            decision_point: { street: "turn", facing: { action: "check" }, sizing_buttons_enabled: false },
+            options: [{ key: "CHECK", label: "Check-through" }],
+            answer: { correct: "CHECK", accepted: [], required_tags: ["equity_denial"], explanation: "Check." },
+          }],
+          answer_by_pool: {
+            B: {
+              correct: "FOLD",
+              accepted: [],
+              required_tags: ["paired_top_river"],
+              explanation: "Fold.",
+            },
+          },
+        })],
+        attempts: [],
+        srs: [],
+        now,
+      },
+    });
+
+    expect(plan.metadata.notes.some((note) => note.includes("Memory-decisive follow-up"))).toBe(true);
+    expect(plan.drills[0]?.metadata.assignmentBucket).toBe("memory_decisive");
+    expect(plan.drills[0]?.metadata.assignmentRationale).toContain("turn version");
+  });
+
+  it("prioritizes memory-decisive reps before bridge and exact-match filler", () => {
+    const memoryDrill = makeDrill({
+      drill_id: "gold_bc_memory_flip",
+      node_id: "bluff_catch_02",
+      title: "Memory Flip",
+      tags: ["street:river", "spot:btn_vs_bb", "decision:bluff_catch", "concept:blocker_effect"],
+      answer_by_pool: {
+        B: {
+          correct: "FOLD",
+          accepted: [],
+          required_tags: ["paired_top_river"],
+          explanation: "Fold.",
+        },
+      },
+      steps: [{
+        step_id: "resolve_memory",
+        street: "turn",
+        prompt: "Which turn happened?",
+        decision_point: { street: "turn", facing: { action: "check" }, sizing_buttons_enabled: false },
+        options: [{ key: "CHECK", label: "Check-through" }],
+        answer: { correct: "CHECK", accepted: [], required_tags: ["equity_denial"], explanation: "Check." },
+      }],
+    });
+    const bridgeDrill = makeDrill({
+      drill_id: "gold_bc_tr_bridge_memory",
+      node_id: "bluff_catch_01",
+      title: "Bridge Memory",
+      tags: ["street:river", "spot:btn_vs_bb", "decision:bluff_catch", "concept:blocker_effect"],
+      coaching_context: { what_changed_by_street: [{ street: "turn", detail: "Turn story controls river." }] },
+    });
+    const exactDrill = makeDrill({
+      drill_id: "exact_memory",
+      node_id: "bluff_catch_01",
+      title: "Exact Memory",
+      tags: ["street:river", "decision:bluff_catch", "concept:blocker_effect"],
+    });
+
+    const plan = createRealHandFollowUpSessionPlan({
+      request: {
+        conceptKey: "blocker_effects",
+        handSource: "manual",
+        parseStatus: "partial",
+        uncertaintyProfile: "memory_decisive",
+        activePool: "baseline",
+        count: 3,
+      },
+      inputs: { drills: [exactDrill, bridgeDrill, memoryDrill], attempts: [], srs: [], now },
+    });
+
+    expect(plan.drills[0]?.metadata.assignmentBucket).toBe("memory_decisive");
+    expect(plan.drills.map((entry) => entry.metadata.assignmentBucket)).toContain("bridge_reconstruction");
+  });
+
+  it("overweights corrective buckets ahead of the default uncertainty mix", () => {
+    const exactDrill = makeDrill({
+      drill_id: "exact_bucket",
+      node_id: "bluff_catch_01",
+      title: "Exact Bucket",
+      tags: ["street:river", "decision:bluff_catch", "concept:blocker_effect"],
+    });
+    const bridgeDrill = makeDrill({
+      drill_id: "bridge_bucket",
+      node_id: "bluff_catch_02",
+      title: "Bridge Bucket",
+      tags: ["street:river", "spot:btn_vs_bb", "decision:bluff_catch", "concept:blocker_effect"],
+      coaching_context: {
+        what_changed_by_street: [{ street: "turn", detail: "Turn line is the main filter." }],
+      },
+    });
+    const sizingDrill = makeDrill({
+      drill_id: "sizing_bucket",
+      node_id: "bluff_catch_01",
+      title: "Sizing Bucket",
+      tags: ["street:river", "spot:btn_vs_bb", "decision:bluff_catch", "concept:blocker_effect"],
+      answer_by_pool: {
+        B: {
+          correct: "FOLD",
+          accepted: [],
+          required_tags: ["paired_top_river"],
+          explanation: "Fold in tighter pools.",
+        },
+      },
+    });
+
+    const plan = createRealHandFollowUpSessionPlan({
+      request: {
+        conceptKey: "blocker_effects",
+        handSource: "manual",
+        parseStatus: "partial",
+        uncertaintyProfile: "turn_line_fuzzy",
+        correctiveBuckets: ["sizing_stability"],
+        activePool: "baseline",
+        count: 3,
+      },
+      inputs: { drills: [exactDrill, bridgeDrill, sizingDrill], attempts: [], srs: [], now },
+    });
+
+    expect(plan.drills.map((entry) => entry.metadata.assignmentBucket)).toContain("sizing_stability");
+    expect(plan.metadata.followUpAudit?.bucketMix.some((entry) => entry.bucket === "sizing_stability")).toBe(true);
+    expect(plan.metadata.notes.some((note) => note.includes("Corrective weighting applied"))).toBe(true);
+  });
+
+  it("sends corrective buckets in the real-hand follow-up request payload", async () => {
+    const payload = {
+      drills: [
+        {
+          drill: makeDrill({ drill_id: "gold-1", node_id: "bluff_catch_01", title: "Gold Follow-Up" }),
+          kind: "review",
+          reason: "due_review",
+          matchedWeaknessTargets: ["concept:blocker_effects", "source:real_hand_follow_up"],
+          metadata: { priorAttempts: 1, dueAt: now.toISOString(), lastScore: 0.3, weaknessPriority: 1 },
+        },
+      ],
+      metadata: {
+        requestedCount: 6,
+        selectedCount: 1,
+        reviewCount: 1,
+        newCount: 0,
+        dueReviewCount: 1,
+        weaknessReviewCount: 0,
+        weaknessNewCount: 0,
+        newMaterialFillCount: 0,
+        activePool: "baseline",
+        generatedAt: now.toISOString(),
+        weaknessTargets: [
+          { type: "classification_tag", key: "concept:blocker_effects", scope: "overall", sampleSize: 1, priority: 1 },
+        ],
+        notes: ["Targeted real-hand follow-up focused on blocker effects."],
+      },
+    };
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => payload,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await loadRealHandFollowUpSessionPlan({
+      conceptKey: "blocker_effects",
+      preferredDrillIds: ["gold-1"],
+      correctiveBuckets: ["bridge_reconstruction", "memory_decisive"],
+      handTitle: "Table Alpha",
+      handSource: "manual",
+      parseStatus: "partial",
+      uncertaintyProfile: "turn_line_fuzzy",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/real-hands/follow-up-session", expect.objectContaining({
+      method: "POST",
+      body: JSON.stringify({
+        conceptKey: "blocker_effects",
+        activePool: "baseline",
+        preferredDrillIds: ["gold-1"],
+        correctiveBuckets: ["bridge_reconstruction", "memory_decisive"],
+        handTitle: "Table Alpha",
+        handSource: "manual",
+        parseStatus: "partial",
+        uncertaintyProfile: "turn_line_fuzzy",
+        count: undefined,
+      }),
+    }));
+
+    vi.unstubAllGlobals();
+  });
+
+  it("loads a real-hand follow-up session payload from the API route", async () => {
+    const payload = {
+      drills: [
+        {
+          drill: makeDrill({ drill_id: "gold-1", node_id: "bluff_catch_01", title: "Gold Follow-Up" }),
+          kind: "review",
+          reason: "due_review",
+          matchedWeaknessTargets: ["concept:blocker_effects", "source:real_hand_follow_up"],
+          metadata: { priorAttempts: 1, dueAt: now.toISOString(), lastScore: 0.3, weaknessPriority: 1 },
+        },
+      ],
+      metadata: {
+        requestedCount: 6,
+        selectedCount: 1,
+        reviewCount: 1,
+        newCount: 0,
+        dueReviewCount: 1,
+        weaknessReviewCount: 0,
+        weaknessNewCount: 0,
+        newMaterialFillCount: 0,
+        activePool: "baseline",
+        generatedAt: now.toISOString(),
+        weaknessTargets: [
+          { type: "classification_tag", key: "concept:blocker_effects", scope: "overall", sampleSize: 1, priority: 1 },
+        ],
+        notes: ["Targeted real-hand follow-up focused on blocker effects."],
+      },
+    };
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => payload,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const plan = await loadRealHandFollowUpSessionPlan({
+      conceptKey: "blocker_effects",
+      preferredDrillIds: ["gold-1"],
+      handTitle: "Table Alpha",
+      handSource: "manual",
+      parseStatus: "partial",
+      uncertaintyProfile: "turn_line_fuzzy",
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/real-hands/follow-up-session", expect.objectContaining({
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        conceptKey: "blocker_effects",
+        activePool: "baseline",
+        preferredDrillIds: ["gold-1"],
+        correctiveBuckets: [],
+        handTitle: "Table Alpha",
+        handSource: "manual",
+        parseStatus: "partial",
+        uncertaintyProfile: "turn_line_fuzzy",
+        count: undefined,
+      }),
+    }));
+    expect(plan.metadata.notes[0]).toContain("blocker effects");
 
     vi.unstubAllGlobals();
   });

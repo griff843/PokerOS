@@ -169,6 +169,77 @@ Each pool entry has: `correct`, `accepted`, `required_tags`, `explanation`.
 
 ---
 
+## Canonical Enums You Must Not Invent
+
+Some fields are strict enums. If authors improvise here, the drill may look fine in JSON but fail the real content loader.
+
+### `metadata.source`
+
+Allowed values only:
+
+- `manual`
+- `ai_generated`
+- `session_import`
+- `solver`
+
+### `diagnostic_prompts[].type`
+
+Allowed values only:
+
+- `line_understanding`
+- `threshold`
+- `range_construction`
+- `blocker`
+- `pool_assumption`
+- `street_shift`
+- `mix_reasoning`
+
+### `diagnostic_prompts[].options[].diagnosis`
+
+Allowed values only:
+
+- `line_misunderstanding`
+- `threshold_error`
+- `range_construction_error`
+- `blocker_blindness`
+- `pool_assumption_error`
+- `confidence_miscalibration`
+
+### Common Wrong Values
+
+These are examples of values that may sound reasonable but are invalid:
+
+- `range_discipline`
+- `line_reading`
+- `blocker_misread`
+- `blocker_ignored`
+- custom `metadata.source` values like `claude_batch1`
+
+If you need one of these concepts, map it to the nearest canonical enum rather than inventing a new one.
+
+---
+
+## Staging Rule For Claude Batches
+
+Unreviewed Claude batches must not live in `content/drills`.
+
+Why:
+
+- `pnpm content:init` loads every JSON file inside `content/drills`
+- one malformed Claude batch can break app boot and poison the live content path
+
+Stage unreviewed batches under:
+
+- `out/reports/gold-lane-reviews/pending/`
+
+Only move a batch into `content/drills` after:
+
+- `node scripts/validate-gold-lane.mjs --mode=batch <path>` passes
+- `pnpm review:gold-batch --batch=<path>` produces an acceptable recommendation
+- the batch is explicitly accepted for merge
+
+---
+
 ## Prompt Requirements
 
 Every prompt must include:

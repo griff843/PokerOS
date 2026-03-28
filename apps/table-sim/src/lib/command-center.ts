@@ -67,6 +67,22 @@ export interface CommandCenterSnapshot {
     reminder: string;
     recommendation: string;
   };
+  followUpMonitor?: {
+    title: string;
+    detail: string;
+    planningBias: string;
+    bucketMix: Array<{ label: string; count: number }>;
+    warnings: string[];
+    selectedDrillIds: string[];
+    recentHistory: Array<{
+      handTitle: string;
+      concept: string;
+      uncertaintyLabel: string;
+      bucketMix: string;
+      createdAtLabel: string;
+      warningCount: number;
+    }>;
+  };
   interventions: {
     active: Array<{ concept: string; status: string; detail: string }>;
     completed: Array<{ concept: string; status: string; detail: string }>;
@@ -130,6 +146,32 @@ interface BuildCommandCenterSnapshotArgs {
   retentionSchedules?: RetentionScheduleRow[];
   transferSnapshots?: TransferEvaluationSnapshotRow[];
   inputSnapshots?: CoachingInputSnapshotRow[];
+  recentFollowUpPreview?: {
+    handTitle: string;
+    conceptKey: string;
+    uncertaintyProfile:
+      | "precise_history"
+      | "turn_line_clear"
+      | "sizing_fuzzy_line_clear"
+      | "turn_line_fuzzy"
+      | "memory_decisive";
+    planningBias: string;
+    bucketMix: Array<{
+      bucket: "exact_match" | "turn_line_transfer" | "sizing_stability" | "bridge_reconstruction" | "memory_decisive";
+      count: number;
+    }>;
+    selectedDrillIds: string[];
+  };
+  recentFollowUpAudits?: Array<{
+    conceptKey: string;
+    handTitle?: string | null;
+    uncertaintyProfile?: string | null;
+    createdAt: string;
+    bucketMix: Array<{
+      bucket: "exact_match" | "turn_line_transfer" | "sizing_stability" | "bridge_reconstruction" | "memory_decisive";
+      count: number;
+    }>;
+  }>;
   now?: Date;
 }
 
@@ -148,6 +190,8 @@ export function buildCommandCenterSnapshot({
   retentionSchedules = [],
   transferSnapshots = [],
   inputSnapshots = [],
+  recentFollowUpPreview,
+  recentFollowUpAudits = [],
   now = new Date(),
 }: BuildCommandCenterSnapshotArgs): CommandCenterSnapshot {
   const playerIntelligence = buildTableSimPlayerIntelligence({
@@ -237,6 +281,7 @@ export function buildCommandCenterSnapshot({
       reminder: adaptive.surfaceSignals.commandCenter,
       recommendation: `${interventionPlan.nextSessionFocus}`,
     },
+    followUpMonitor: buildFollowUpMonitor(recentFollowUpPreview, recentFollowUpAudits),
     interventions: buildInterventionSection(interventionHistory, playerIntelligence),
     retention: buildRetentionSection(playerIntelligence, retentionSchedules, now),
     coachingPatterns: buildPatternBriefs(playerIntelligence.patterns.topPatterns, 2),
@@ -277,11 +322,128 @@ export function buildCommandCenterSnapshot({
     },
     recentWork: recentAttempts.slice(0, 4).map((attempt) => ({
       title: attempt.title,
-      detail: `${attempt.nodeId} · ${attempt.activePool && attempt.activePool !== "baseline" ? `Pool ${attempt.activePool}` : "Baseline"}`,
+      detail: `${attempt.nodeId} - ${attempt.activePool && attempt.activePool !== "baseline" ? `Pool ${attempt.activePool}` : "Baseline"}`,
       outcome: attempt.correct ? `Locked in at ${Math.round(attempt.score * 100)}%` : `Needs review at ${Math.round(attempt.score * 100)}%`,
       tsLabel: formatRecentDate(attempt.ts),
     })),
   };
+}
+
+function buildFollowUpMonitor(
+  preview: BuildCommandCenterSnapshotArgs["recentFollowUpPreview"],
+  recentAudits: BuildCommandCenterSnapshotArgs["recentFollowUpAudits"] = []
+): CommandCenterSnapshot["followUpMonitor"] | undefined {
+  if (!preview) {
+    return undefined;
+  }
+
+  return {
+    title: `Latest follow-up preview: ${preview.handTitle}`,
+    detail: `The latest real-hand preview is anchored in ${formatSessionLabel(preview.conceptKey)} using a ${formatSessionLabel(preview.uncertaintyProfile)} assignment profile.`,
+    planningBias: preview.planningBias,
+    bucketMix: preview.bucketMix.map((entry) => ({
+      label: formatAssignmentBucketLabel(entry.bucket),
+      count: entry.count,
+    })),
+    warnings: buildFollowUpMonitorWarnings(preview),
+    selectedDrillIds: preview.selectedDrillIds,
+    recentHistory: recentAudits.slice(0, 3).map((audit) => ({
+      handTitle: audit.handTitle ?? "Follow-up hand",
+      concept: formatSessionLabel(audit.conceptKey),
+      uncertaintyLabel: audit.uncertaintyProfile ? formatSessionLabel(audit.uncertaintyProfile) : "Unknown profile",
+      bucketMix: audit.bucketMix.map((entry) => `${entry.count} ${formatAssignmentBucketShortLabel(entry.bucket)}`).join(", "),
+      createdAtLabel: formatRecentDate(audit.createdAt),
+      warningCount: buildFollowUpMonitorWarnings({
+        handTitle: audit.handTitle ?? "Follow-up hand",
+        conceptKey: audit.conceptKey,
+        uncertaintyProfile: (audit.uncertaintyProfile as NonNullable<BuildCommandCenterSnapshotArgs["recentFollowUpPreview"]>["uncertaintyProfile"]) ?? "turn_line_fuzzy",
+        planningBias: "",
+        bucketMix: audit.bucketMix,
+        selectedDrillIds: [],
+      }).length,
+    })),
+  };
+}
+
+function buildFollowUpMonitorWarnings(
+  preview: NonNullable<BuildCommandCenterSnapshotArgs["recentFollowUpPreview"]>
+): string[] {
+  const counts = new Map(preview.bucketMix.map((entry) => [entry.bucket, entry.count]));
+  const warnings: string[] = [];
+
+  switch (preview.uncertaintyProfile) {
+    case "memory_decisive":
+      if ((counts.get("memory_decisive") ?? 0) === 0) {
+        warnings.push("Memory-decisive previews should include at least one memory-decisive rep.");
+      }
+      if ((counts.get("bridge_reconstruction") ?? 0) === 0) {
+        warnings.push("Memory-decisive previews should still include a bridge reconstruction rep.");
+      }
+      break;
+    case "turn_line_fuzzy":
+      if ((counts.get("bridge_reconstruction") ?? 0) === 0) {
+        warnings.push("Turn-line-fuzzy previews should include bridge reconstruction reps.");
+      }
+      if ((counts.get("exact_match") ?? 0) === 0) {
+        warnings.push("Turn-line-fuzzy previews may be too abstract if no exact-match reps remain.");
+      }
+      break;
+    case "sizing_fuzzy_line_clear":
+      if ((counts.get("sizing_stability") ?? 0) === 0) {
+        warnings.push("Sizing-fuzzy previews should include sizing-stability reps.");
+      }
+      break;
+    case "turn_line_clear":
+      if ((counts.get("turn_line_transfer") ?? 0) === 0) {
+        warnings.push("Turn-line-clear previews should include turn-line transfer reps.");
+      }
+      break;
+    case "precise_history":
+      if ((counts.get("exact_match") ?? 0) === 0) {
+        warnings.push("Precise-history previews should stay anchored in exact-match reps.");
+      }
+      break;
+    default:
+      break;
+  }
+
+  return warnings;
+}
+
+function formatAssignmentBucketLabel(
+  bucket: "exact_match" | "turn_line_transfer" | "sizing_stability" | "bridge_reconstruction" | "memory_decisive"
+) {
+  switch (bucket) {
+    case "memory_decisive":
+      return "Memory Decisive";
+    case "bridge_reconstruction":
+      return "Bridge Reconstruction";
+    case "sizing_stability":
+      return "Sizing Stability";
+    case "turn_line_transfer":
+      return "Turn-Line Transfer";
+    case "exact_match":
+    default:
+      return "Exact Match";
+  }
+}
+
+function formatAssignmentBucketShortLabel(
+  bucket: "exact_match" | "turn_line_transfer" | "sizing_stability" | "bridge_reconstruction" | "memory_decisive"
+) {
+  switch (bucket) {
+    case "memory_decisive":
+      return "memory";
+    case "bridge_reconstruction":
+      return "bridge";
+    case "sizing_stability":
+      return "sizing";
+    case "turn_line_transfer":
+      return "turn-line";
+    case "exact_match":
+    default:
+      return "exact";
+  }
 }
 
 function summarizeReplayDrift(

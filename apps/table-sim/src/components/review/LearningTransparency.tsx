@@ -144,6 +144,33 @@ export function RangeSupportCard({
         ))}
       </div>
 
+      {rangeView.streetShifts.length > 0 ? (
+        <div className="rounded-xl border border-cyan-500/18 bg-cyan-500/10 p-3 space-y-3">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-100/85">Street Shift Logic</p>
+            <p className="mt-1 text-sm leading-6 text-cyan-50/80">What each street removed, preserved, or reweighted in the published range story.</p>
+          </div>
+          <div className="grid gap-2 md:grid-cols-3">
+            {rangeView.streetShifts.map((shift) => (
+              <div key={`range-shift:${shift.street}`} className="rounded-xl border border-white/8 bg-slate-950/65 p-3 space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-sm font-semibold text-white">{shift.label}</span>
+                  {shift.isDecisionStreet ? (
+                    <span className="rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100">
+                      Decision
+                    </span>
+                  ) : null}
+                </div>
+                {shift.board ? (
+                  <p className="text-xs font-medium tracking-[0.08em] text-cyan-100/70">{shift.board}</p>
+                ) : null}
+                <p className="text-sm leading-6 text-gray-100">{shift.summary}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       {rangeView.sections.length > 0 ? (
         <div className="grid gap-3 md:grid-cols-2">
           {rangeView.sections.map((section) => (
@@ -209,6 +236,35 @@ export function CoachDiagnosisCard({ diagnosis }: { diagnosis: TransparencyDiagn
         <p className="mt-2 text-base font-semibold leading-7 text-amber-50">{diagnosis.headline}</p>
       </div>
       <p className="text-sm leading-6 text-gray-200">{diagnosis.detail}</p>
+      {diagnosis.promptType ? (
+        <div className="flex flex-wrap gap-2">
+          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-amber-50/85">
+            {diagnosis.promptType}
+          </span>
+        </div>
+      ) : null}
+      {(diagnosis.prompt || diagnosis.selectedReasoning || diagnosis.expectedReasoning) ? (
+        <div className="grid gap-3 md:grid-cols-3">
+          {diagnosis.prompt ? (
+            <div className="rounded-xl border border-white/8 bg-black/20 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-500">Reasoning Check</p>
+              <p className="mt-2 text-sm leading-6 text-gray-100">{diagnosis.prompt}</p>
+            </div>
+          ) : null}
+          {diagnosis.selectedReasoning ? (
+            <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/85">Your Reasoning</p>
+              <p className="mt-2 text-sm leading-6 text-amber-50/90">{diagnosis.selectedReasoning}</p>
+            </div>
+          ) : null}
+          {diagnosis.expectedReasoning ? (
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-200/85">Expected Reasoning</p>
+              <p className="mt-2 text-sm leading-6 text-emerald-50/90">{diagnosis.expectedReasoning}</p>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
       {diagnosis.tags.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {diagnosis.tags.map((tag) => (

@@ -1,0 +1,112 @@
+[
+  {
+    "drill_id": "template_lane_01",
+    "node_id": "bluff_catch_01",
+    "version": "1.0.0",
+    "title": "Template Drill 01",
+    "prompt": "$2/$5 live. BB vs BTN SRP. Template prompt.",
+    "scenario": {
+      "game": "NLHE Cash",
+      "street": "river",
+      "pot_type": "SRP",
+      "players_to_flop": 2,
+      "hero_position": "BB",
+      "villain_position": "BTN",
+      "effective_stack_bb": 100,
+      "pot_size_bb": 12,
+      "board": {
+        "flop": ["As", "Kd", "2c"],
+        "turn": "7h",
+        "river": "3d"
+      },
+      "hero_hand": ["Ah", "Qc"],
+      "action_history": [
+        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 2.5 },
+        { "street": "preflop", "player": "BB", "action": "call" },
+        { "street": "flop", "player": "BB", "action": "check" },
+        { "street": "flop", "player": "BTN", "action": "bet", "size_pct_pot": 33 },
+        { "street": "flop", "player": "BB", "action": "call" },
+        { "street": "turn", "player": "BB", "action": "check" },
+        { "street": "turn", "player": "BTN", "action": "check" },
+        { "street": "river", "player": "BB", "action": "check" }
+      ]
+    },
+    "decision_point": {
+      "street": "river",
+      "facing": { "action": "bet", "size_pct_pot": 75 },
+      "sizing_buttons_enabled": false
+    },
+    "options": [
+      { "key": "CALL", "label": "Call" },
+      { "key": "FOLD", "label": "Fold" },
+      { "key": "RAISE", "label": "Raise" }
+    ],
+    "answer": {
+      "correct": "CALL",
+      "accepted": [],
+      "required_tags": ["paired_top_river"],
+      "explanation": "Replace with real explanation."
+    },
+    "answer_by_pool": {
+      "A": {
+        "correct": "CALL",
+        "accepted": [],
+        "required_tags": ["paired_top_river"],
+        "explanation": "Replace with pool A explanation."
+      }
+    },
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:oop",
+      "spot:btn_vs_bb",
+      "concept:blocker_effect",
+      "decision:bluff_catch"
+    ],
+    "difficulty": 3,
+    "coaching_context": {
+      "range_support": {
+        "threshold_notes": ["Replace with threshold note."],
+        "blocker_notes": ["Replace with blocker note."]
+      },
+      "what_changed_by_street": [
+        { "street": "turn", "detail": "Replace with turn range-shift note." },
+        { "street": "river", "detail": "Replace with river range-shift note." }
+      ],
+      "follow_up": "Replace with follow-up study instruction.",
+      "follow_up_concepts": ["concept:blocker_effect"],
+      "common_mistakes": [
+        "Replace with a real player leak."
+      ]
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "template_line_01",
+        "type": "line_understanding",
+        "prompt": "Replace with line-understanding prompt.",
+        "expected_reasoning": "Replace with expected reasoning.",
+        "options": [
+          {
+            "id": "template_line_01_a",
+            "label": "Replace option A",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "template_line_01_b",
+            "label": "Replace option B",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "template_line_01_c",
+            "label": "Replace option C",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "source": "ai_generated",
+      "created_at": "2026-03-27T00:00:00.000Z"
+    }
+  }
+]
