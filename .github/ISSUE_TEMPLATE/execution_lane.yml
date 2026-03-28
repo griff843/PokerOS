@@ -1,78 +1,99 @@
-name: Execution lane
-description: Open a scoped implementation lane for Poker OS.
-title: "[Lane] "
-labels:
-  - coach-surface
+name: Execution Lane
+description: Standard implementation work — feature, hardening, content, or surface addition
+title: "[LANE] "
+labels: ["type:execution-lane"]
 body:
   - type: markdown
     attributes:
       value: |
-        Use this form for an execution-ready lane. Keep the lane bounded and tie it to an existing roadmap phase.
-  - type: input
-    id: summary
+        Use this template for bounded implementation work with a clear proof path.
+        Keep In Scope tight enough for one PR or a closely related set.
+
+  - type: dropdown
+    id: priority
     attributes:
-      label: Lane summary
-      description: One-sentence description of the lane.
-      placeholder: Persist daily plan execution state and feed it back into coaching memory.
+      label: Priority
+      options:
+        - "p0 — blocks core loop"
+        - "p1 — degrades coaching quality or data trust"
+        - "p2 — improvement or expansion"
     validations:
       required: true
+
   - type: dropdown
     id: phase
     attributes:
-      label: Roadmap phase
+      label: Phase / Milestone
       options:
-        - Phase 2 — Content Expansion
-        - Phase 3 — System Integration
-        - Phase 4 — Coaching Intelligence
-        - Phase 5 — Real Play Integration
+        - "Phase 3 — System Integration"
+        - "Phase 4 — Coaching Intelligence"
+        - "Phase 5 — Real Play Integration"
     validations:
       required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Primary Area
+      options:
+        - persistence
+        - ui
+        - coaching-engine
+        - content
+        - api
+        - real-hands
+        - infra
+    validations:
+      required: true
+
   - type: textarea
     id: problem
     attributes:
-      label: Problem to solve
-      description: What product or system gap does this lane close?
+      label: Problem
+      description: What is broken, missing, or degraded? Be specific about the user-visible or coaching-quality impact.
+      placeholder: "The play session writes attempts to React state but never calls /api/attempts, so coaching memory never updates across sessions."
     validations:
       required: true
+
   - type: textarea
-    id: scope
+    id: in_scope
     attributes:
-      label: In scope
-      description: Concrete work included in this lane.
+      label: In Scope
+      description: Exact list of what will be implemented. Bullet points. If it is not listed here, it is out of scope.
     validations:
       required: true
+
   - type: textarea
     id: out_of_scope
     attributes:
-      label: Out of scope
-      description: Explicitly exclude adjacent work.
-  - type: textarea
-    id: acceptance
-    attributes:
-      label: Acceptance criteria
-      description: Observable conditions required before closeout.
+      label: Out of Scope
+      description: What this lane deliberately does not touch. Prevents scope creep.
     validations:
       required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Verifiable checkboxes. Every item must be observable — a test, a route response, or a UI behavior.
+      placeholder: |
+        - [ ] `pnpm verify` passes
+        - [ ] POST /api/attempts returns 200 with a persisted attempt_id
+        - [ ] After a 10-drill session, `getAllAttempts()` returns 10 new rows
+    validations:
+      required: true
+
   - type: textarea
     id: proof
     attributes:
-      label: Proof / verification
-      description: Tests, screenshots, docs sync, or runtime evidence required.
+      label: Proof / Verification
+      description: What artifact or command proves this is done? Test output, curl response, screenshot, or proof file path.
+      placeholder: "pnpm vitest run apps/table-sim/src/lib/session-persistence.test.ts — all pass"
     validations:
       required: true
+
   - type: textarea
     id: dependencies
     attributes:
-      label: Dependencies / blockers
-      description: Repo docs, prior lanes, or technical blockers.
-  - type: checkboxes
-    id: governance
-    attributes:
-      label: Governance checks
-      options:
-        - label: I checked the roadmap and gap tracker first.
-          required: true
-        - label: This lane is bounded enough for a single PR or tightly related PR set.
-          required: true
-        - label: I listed explicit acceptance criteria.
-          required: true
+      label: Dependencies / Blockers
+      description: Issue numbers or named docs this work depends on. Leave blank if none.

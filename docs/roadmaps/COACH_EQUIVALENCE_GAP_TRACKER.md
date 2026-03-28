@@ -10,6 +10,8 @@ This document tracks which capabilities required for **coach-level training** ar
 
 It should be updated as development progresses.
 
+> **Audit Notice (2026-03-27):** Several rows below are suspected stale against code truth. Issue #1 in `INITIAL_GITHUB_BACKLOG.md` is a formal truth audit that will reconcile every row. Do not treat "Missing" rows as authoritative until that audit closes. Suspected divergences noted inline.
+
 ---
 
 # Current Capability Status
@@ -45,7 +47,7 @@ It should be updated as development progresses.
 | Concept snapshots | Complete |
 | Weakness inference | Complete |
 | Recommendation engine | Partial |
-| Intervention planning | Missing |
+| Intervention planning | Missing* | ← *Suspected stale: `/app/concepts/[conceptId]/execution` and `/app/training/session/[id]` exist. Needs end-to-end wire verification (Issue #3).* |
 
 ---
 
@@ -65,9 +67,9 @@ It should be updated as development progresses.
 | Capability | Status |
 |------------|--------|
 | Persistent learner model | Partial |
-| Persistent session attempts | Missing |
-| Persistent review queue | Missing |
-| Cross-session coaching memory | Missing |
+| Persistent session attempts | Missing* | ← *Suspected stale: `attempts` table exists in migrations, `/api/attempts/route.ts` exists. Play→DB write path unconfirmed (Issue #2).* |
+| Persistent review queue | Missing* | ← *Suspected stale: `/api/review-queue/route.ts` exists. Needs verification (Issue #1).* |
+| Cross-session coaching memory | Missing* | ← *Suspected stale: `coaching_diagnoses`, `coaching_interventions`, `intervention_decision_snapshots`, `retention_schedules` tables all exist. Exact write path unverified.* |
 
 ---
 
@@ -75,8 +77,8 @@ It should be updated as development progresses.
 
 | Capability | Status |
 |------------|--------|
-| Reasoning prompts | Missing |
-| Misunderstanding classification | Missing |
+| Reasoning prompts | Missing* | ← *Suspected stale: `diagnostic_prompts[]` schema exists on drills, `DrillAttempt.diagnostic` field exists. UI surfacing unconfirmed (Issue #6).* |
+| Misunderstanding classification | Missing* | ← *`coaching_diagnoses` table exists with `diagnostic_type` column. Write path from play session unconfirmed.* |
 | Concept misunderstanding detection | Partial |
 
 ---
@@ -96,9 +98,9 @@ It should be updated as development progresses.
 
 | Capability | Status |
 |------------|--------|
-| Hand history ingestion | Missing |
-| Real-play leak analysis | Missing |
-| Practice vs real-play comparison | Missing |
+| Hand history ingestion | Partial | Manual reconstruction exists via `/app/hands`. PokerTracker/HM2 import not implemented. |
+| Real-play leak analysis | Missing* | ← *Suspected stale: `real-hands.ts`, `real-hand-bridge.ts`, `/api/real-hands/`, `/app/app/hands/` all exist. Actual gap TBD (Issue #4).* |
+| Practice vs real-play comparison | Partial | `buildRealHandsSnapshot` produces comparison data. UI surface exists at `/app/hands`. Depth of comparison TBD (Issue #4). |
 
 ---
 

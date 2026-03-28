@@ -9,10 +9,11 @@ interface SessionRailProps {
   attempts: DrillAttempt[];
   assignmentBucket?: "exact_match" | "turn_line_transfer" | "sizing_stability" | "bridge_reconstruction" | "memory_decisive";
   assignmentRationale?: string;
+  correctiveFocus?: string;
   onExit: () => void;
 }
 
-export function SessionRail({ drill, attempts, assignmentBucket, assignmentRationale, onExit }: SessionRailProps) {
+export function SessionRail({ drill, attempts, assignmentBucket, assignmentRationale, correctiveFocus, onExit }: SessionRailProps) {
   const momentum = buildMomentumSignal(attempts);
   const assignmentLabel = assignmentBucket ? formatAssignmentBucket(assignmentBucket) : null;
 
@@ -38,6 +39,14 @@ export function SessionRail({ drill, attempts, assignmentBucket, assignmentRatio
               {assignmentRationale ? (
                 <span className="max-w-[48rem] text-xs leading-5 text-gray-400">{assignmentRationale}</span>
               ) : null}
+            </div>
+          ) : null}
+          {correctiveFocus ? (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-emerald-500/18 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100">
+                Corrective Focus
+              </span>
+              <span className="max-w-[48rem] text-xs leading-5 text-emerald-50/85">{correctiveFocus}</span>
             </div>
           ) : null}
         </div>

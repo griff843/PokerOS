@@ -285,6 +285,7 @@ function AssignmentAuditCard({
     bucketMix: Array<{ label: string; count: number }>;
     selectedDrillIds: string[];
     warnings: string[];
+    correctiveFocus?: string;
   };
 }) {
   return (
@@ -304,6 +305,12 @@ function AssignmentAuditCard({
       <p className="mt-4 text-xs leading-5 text-slate-400">
         Drill IDs: {audit.selectedDrillIds.join(", ")}
       </p>
+      {audit.correctiveFocus ? (
+        <div className="mt-4 rounded-[18px] border border-emerald-400/18 bg-emerald-500/8 px-4 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200/85">Corrective Focus</p>
+          <p className="mt-2 text-xs leading-5 text-emerald-50/90">{audit.correctiveFocus}</p>
+        </div>
+      ) : null}
       {audit.warnings.length ? (
         <div className="mt-4 rounded-[18px] border border-amber-400/18 bg-amber-500/8 px-4 py-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-200/85">Audit Warnings</p>

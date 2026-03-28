@@ -23,6 +23,7 @@ import { buildInterventionStrategyBlueprint } from "./intervention-strategy";
 import { buildPatternBriefs, type PatternBrief } from "./pattern-summaries";
 import { buildConceptRetentionSummary } from "./retention-scheduling";
 import type { InterventionDecisionSnapshotRow } from "../../../../packages/db/src/repository";
+import { formatCorrectiveBucketLabels, inferCorrectiveBucketsFromWarnings } from "./follow-up-audit";
 
 export interface CommandCenterRecentAttempt {
   drillId: string;
@@ -71,6 +72,7 @@ export interface CommandCenterSnapshot {
     title: string;
     detail: string;
     planningBias: string;
+    correctiveFocus?: string;
     bucketMix: Array<{ label: string; count: number }>;
     warnings: string[];
     selectedDrillIds: string[];
@@ -81,6 +83,7 @@ export interface CommandCenterSnapshot {
       bucketMix: string;
       createdAtLabel: string;
       warningCount: number;
+      correctiveFocus?: string;
     }>;
   };
   interventions: {
@@ -156,6 +159,7 @@ interface BuildCommandCenterSnapshotArgs {
       | "turn_line_fuzzy"
       | "memory_decisive";
     planningBias: string;
+    correctiveFocus?: string;
     bucketMix: Array<{
       bucket: "exact_match" | "turn_line_transfer" | "sizing_stability" | "bridge_reconstruction" | "memory_decisive";
       count: number;
@@ -171,6 +175,7 @@ interface BuildCommandCenterSnapshotArgs {
       bucket: "exact_match" | "turn_line_transfer" | "sizing_stability" | "bridge_reconstruction" | "memory_decisive";
       count: number;
     }>;
+    correctiveFocus?: string;
   }>;
   now?: Date;
 }
@@ -341,6 +346,7 @@ function buildFollowUpMonitor(
     title: `Latest follow-up preview: ${preview.handTitle}`,
     detail: `The latest real-hand preview is anchored in ${formatSessionLabel(preview.conceptKey)} using a ${formatSessionLabel(preview.uncertaintyProfile)} assignment profile.`,
     planningBias: preview.planningBias,
+    correctiveFocus: preview.correctiveFocus,
     bucketMix: preview.bucketMix.map((entry) => ({
       label: formatAssignmentBucketLabel(entry.bucket),
       count: entry.count,
@@ -361,6 +367,14 @@ function buildFollowUpMonitor(
         bucketMix: audit.bucketMix,
         selectedDrillIds: [],
       }).length,
+      correctiveFocus: audit.correctiveFocus ?? buildCorrectiveFocusFromBucketMixWarnings({
+        handTitle: audit.handTitle ?? "Follow-up hand",
+        conceptKey: audit.conceptKey,
+        uncertaintyProfile: (audit.uncertaintyProfile as NonNullable<BuildCommandCenterSnapshotArgs["recentFollowUpPreview"]>["uncertaintyProfile"]) ?? "turn_line_fuzzy",
+        planningBias: "",
+        bucketMix: audit.bucketMix,
+        selectedDrillIds: [],
+      }),
     })),
   };
 }
@@ -408,6 +422,17 @@ function buildFollowUpMonitorWarnings(
   }
 
   return warnings;
+}
+
+function buildCorrectiveFocusFromBucketMixWarnings(
+  preview: NonNullable<BuildCommandCenterSnapshotArgs["recentFollowUpPreview"]>
+) {
+  const buckets = inferCorrectiveBucketsFromWarnings(buildFollowUpMonitorWarnings(preview));
+  if (buckets.length === 0) {
+    return undefined;
+  }
+
+  return `Corrective weighting applied: ${joinWithAnd(formatCorrectiveBucketLabels(buckets))}.`;
 }
 
 function formatAssignmentBucketLabel(
@@ -801,6 +826,16 @@ function formatRecentDate(value: string): string {
     month: "short",
     day: "numeric",
   }).format(new Date(value));
+}
+
+function joinWithAnd(parts: string[]) {
+  if (parts.length <= 1) {
+    return parts[0] ?? "";
+  }
+  if (parts.length === 2) {
+    return `${parts[0]} and ${parts[1]}`;
+  }
+  return `${parts.slice(0, -1).join(", ")}, and ${parts.at(-1)}`;
 }
 
 function average(values: number[]): number {

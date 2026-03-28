@@ -201,6 +201,7 @@ describe("command center snapshot", () => {
         conceptKey: "blocker_effect",
         uncertaintyProfile: "turn_line_fuzzy",
         planningBias: "Bridge drills first; recover the likely turn story before forcing an exact river answer.",
+        correctiveFocus: "Corrective weighting applied: bridge reconstruction reps.",
         bucketMix: [
           { bucket: "bridge_reconstruction", count: 3 },
           { bucket: "exact_match", count: 1 },
@@ -243,7 +244,9 @@ describe("command center snapshot", () => {
     expect(snapshot.recentWork).toHaveLength(3);
     expect(snapshot.followUpMonitor?.bucketMix[0]?.label).toBe("Bridge Reconstruction");
     expect(snapshot.followUpMonitor?.warnings).toHaveLength(0);
+    expect(snapshot.followUpMonitor?.correctiveFocus).toBe("Corrective weighting applied: bridge reconstruction reps.");
     expect(snapshot.followUpMonitor?.recentHistory[0]?.handTitle).toBe("Recent manual hand");
+    expect(snapshot.followUpMonitor?.recentHistory[0]?.correctiveFocus).toBeUndefined();
     expect(snapshot.recentWork[0]?.detail).toContain(" - ");
   });
 

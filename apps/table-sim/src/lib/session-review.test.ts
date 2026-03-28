@@ -187,7 +187,10 @@ describe("session review snapshot", () => {
       ]),
       planMetadata: {
       ...makeState([]).planMetadata!,
-      notes: ["Memory-decisive follow-up: prioritize drills where the river answer can flip depending on which turn version actually happened."],
+      notes: [
+        "Memory-decisive follow-up: prioritize drills where the river answer can flip depending on which turn version actually happened.",
+        "Corrective weighting applied: memory-decisive.",
+      ],
       followUpAudit: {
         conceptKey: "blocker_effects",
         handTitle: "Table Alpha",
@@ -205,6 +208,7 @@ describe("session review snapshot", () => {
     expect(snapshot.assignmentAudit?.title).toBe("Assignment Audit");
     expect(snapshot.assignmentAudit?.bucketMix[0]?.label).toBe("Memory Decisive");
     expect(snapshot.assignmentAudit?.selectedDrillIds).toContain("d-followup-1");
+    expect(snapshot.assignmentAudit?.correctiveFocus).toBe("Corrective weighting applied: memory-decisive.");
     expect(snapshot.importantDrills[0]?.assignmentBucket).toBe("memory_decisive");
     expect(snapshot.importantDrills[0]?.assignmentRationale).toContain("turn version");
   });

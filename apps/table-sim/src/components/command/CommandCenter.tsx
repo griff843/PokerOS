@@ -565,6 +565,12 @@ function FollowUpMonitorCard({ snapshot }: { snapshot: CommandCenterSnapshot | n
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-200">Planning Bias</p>
             <p className="mt-2 text-sm leading-6 text-emerald-50">{monitor.planningBias}</p>
           </div>
+          {monitor.correctiveFocus ? (
+            <div className="mt-4 rounded-[20px] border border-sky-500/16 bg-sky-500/8 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-100">Corrective Focus</p>
+              <p className="mt-2 text-sm leading-6 text-sky-50/90">{monitor.correctiveFocus}</p>
+            </div>
+          ) : null}
           {monitor.warnings.length > 0 ? (
             <div className="mt-4 rounded-[20px] border border-amber-500/18 bg-amber-500/8 p-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-100">Mix Warnings</p>
@@ -617,6 +623,9 @@ function FollowUpMonitorCard({ snapshot }: { snapshot: CommandCenterSnapshot | n
                     </div>
                     <p className="mt-1 text-xs text-slate-400">{entry.concept} - {entry.uncertaintyLabel}</p>
                     <p className="mt-2 text-sm leading-6 text-slate-300">{entry.bucketMix}</p>
+                    {entry.correctiveFocus ? (
+                      <p className="mt-2 text-xs leading-5 text-sky-100/85">{entry.correctiveFocus}</p>
+                    ) : null}
                     <p className={`mt-2 text-xs font-semibold uppercase tracking-[0.16em] ${entry.warningCount > 0 ? "text-amber-200" : "text-emerald-200"}`}>
                       {entry.warningCount > 0 ? `${entry.warningCount} mix warnings` : "Mix aligned"}
                     </p>

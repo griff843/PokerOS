@@ -1,28 +1,58 @@
-## Summary
+# Pull Request
 
-- 
+## Closes
 
-## Linked issue
+Closes #<!-- issue number -->
 
-- Closes #
+---
 
-## What changed
+## What Changed
 
-- 
+<!-- 2–4 bullet points. Focus on what changed and why, not line-by-line description. -->
 
-## Verification
+-
+-
 
-- [ ] `pnpm test`
-- [ ] `pnpm typecheck`
-- [ ] `pnpm build:web`
-- [ ] docs updated if truth changed
+---
 
-## Acceptance check
+## Acceptance Criteria Checklist
 
-- [ ] lane acceptance criteria are satisfied
-- [ ] out-of-scope work was not silently included
-- [ ] follow-up work is captured in a new issue if needed
+<!-- Copy from the linked issue and check each item. Do not merge with unchecked boxes. -->
 
-## Notes / proof
+- [ ]
+- [ ]
+- [ ] `pnpm verify` passes (typecheck + test + build)
 
-- 
+---
+
+## Proof
+
+<!-- Paste test output, API response, or describe the observable behavior that proves this is done. -->
+
+```
+pnpm verify output or test run output here
+```
+
+---
+
+## Out of Scope (confirm)
+
+<!-- Confirm that nothing outside the issue's Out of Scope was touched. -->
+
+Did not touch:
+-
+
+---
+
+## Gap Tracker Update
+
+<!-- If this PR changes a capability status, list the rows that need updating. -->
+
+- [ ] No gap tracker rows affected
+- [ ] Updated `COACH_EQUIVALENCE_GAP_TRACKER.md` rows: <!-- list them -->
+
+---
+
+## Notes for Reviewer
+
+<!-- Anything the reviewer needs to know: non-obvious decisions, known trade-offs, follow-on issues filed. -->

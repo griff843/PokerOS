@@ -172,6 +172,7 @@ export async function GET() {
           bucket: "exact_match" | "turn_line_transfer" | "sizing_stability" | "bridge_reconstruction" | "memory_decisive";
           count: number;
         }>,
+        correctiveFocus: undefined,
       })),
       recentFollowUpPreview: realHandsSnapshot?.selectedHand && followUpRecommendation && followUpPreviewPlan
         ? {
@@ -179,6 +180,7 @@ export async function GET() {
             conceptKey: followUpRecommendation.conceptKey,
             uncertaintyProfile: realHandsSnapshot.selectedHand.followUpContext.uncertaintyProfile,
             planningBias: realHandsSnapshot.selectedHand.followUpContext.planningBias,
+            correctiveFocus: followUpPreviewPlan.metadata.notes.find((note) => note.startsWith("Corrective weighting applied:")),
             bucketMix: followUpPreviewPlan.metadata.followUpAudit?.bucketMix ?? [],
             selectedDrillIds: followUpPreviewPlan.metadata.followUpAudit?.selectedDrillIds ?? [],
           }

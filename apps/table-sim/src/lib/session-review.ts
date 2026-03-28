@@ -62,6 +62,7 @@ export interface SessionReviewSnapshot {
     bucketMix: Array<{ label: string; count: number }>;
     selectedDrillIds: string[];
     warnings: string[];
+    correctiveFocus?: string;
   };
   importantDrills: Array<{
     drillId: string;
@@ -373,6 +374,7 @@ function buildAssignmentAudit(planMetadata: SessionState["planMetadata"]): Sessi
     bucketMix,
     selectedDrillIds: audit.selectedDrillIds,
     warnings: buildAssignmentAuditWarnings(audit),
+    correctiveFocus: buildCorrectiveFocus(planMetadata?.notes ?? []),
   };
 }
 
@@ -487,6 +489,10 @@ function buildAssignmentAuditWarnings(audit: NonNullable<NonNullable<SessionStat
   }
 
   return warnings;
+}
+
+function buildCorrectiveFocus(notes: string[]) {
+  return notes.find((note) => note.startsWith("Corrective weighting applied:"));
 }
 
 function isAssignmentBucket(value: DrillAttempt["selection"]["metadata"]["assignmentBucket"]): value is AssignmentBucket {

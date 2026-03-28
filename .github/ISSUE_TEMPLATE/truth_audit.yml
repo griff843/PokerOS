@@ -1,53 +1,99 @@
-name: Truth audit
-description: Reconcile roadmap/docs/product claims against actual repo truth.
-title: "[Truth Audit] "
-labels:
-  - truth-audit
-  - docs-sync
+name: Truth Audit
+description: Reconcile a doc, gap tracker row, or architecture claim against code reality
+title: "[AUDIT] "
+labels: ["type:truth-audit"]
 body:
   - type: markdown
     attributes:
       value: |
-        Use this form when docs, roadmap status, or product claims may be out of sync with code truth.
-  - type: input
-    id: area
+        Use this template when a doc says one thing and the code says another.
+        The output is always a gap tracker update + optionally a follow-on execution lane issue.
+
+  - type: dropdown
+    id: priority
     attributes:
-      label: Area being audited
-      placeholder: Daily Study Plan persistence / intervention planning / real-hand loop
+      label: Priority
+      options:
+        - "p0 — active work is being misled by the stale claim"
+        - "p1 — coaching quality or data trust depends on the claim being accurate"
+        - "p2 — doc hygiene, no immediate execution impact"
     validations:
       required: true
+
   - type: textarea
-    id: claimed_truth
+    id: claim
     attributes:
-      label: Claimed truth
-      description: What do docs, roadmap, or prior summaries currently claim?
+      label: Stale or Unverified Claim
+      description: Quote the exact line from the gap tracker, roadmap, or doc that needs verification.
+      placeholder: |
+        COACH_EQUIVALENCE_GAP_TRACKER.md row: "Persistent session attempts | Missing"
+        But /api/attempts/route.ts exists and the attempts table schema is present in migrations.ts.
     validations:
       required: true
-  - type: textarea
-    id: observed_truth
-    attributes:
-      label: Observed repo truth
-      description: What does the current code, route layer, DB layer, or UI actually do?
-    validations:
-      required: true
-  - type: textarea
-    id: drift
-    attributes:
-      label: Drift / mismatch
-      description: Summarize the specific conflict or overstatement/understatement.
-    validations:
-      required: true
-  - type: textarea
-    id: action
-    attributes:
-      label: Required action
-      description: Doc correction, implementation follow-up, or both.
-    validations:
-      required: true
+
   - type: textarea
     id: evidence
     attributes:
-      label: Evidence
-      description: File paths, routes, PRs, or screenshots that support the audit.
+      label: Evidence of Divergence
+      description: Point to the file(s) where code and docs disagree. Include line numbers or route paths.
     validations:
       required: true
+
+  - type: textarea
+    id: audit_steps
+    attributes:
+      label: Audit Steps
+      description: What needs to be checked to resolve the claim? List the exact files, routes, or tests to read.
+      placeholder: |
+        1. Read /api/attempts/route.ts — does it write to DB?
+        2. Read play/page.tsx — does it call /api/attempts after each drill?
+        3. Run getAllAttempts() against a test DB after a session — do rows appear?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_outcome
+    attributes:
+      label: Expected Outcome
+      description: What should the gap tracker row say after this audit completes? What follow-on issues should be filed if gaps are real?
+    validations:
+      required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of Scope
+      description: What this audit deliberately does not touch. Audits do not implement — list any implementation work that is explicitly deferred.
+      placeholder: |
+        - Implementing any missing capability (follow-on execution lane issues only)
+        - Changing any code
+        - Updating MASTER_ROADMAP phases
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Verifiable checkboxes. An audit is done when each claim can be verified by opening the cited file or route.
+      placeholder: |
+        - [ ] Every "Missing" row verified against code
+        - [ ] Gap tracker updated to reflect code truth
+        - [ ] Follow-on execution lane issues filed for any real gap
+    validations:
+      required: true
+
+  - type: textarea
+    id: proof
+    attributes:
+      label: Proof / Verification
+      description: How a reviewer confirms the audit is accurate. Typically: gap tracker diff + cited file paths or route names.
+      placeholder: "Reviewer reads updated gap tracker and can open the cited file or route for each changed row."
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies / Blockers
+      description: Other audit or execution issues that must resolve first. Leave blank if none.

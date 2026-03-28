@@ -1,102 +1,167 @@
-# GitHub Execution Model
+# Poker OS — GitHub Execution Model
 
 ## Purpose
 
-GitHub is the active execution control plane for Poker OS.
+This document defines how GitHub Issues and PRs function as the active execution control plane for Poker OS. It governs how work is scoped, tracked, validated, and closed.
 
-Use it to track bounded work, link code to decisions, and keep planning close to the repo.
+Claude and Codex agents operate from this model. Human review governs lane approval and merge.
 
-## Authority order
+---
 
-1. Repo code and tests
-2. Canonical docs in `docs/`
-3. GitHub issues and pull requests
-4. Chat summaries and external notes
+## Control Plane Principle
 
-If these disagree, resolve the disagreement in that order.
+**GitHub Issues are the unit of work. PRs are the unit of proof.**
 
-## What belongs in GitHub
+- No significant code change without a linked issue
+- No issue closed without an acceptance-criteria checklist and proof artifact
+- No PR merged without a linked issue and passing `pnpm verify`
 
-### Issues
+---
 
-Use issues for:
+## Issue Types
 
-- execution lanes
-- truth audits
-- product gaps
-- blocked work
-- follow-up work discovered during implementation
+Two templates exist under `.github/ISSUE_TEMPLATE/`:
 
-### Pull requests
+### `execution_lane.yml`
+Standard work lane. Used for feature work, hardening, content, and surface additions.
 
-Every PR should:
+Use when: scoping a bounded piece of implementation work with a clear proof path.
 
-- link the issue it closes or advances
-- state what changed
-- state how it was verified
-- note any doc truth that changed
+### `truth_audit.yml`
+Reconciliation lane. Used when docs, gap tracker, or architecture claims diverge from code truth.
 
-## Lane sizing rule
+Use when: gap tracker rows need verification, route inventory doesn't match docs, or a "Missing" capability appears to be partially built.
 
-A good lane is:
+---
 
-- small enough to review cleanly
-- large enough to produce a meaningful product or system outcome
-- bounded enough that acceptance criteria are unambiguous
+## Label Taxonomy
 
-Avoid vague mega-issues.
+Create these labels in the GitHub UI before creating issues.
 
-## Suggested labels
+### Type
+| Label | Use |
+|-------|-----|
+| `type:execution-lane` | Implementation work |
+| `type:truth-audit` | Reconciliation and verification |
+| `type:content` | Drill authoring, node expansion |
+| `type:infra` | Build, CI, migrations, tooling |
 
-Create and use these labels in GitHub:
+### Priority
+| Label | Use |
+|-------|-----|
+| `priority:p0` | Blocks the core loop from functioning |
+| `priority:p1` | Degrades coaching quality or data trust |
+| `priority:p2` | Improvement, enrichment, expansion |
 
-- `truth-audit`
-- `content`
-- `persistence`
-- `coach-surface`
-- `coaching-intelligence`
-- `real-play`
-- `docs-sync`
-- `blocked`
+### Area
+| Label | Use |
+|-------|-----|
+| `area:persistence` | DB writes, migrations, repository layer |
+| `area:ui` | React components, pages, routing |
+| `area:coaching-engine` | Player intelligence, intervention logic, session planning |
+| `area:content` | Drills, nodes, tags, gold-lane content |
+| `area:api` | Next.js API routes |
+| `area:real-hands` | Hand import, follow-up session, real-play bridge |
 
-## Suggested milestones
+### Phase
+| Label | Use |
+|-------|-----|
+| `phase:3-integration` | Phase 3 — System Integration |
+| `phase:4-coaching` | Phase 4 — Coaching Intelligence |
+| `phase:5-real-play` | Phase 5 — Real Play Integration |
 
-Map milestones to the current roadmap:
+---
 
-- `Phase 2 — Content Expansion`
-- `Phase 3 — System Integration`
-- `Phase 4 — Coaching Intelligence`
-- `Phase 5 — Real Play Integration`
+## Milestones
 
-## Operating rhythm
+Align with MASTER_ROADMAP phases. Create in GitHub UI.
 
-### Before opening a lane
+| Milestone | Scope |
+|-----------|-------|
+| Phase 3 — System Integration | Close all persistence gaps, unify session loop, harden SRS |
+| Phase 4 — Coaching Intelligence | Diagnostic prompts, adaptive curriculum, intervention surface |
+| Phase 5 — Real Play Integration | Hand ingestion, real-play leak analysis |
 
-- check `docs/roadmaps/MASTER_ROADMAP.md`
-- check `docs/roadmaps/COACH_EQUIVALENCE_GAP_TRACKER.md`
-- check whether the issue is really a truth correction, a product gap, or an execution lane
+---
 
-### During execution
+## Issue Scoping Rules
 
-- keep scope bounded
-- do not smuggle in adjacent work
-- open follow-up issues instead of silently widening scope
+1. **One PR or tightly related PR set per issue.** If a lane would require 3+ unrelated PRs, split it.
+2. **Acceptance criteria must be checkboxes.** If you cannot write verifiable checkboxes, scope is too vague.
+3. **Every issue must name its proof artifact.** A passing `pnpm verify` plus a specific observable (route returns expected JSON, UI renders X, test output shows Y).
+4. **Dependencies must be explicit.** List blocking issue numbers, not vague references.
+5. **Out of scope must be filled in.** It defines the blast radius. If it is blank, the issue is too vague to execute.
 
-### At closeout
+---
 
-- verify code and tests
-- update docs if product truth changed
-- close the linked issue only when acceptance criteria are actually met
+## PR Protocol
 
-## First recommended issue set
+Every PR must:
 
-1. Truth audit — reconcile gap tracker against current persistence and route-layer reality
-2. Coaching loop closure — persist daily plan/session execution state
-3. Intervention surface v1 — surface active intervention and intervention history cleanly
-4. Real-hand loop audit — define current state vs target productized real-play loop
+1. Link to the issue it closes (`Closes #N`)
+2. Pass `pnpm verify` (typecheck + test + build)
+3. Include proof: test output, API response sample, or screenshot for UI lanes
+4. Have the acceptance criteria checklist reviewed before merge
 
-## Notes
+The PR template at `.github/PULL_REQUEST_TEMPLATE.md` enforces this.
 
-This model is intentionally simple.
+---
 
-The goal is not more process. The goal is cleaner truth, tighter repo linkage, and less execution drift.
+## Agent Operating Rules
+
+When Claude or Codex works on an issue:
+
+- Read the issue's **In scope** before touching anything
+- Read the issue's **Out of scope** before touching anything
+- Run `pnpm verify` before marking work complete
+- Write the proof artifact as part of the PR, not after
+- Do not expand scope mid-lane. Open a new issue if scope creep is discovered
+
+---
+
+## Execution Flow
+
+```
+INITIAL_GITHUB_BACKLOG.md
+        ↓
+  Create issues in GitHub UI
+        ↓
+  Assign to sprint / milestone
+        ↓
+  Agent or human picks up issue
+        ↓
+  Branch: <issue-number>/<short-slug>
+        ↓
+  Implement within In-scope bounds
+        ↓
+  pnpm verify passes
+        ↓
+  PR opened, acceptance criteria checked
+        ↓
+  Human reviews and merges
+        ↓
+  Issue closed, gap tracker updated if needed
+```
+
+---
+
+## Gap Tracker Discipline
+
+`COACH_EQUIVALENCE_GAP_TRACKER.md` must stay in sync with code truth.
+
+- When a truth audit issue closes, update the gap tracker row
+- Do not mark a capability "Complete" without a route or test to point at
+- When code outpaces docs, a truth audit issue should be filed, not the gap tracker manually edited without proof
+
+---
+
+## Source of Truth Hierarchy
+
+When docs and code disagree, trust this order:
+
+1. Running code and passing tests
+2. DB migrations (what tables exist)
+3. API routes (what endpoints are live)
+4. This execution model
+5. Gap tracker
+6. Roadmap docs

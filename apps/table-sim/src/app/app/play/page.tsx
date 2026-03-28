@@ -188,6 +188,7 @@ export default function PlayPage() {
   const decisionLabel = extractDecisionLabel(drill);
   const spotLabel = `${formatSessionLabel(drill.scenario.pot_type)} | ${drill.scenario.hero_position} vs ${drill.scenario.villain_position}`;
   const assignmentRationale = selectedDrill.metadata.assignmentRationale;
+  const correctiveFocusNote = state.planMetadata?.notes.find((note) => note.startsWith("Corrective weighting applied:"));
   const followUpContextNote = state.planMetadata?.notes.find((note) =>
     note.includes("Memory-ambiguous follow-up")
     || note.includes("Manual reconstruction with a clear turn-line family")
@@ -204,6 +205,7 @@ export default function PlayPage() {
           attempts={state.attempts}
           assignmentBucket={selectedDrill.metadata.assignmentBucket}
           assignmentRationale={selectedDrill.metadata.assignmentRationale}
+          correctiveFocus={correctiveFocusNote}
           onExit={handleExit}
         />
 
@@ -247,6 +249,14 @@ export default function PlayPage() {
                     Why This Drill Was Picked
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-200">{assignmentRationale}</p>
+                </div>
+              ) : null}
+              {correctiveFocusNote ? (
+                <div className="mt-4 rounded-[22px] border border-emerald-400/18 bg-emerald-500/8 px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200/85">
+                    Corrective Focus
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-emerald-50/90">{correctiveFocusNote}</p>
                 </div>
               ) : null}
             </section>
