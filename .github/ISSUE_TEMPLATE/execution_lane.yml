@@ -1,0 +1,78 @@
+name: Execution lane
+description: Open a scoped implementation lane for Poker OS.
+title: "[Lane] "
+labels:
+  - coach-surface
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for an execution-ready lane. Keep the lane bounded and tie it to an existing roadmap phase.
+  - type: input
+    id: summary
+    attributes:
+      label: Lane summary
+      description: One-sentence description of the lane.
+      placeholder: Persist daily plan execution state and feed it back into coaching memory.
+    validations:
+      required: true
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Roadmap phase
+      options:
+        - Phase 2 — Content Expansion
+        - Phase 3 — System Integration
+        - Phase 4 — Coaching Intelligence
+        - Phase 5 — Real Play Integration
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What product or system gap does this lane close?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: In scope
+      description: Concrete work included in this lane.
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+      description: Explicitly exclude adjacent work.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Observable conditions required before closeout.
+    validations:
+      required: true
+  - type: textarea
+    id: proof
+    attributes:
+      label: Proof / verification
+      description: Tests, screenshots, docs sync, or runtime evidence required.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies / blockers
+      description: Repo docs, prior lanes, or technical blockers.
+  - type: checkboxes
+    id: governance
+    attributes:
+      label: Governance checks
+      options:
+        - label: I checked the roadmap and gap tracker first.
+          required: true
+        - label: This lane is bounded enough for a single PR or tightly related PR set.
+          required: true
+        - label: I listed explicit acceptance criteria.
+          required: true
