@@ -2,6 +2,9 @@
 
 This file provides guidance to Claude Code when working with code in this repository.
 
+Before making claims about what is or is not built, read `TRUTH.md` first.
+For the 12-sprint execution plan, see `docs/roadmaps/ELITE_DAILY_COACH_12_SPRINT_PLAN.md`.
+
 ## Commands
 
 ```bash
@@ -17,6 +20,23 @@ pnpm verify
 # Build
 pnpm build:web
 
+# Content validation
+pnpm validate:canonical        # schema + structure check across all drill files
+pnpm validate:gold-lane        # gold-lane depth check
+pnpm validate:gold-seed        # validate the seed file specifically
+
+# Content audit CLIs
+pnpm drill:coverage            # drill count by street, pot type, concept
+pnpm drill:lane-gaps           # identify undertaught lanes
+pnpm drill:followups-audit     # follow_up and follow_up_concepts coverage
+pnpm drill:trace               # trace a single drill's coaching chain
+
+# Content patch application
+pnpm apply:diagnostic-patch
+pnpm apply:pack-diagnostic-patches
+pnpm apply:coaching-context-patch
+pnpm apply:pack-coaching-context-patches
+
 # Single test file
 pnpm vitest run packages/core/src/__tests__/scoring.test.ts
 pnpm vitest run apps/table-sim/src/lib/daily-study-plan.test.ts
@@ -31,6 +51,7 @@ packages/core/     - Business logic: scoring, SRS, coaching, diagnostics
 packages/db/       - SQLite (WAL mode), migrations, CRUD repository
 content/           - Authored JSON drills and node definitions (source of truth)
 docs/              - Architecture specs, curriculum guides, system design
+scripts/           - Audit CLIs, patch tools, validators, scaffold utilities
 ```
 
 Path aliases:
@@ -55,6 +76,8 @@ Key modules:
 - `tags.ts` - all valid rule tags
 - `schemas.ts` - canonical record shapes
 - `answer-resolution.ts` - pool-aware answer mapping
+- `drill-coaching-snapshot.ts` - builds the coaching panel data structure from drill + attempt
+- `session-generator.ts` - generates session drill queues, supports focus-concept filtering
 
 ### packages/db - Persistence Layer
 
@@ -71,9 +94,18 @@ Session state flows through React Context + useReducer:
 - `feedback`
 - `summary`
 
+Key lib modules:
+- `daily-plan-session-bridge.ts` - canonical adapter between DailyStudyPlan block selection and session launch; use `buildConceptFollowUpSessionHref` to route follow-up concept clicks
+- `session-plan.ts` - loads session plan from API, supports `dailyPlanOverride` for focus concept and block kind
+- `session-plan-server.ts` - server-side plan builder, handles override parameters
+- `session-review.ts` - builds post-session review snapshot; surfaces authored `follow_up` and `follow_up_concepts` from drill data
+- `command-center.ts` - command center snapshot builder; exposes `coachBriefing.followUpConcepts`
+
 ### content - Drill and Node JSON
 
 Drills are JSON arrays. Nodes are single JSON objects. Content is loaded via `packages/core/src/content-loader.ts` with idempotent upserts.
+
+**Current state (verified 2026-04-05):** 241 drills across 7 files, 241/241 diagnostic prompt coverage.
 
 Key drill rules:
 - `answer.correct` and `options[].key` use canonical action names like `CALL`, `FOLD`, `RAISE`, `BET`, `CHECK`
@@ -110,6 +142,8 @@ Pool variants shift the correct answer based on opponent type. Use `answer_by_po
 
 - `pnpm.onlyBuiltDependencies` includes `better-sqlite3`
 - `.local/`, `out/`, `dist/`, and `*.db` are gitignored
+- `.claude/settings.local.json` and `.codex/` are gitignored (local tool state)
+- `.claude/commands/*.md` are project slash commands and ARE committed
 - `out/ai/context/context_bundle.md` is auto-generated
 - node ids must match `^[a-z0-9_]+$`
 - TypeScript target is ES2022 with Node16 module resolution
@@ -117,6 +151,8 @@ Pool variants shift the correct answer based on opponent type. Use `answer_by_po
 ## Architecture Docs
 
 Consult these first for structural changes:
+- `TRUTH.md` - verified wiring and content counts; read before claiming anything is missing or built
+- `docs/roadmaps/ELITE_DAILY_COACH_12_SPRINT_PLAN.md` - 12-sprint execution plan
 - `docs/architecture/ARCHITECTURE_MAP.md`
 - `docs/content/DRILL_SCHEMA.md`
 - `docs/curriculum/DRILL_AUTHORING_GUIDE.md`
@@ -181,13 +217,16 @@ Use this when authoring or rewriting drills so you do not keep re-deriving the s
 
 ### Authoring workflow
 
-- Stage unreviewed Claude batches under:
+- Stage unreviewed batches under:
   - `out/reports/gold-lane-reviews/pending/`
 - Do not write unreviewed batches into `content/drills`
 - Validate with:
   - `node scripts/validate-gold-lane.mjs --mode=batch <path>`
 - Review with:
   - `pnpm review:gold-batch --batch=<path> --report=<path>`
+- Check coverage gaps before authoring:
+  - `pnpm drill:lane-gaps`
+  - `pnpm drill:followups-audit`
 - Merge only after acceptance
 
 ### Fast starting points
