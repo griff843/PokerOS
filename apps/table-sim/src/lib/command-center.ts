@@ -67,6 +67,8 @@ export interface CommandCenterSnapshot {
     headline: string;
     reminder: string;
     recommendation: string;
+    followUp?: string;
+    followUpConcepts: string[];
   };
   followUpMonitor?: {
     title: string;
@@ -235,6 +237,7 @@ export function buildCommandCenterSnapshot({
   });
   const nextFocusCoach = buildFallbackCoachResponse(nextFocusSummary);
   const firstDrill = plan.drills[0]?.drill;
+  const planFollowUp = buildPlanFollowUp(plan);
   const leadTarget = plan.metadata.weaknessTargets[0];
   const leadConcept = playerIntelligence.priorities[0];
   const concept = leadConcept?.conceptKey
@@ -272,7 +275,7 @@ export function buildCommandCenterSnapshot({
       effort: `${interventionPlan.totalTargetReps} deliberate reps`,
       mix: `${plan.metadata.reviewCount} review / ${plan.metadata.newCount} new`,
       pool: activePool === "baseline" ? "Baseline" : `Pool ${activePool}`,
-      reasons: buildDailyFocusReasons(plan, leadTarget, leadConcept, recentAttempts, adaptive.surfaceSignals.commandCenter),
+      reasons: buildDailyFocusReasons(plan, leadTarget, leadConcept, recentAttempts, adaptive.surfaceSignals.commandCenter, planFollowUp),
     },
     momentum: {
       cadence: buildCadenceSignal(recentAttempts),
@@ -284,7 +287,11 @@ export function buildCommandCenterSnapshot({
     coachBriefing: {
       headline: nextFocusCoach.headline,
       reminder: adaptive.surfaceSignals.commandCenter,
-      recommendation: `${interventionPlan.nextSessionFocus}`,
+      recommendation: planFollowUp?.detail
+        ? `${interventionPlan.nextSessionFocus} Coach assignment: ${planFollowUp.detail}`
+        : `${interventionPlan.nextSessionFocus}`,
+      followUp: planFollowUp?.detail,
+      followUpConcepts: planFollowUp?.concepts ?? [],
     },
     followUpMonitor: buildFollowUpMonitor(recentFollowUpPreview, recentFollowUpAudits),
     interventions: buildInterventionSection(interventionHistory, playerIntelligence),
@@ -639,7 +646,8 @@ function buildDailyFocusReasons(
   leadTarget: TableSimSessionPlan["metadata"]["weaknessTargets"][number] | undefined,
   leadConcept: ReturnType<typeof buildTableSimPlayerIntelligence>["priorities"][number] | undefined,
   recentAttempts: CommandCenterRecentAttempt[],
-  adaptiveSignal: string
+  adaptiveSignal: string,
+  planFollowUp?: { detail: string; concepts: string[] }
 ): string[] {
   const reasons: string[] = [];
   const planningReasons = plan.metadata.intervention?.planningReasons ?? [];
@@ -660,8 +668,38 @@ function buildDailyFocusReasons(
     reasons.push("Recent work is available, so you can continue without a reset.");
   }
 
+  if (planFollowUp?.detail) {
+    reasons.push(`Coach assignment: ${planFollowUp.detail}`);
+  }
+
   reasons.push(adaptiveSignal);
   return [...new Set(reasons)].slice(0, 4);
+}
+
+function buildPlanFollowUp(plan: TableSimSessionPlan): { detail: string; concepts: string[] } | undefined {
+  const authored = plan.drills
+    .map((entry) => ({
+      followUp: entry.drill.coaching_context?.follow_up?.trim(),
+      concepts: entry.drill.coaching_context?.follow_up_concepts ?? [],
+    }))
+    .filter((entry): entry is { followUp: string; concepts: string[] } => Boolean(entry.followUp));
+
+  if (authored.length === 0) {
+    return undefined;
+  }
+
+  const conceptCounts = new Map<string, number>();
+  for (const concept of authored.flatMap((entry) => entry.concepts)) {
+    conceptCounts.set(concept, (conceptCounts.get(concept) ?? 0) + 1);
+  }
+
+  return {
+    detail: authored[0].followUp,
+    concepts: [...conceptCounts.entries()]
+      .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+      .slice(0, 3)
+      .map(([concept]) => concept),
+  };
 }
 
 function buildPriorityLeaks(

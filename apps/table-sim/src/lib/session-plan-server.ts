@@ -17,6 +17,7 @@ import { ensureInterventionForPlan, markInterventionStarted, toDiagnosisHistoryE
 import { TableSimSessionPlanSchema, type TableSimSessionPlan } from "./session-plan";
 import { buildPrimaryInterventionRecommendation, shouldPersistInterventionRecommendation } from "./intervention-decision";
 import type { FollowUpUncertaintyProfile } from "./real-hands";
+import type { DailyPlanSessionOverride } from "./daily-plan-session-bridge";
 import {
   buildDiagnosticInsightsFromAttempts,
   buildInterventionRecentAttempts,
@@ -32,7 +33,10 @@ import {
 import { syncRetentionScheduling, toCoreRetentionSchedule } from "./retention-scheduling";
 
 interface CreateTableSimSessionPlanArgs {
-  request: Pick<SessionRequest, "count" | "reviewRatio" | "activePool"> & { interventionId?: string | null };
+  request: Pick<SessionRequest, "count" | "reviewRatio" | "activePool" | "focusConceptKey"> & {
+    interventionId?: string | null;
+    dailyPlanOverride?: DailyPlanSessionOverride | null;
+  };
   inputs: Pick<GeneratorInputs, "drills" | "attempts" | "srs" | "now">;
   diagnosisHistory?: ReturnType<typeof toDiagnosisHistoryEntries>;
   interventionHistory?: ReturnType<typeof toInterventionHistoryEntries>;
@@ -50,6 +54,7 @@ export function createTableSimSessionPlan({
       count: request.count,
       reviewRatio: request.reviewRatio,
       activePool: request.activePool,
+      focusConceptKey: request.focusConceptKey ?? undefined,
     },
     {
       drills,
@@ -58,6 +63,22 @@ export function createTableSimSessionPlan({
       now: inputs.now,
     }
   );
+
+  if (request.dailyPlanOverride) {
+    return TableSimSessionPlanSchema.parse({
+      ...basePlan,
+      metadata: {
+        ...basePlan.metadata,
+        dailyPlanOverride: request.dailyPlanOverride,
+        notes: [
+          request.dailyPlanOverride.focusConceptKey
+            ? `Daily plan bridge focused this session on ${request.dailyPlanOverride.focusConceptLabel ?? request.dailyPlanOverride.focusConceptKey.replace(/_/g, " ")}.`
+            : `Daily plan bridge carried ${request.dailyPlanOverride.recommendedCount} recommended reps into session launch.`,
+          ...basePlan.metadata.notes,
+        ],
+      },
+    });
+  }
 
   const hydratedAttempts = hydratePersistedStudyAttempts(inputs.attempts, drills);
   const patternAttempts = buildPatternAttemptSignals(hydratedAttempts);

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TableSimDrillSchema, type TableSimDrill } from "./drill-schema";
 import type { FollowUpUncertaintyProfile } from "./real-hands";
+import type { DailyPlanSessionOverride } from "./daily-plan-session-bridge";
 
 export const TableSimActivePoolSchema = z.enum(["baseline", "A", "B", "C"]);
 export const TableSimSelectionKindSchema = z.enum(["review", "new"]);
@@ -85,6 +86,23 @@ export const TableSimSessionPlanMetadataSchema = z.object({
   generatedAt: z.string(),
   weaknessTargets: z.array(TableSimWeaknessTargetSchema),
   notes: z.array(z.string()),
+  dailyPlanOverride: z.object({
+    source: z.literal("daily-plan"),
+    recommendedCount: z.number().int().positive(),
+    sessionLength: z.union([z.literal(20), z.literal(45), z.literal(90)]),
+    focusConceptKey: z.string().nullable(),
+    focusConceptLabel: z.string().nullable(),
+    intent: z.string(),
+    blockKind: z.enum([
+      "focus_concept",
+      "secondary_concept",
+      "execute_intervention",
+      "review_real_hands",
+      "retention_check",
+      "inspect_replay_drift",
+    ]).nullable(),
+    blockTitle: z.string().nullable(),
+  }).optional(),
   followUpAudit: z.object({
     conceptKey: z.string(),
     handTitle: z.string().nullable().optional(),
@@ -141,7 +159,8 @@ export type TableSimWeaknessTarget = z.infer<typeof TableSimWeaknessTargetSchema
 export async function loadSessionPlan(
   count: number,
   activePool: TableSimActivePool = "baseline",
-  interventionId?: string
+  interventionId?: string,
+  dailyPlanOverride?: DailyPlanSessionOverride
 ): Promise<TableSimSessionPlan> {
   const params = new URLSearchParams({
     count: String(count),
@@ -149,6 +168,23 @@ export async function loadSessionPlan(
   });
   if (interventionId) {
     params.set("intervention", interventionId);
+  }
+  if (dailyPlanOverride) {
+    params.set("source", dailyPlanOverride.source);
+    params.set("sessionLength", String(dailyPlanOverride.sessionLength));
+    params.set("intent", dailyPlanOverride.intent);
+    if (dailyPlanOverride.focusConceptKey) {
+      params.set("focusConcept", dailyPlanOverride.focusConceptKey);
+    }
+    if (dailyPlanOverride.focusConceptLabel) {
+      params.set("focusLabel", dailyPlanOverride.focusConceptLabel);
+    }
+    if (dailyPlanOverride.blockKind) {
+      params.set("blockKind", dailyPlanOverride.blockKind);
+    }
+    if (dailyPlanOverride.blockTitle) {
+      params.set("blockTitle", dailyPlanOverride.blockTitle);
+    }
   }
   const res = await fetch(`/api/session-plan?${params.toString()}`);
   if (!res.ok) throw new Error("Failed to load session plan");

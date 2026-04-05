@@ -50,6 +50,10 @@ function makePlan(): TableSimSessionPlan {
           },
           tags: ["street:river", "concept:blocker_effect", "decision:bluff_catch"],
           difficulty: 2,
+          coaching_context: {
+            follow_up: "Start with blocker-driven river bluff catches, then widen into range-density retests.",
+            follow_up_concepts: ["concept:blocker_effect", "concept:range_density"],
+          },
         },
         kind: "review",
         reason: "weakness_review",
@@ -229,6 +233,9 @@ describe("command center snapshot", () => {
     expect(snapshot.momentum.readiness?.label).toBe("Ready to press");
     expect(snapshot.coachBriefing.recommendation).toContain("Turn Defense");
     expect(snapshot.coachBriefing.reminder.length).toBeGreaterThan(0);
+    expect(snapshot.coachBriefing.followUp).toContain("blocker-driven river bluff catches");
+    expect(snapshot.coachBriefing.followUpConcepts).toContain("concept:blocker_effect");
+    expect(snapshot.dailyFocus.reasons.some((reason) => reason.includes("Coach assignment:"))).toBe(true);
     expect(snapshot.recommendedTrainingBlock.plan.id).toBe("plan-B-turn_defense-river_bluff_catching");
     expect(snapshot.coachingPatterns[0]?.title).toBe("Recurring threshold leak");
     expect(snapshot.nextInterventionDecision?.action).toBe("assign_intervention");

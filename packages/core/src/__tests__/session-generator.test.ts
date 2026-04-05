@@ -300,4 +300,70 @@ describe("generateSessionPlan", () => {
     expect(plan.drills[0].drill.drill_id).toBe("d1");
     expect(plan.drills[0].matchedWeaknessTargets.some((key) => key.startsWith("pool:B:"))).toBe(true);
   });
+
+  it("prefers focus-matched drills when a daily-plan concept override is supplied", () => {
+    const focusDrill = makeDrill({
+      drill_id: "focus_d1",
+      node_id: "hu_focus",
+      title: "Focus Drill",
+      tags: [
+        "street:river",
+        "pot:srp",
+        "position:oop",
+        "spot:btn_vs_bb",
+        "concept:blocker_effect",
+        "decision:bluff_catch",
+        "pool:baseline",
+      ],
+    });
+    const otherDrill = makeDrill({
+      drill_id: "other_d2",
+      node_id: "hu_other",
+      title: "Other Drill",
+      tags: [
+        "street:river",
+        "pot:srp",
+        "position:oop",
+        "spot:btn_vs_bb",
+        "concept:turn_barrel",
+        "decision:bluff_catch",
+        "pool:baseline",
+      ],
+    });
+
+    const plan = generateSessionPlan(
+      { count: 1, focusConceptKey: "blocker_effect" },
+      { drills: [otherDrill, focusDrill], attempts: [], srs: [], now }
+    );
+
+    expect(plan.drills[0].drill.drill_id).toBe("focus_d1");
+    expect(plan.metadata.notes.some((note) => note.includes("Daily-plan focus prioritized concept:blocker_effect"))).toBe(true);
+  });
+
+  it("keeps default selection behavior when no focus override is supplied", () => {
+    const earlierDue = makeDrill({ drill_id: "due_early", node_id: "hu_01", title: "Earlier Due" });
+    const laterDueFocus = makeDrill({
+      drill_id: "due_focus",
+      node_id: "hu_02",
+      title: "Later Due Focus",
+      tags: [
+        "street:river",
+        "pot:srp",
+        "position:oop",
+        "spot:btn_vs_bb",
+        "concept:blocker_effect",
+        "decision:bluff_catch",
+        "pool:baseline",
+      ],
+    });
+    const srs = [
+      makeSrs({ drill_id: "due_early", due_at: "2026-03-08T00:00:00.000Z" }),
+      makeSrs({ drill_id: "due_focus", due_at: "2026-03-09T00:00:00.000Z" }),
+    ];
+
+    const plan = generateSessionPlan({ count: 2 }, { drills: [laterDueFocus, earlierDue], attempts: [], srs, now });
+
+    expect(plan.drills.map((entry) => entry.drill.drill_id)).toEqual(["due_early", "due_focus"]);
+    expect(plan.metadata.notes.some((note) => note.includes("Daily-plan focus prioritized"))).toBe(false);
+  });
 });

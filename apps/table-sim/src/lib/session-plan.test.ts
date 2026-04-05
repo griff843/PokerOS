@@ -3,6 +3,7 @@ import type { AttemptRow, SrsRow } from "../../../../packages/db/src/repository"
 import type { CanonicalDrill } from "../../../../packages/core/src/schemas";
 import { createRealHandFollowUpSessionPlan, createTableSimSessionPlan } from "./session-plan-server";
 import { loadRealHandFollowUpSessionPlan, loadSessionPlan, TableSimSessionPlanSchema, unwrapPlannedDrills } from "./session-plan";
+import type { DailyPlanSessionOverride } from "./daily-plan-session-bridge";
 
 function makeDrill(overrides: Partial<CanonicalDrill> & Pick<CanonicalDrill, "drill_id" | "node_id" | "title">): CanonicalDrill {
   return {
@@ -82,6 +83,16 @@ function makeSrs(overrides: Partial<SrsRow> & Pick<SrsRow, "drill_id" | "due_at"
 
 describe("table-sim session plan integration", () => {
   const now = new Date("2026-03-10T12:00:00.000Z");
+  const dailyPlanOverride: DailyPlanSessionOverride = {
+    source: "daily-plan",
+    recommendedCount: 8,
+    sessionLength: 45,
+    focusConceptKey: "blocker_effect",
+    focusConceptLabel: "Blocker Effect",
+    intent: "focus_concept",
+    blockKind: "focus_concept",
+    blockTitle: "Focus Concept: Blocker Effect",
+  };
 
   it("creates a generated session plan for table-sim with stable sizing and no duplicates", () => {
     const drills = [
@@ -213,6 +224,120 @@ describe("table-sim session plan integration", () => {
     expect(plan.metadata.activePool).toBe("B");
 
     vi.unstubAllGlobals();
+  });
+
+  it("loads a daily-plan-bridged session plan payload with focus override params", async () => {
+    const payload = {
+      drills: [
+        {
+          drill: makeDrill({ drill_id: "d1", node_id: "hu_01", title: "Loaded" }),
+          kind: "review",
+          reason: "due_review",
+          matchedWeaknessTargets: ["classification_tag:concept:blocker_effect"],
+          metadata: { priorAttempts: 2, dueAt: now.toISOString(), lastScore: 0.4 },
+        },
+      ],
+      metadata: {
+        requestedCount: 8,
+        selectedCount: 1,
+        reviewCount: 1,
+        newCount: 0,
+        dueReviewCount: 1,
+        weaknessReviewCount: 0,
+        weaknessNewCount: 0,
+        newMaterialFillCount: 0,
+        activePool: "baseline",
+        generatedAt: now.toISOString(),
+        weaknessTargets: [],
+        notes: [],
+        dailyPlanOverride,
+      },
+    };
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => payload,
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const plan = await loadSessionPlan(8, "baseline", undefined, dailyPlanOverride);
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/session-plan?count=8&pool=baseline&source=daily-plan&sessionLength=45&intent=focus_concept&focusConcept=blocker_effect&focusLabel=Blocker+Effect&blockKind=focus_concept&blockTitle=Focus+Concept%3A+Blocker+Effect");
+    expect(plan.metadata.dailyPlanOverride?.focusConceptKey).toBe("blocker_effect");
+
+    vi.unstubAllGlobals();
+  });
+
+  it("uses the focused base session plan when launched from a daily plan", () => {
+    const drills = [
+      makeDrill({
+        drill_id: "focus-review",
+        node_id: "hu_01",
+        title: "Focused Review",
+        tags: ["street:river", "pot:srp", "position:oop", "spot:btn_vs_bb", "concept:blocker_effect", "decision:bluff_catch", "pool:baseline"],
+      }),
+      makeDrill({
+        drill_id: "focus-new",
+        node_id: "hu_02",
+        title: "Focused New",
+        tags: ["street:river", "pot:srp", "position:oop", "spot:btn_vs_bb", "concept:blocker_effect", "decision:value_bet", "pool:baseline"],
+      }),
+      makeDrill({
+        drill_id: "other",
+        node_id: "hu_03",
+        title: "Other Concept",
+        tags: ["street:turn", "pot:srp", "position:oop", "spot:btn_vs_bb", "concept:turn_barrel", "decision:probe", "pool:baseline"],
+        answer: {
+          correct: "BET",
+          accepted: [],
+          required_tags: ["equity_denial"],
+          explanation: "Bet.",
+        },
+        options: [
+          { key: "BET", label: "Bet" },
+          { key: "CHECK", label: "Check" },
+        ],
+        scenario: {
+          game: "NLHE Cash",
+          street: "turn",
+          pot_type: "SRP",
+          players_to_flop: 2,
+          hero_position: "BB",
+          villain_position: "BTN",
+          board: {
+            flop: ["As", "Kd", "2c"],
+            turn: "7h",
+            river: null,
+          },
+          hero_hand: ["Ah", "Qc"],
+          action_history: [],
+        },
+        decision_point: {
+          street: "turn",
+          facing: null,
+          sizing_buttons_enabled: false,
+        },
+      }),
+    ];
+    const attempts = [
+      makeAttempt({ attempt_id: "a1", drill_id: "focus-review", score: 0.2, missed_tags_json: JSON.stringify(["paired_top_river"]) }),
+      makeAttempt({ attempt_id: "a2", drill_id: "focus-review", score: 0.3, missed_tags_json: JSON.stringify(["paired_top_river"]) }),
+    ];
+
+    const plan = createTableSimSessionPlan({
+      request: {
+        count: 2,
+        activePool: "baseline",
+        focusConceptKey: "blocker_effect",
+        dailyPlanOverride,
+      },
+      inputs: { drills, attempts, srs: [], now },
+    });
+
+    expect(plan.metadata.dailyPlanOverride?.focusConceptKey).toBe("blocker_effect");
+    expect(plan.metadata.intervention).toBeUndefined();
+    expect(plan.metadata.notes[0]).toContain("Daily plan bridge focused this session");
+    expect(plan.drills.every((entry) => entry.drill.tags.includes("concept:blocker_effect"))).toBe(true);
   });
 
   it("creates a targeted real-hand follow-up session with preferred drills first", () => {

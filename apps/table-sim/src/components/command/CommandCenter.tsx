@@ -4,19 +4,25 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/session-context";
+import { buildConceptFollowUpSessionHref } from "@/lib/daily-plan-session-bridge";
 import { loadSessionPlan, type TableSimActivePool } from "@/lib/session-plan";
+import type { DailyPlanSessionOverride } from "@/lib/daily-plan-session-bridge";
 import type { CommandCenterSnapshot } from "@/lib/command-center";
 import { SESSION_COUNT_OPTIONS, SESSION_POOL_OPTIONS } from "@/lib/session-controls";
 import { RecommendedTrainingBlockCard } from "@/components/training/RecommendedTrainingBlockCard";
 import { buildMomentumSignal, formatDecisionConfidence, formatSessionLabel } from "@/lib/study-session-ui";
 
-export function CommandCenter() {
+export function CommandCenter({
+  dailyPlanOverride = null,
+}: {
+  dailyPlanOverride?: DailyPlanSessionOverride | null;
+}) {
   const { state, dispatch, startSession } = useSession();
   const router = useRouter();
   const [snapshot, setSnapshot] = useState<CommandCenterSnapshot | null>(null);
   const [snapshotLoading, setSnapshotLoading] = useState(true);
   const [starting, setStarting] = useState(false);
-  const [count, setCount] = useState(10);
+  const [count, setCount] = useState(dailyPlanOverride?.recommendedCount ?? 10);
   const [timed, setTimed] = useState(true);
   const [activePool, setActivePool] = useState<TableSimActivePool>("baseline");
 
@@ -33,7 +39,7 @@ export function CommandCenter() {
         const data = (await response.json()) as CommandCenterSnapshot;
         if (!cancelled) {
           setSnapshot(data);
-          setCount(data.recommendedConfig.count);
+          setCount(dailyPlanOverride?.recommendedCount ?? data.recommendedConfig.count);
           setTimed(data.recommendedConfig.timed);
           setActivePool(data.recommendedConfig.activePool);
         }
@@ -53,7 +59,7 @@ export function CommandCenter() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [dailyPlanOverride?.recommendedCount]);
 
   const hasActiveSession = state.drills.length > 0 && state.phase !== "configuring" && state.phase !== "summary";
   const hasCompletedSession = state.phase === "summary" && state.attempts.length > 0;
@@ -165,10 +171,14 @@ export function CommandCenter() {
     return signals.slice(0, 4);
   }, [liveMomentum, snapshot, snapshotLoading]);
 
+  function handleFollowUpConcept(concept: string) {
+    router.push(buildConceptFollowUpSessionHref({ conceptTag: concept }));
+  }
+
   async function handleStart() {
     setStarting(true);
     try {
-      const plan = await loadSessionPlan(count, activePool);
+      const plan = await loadSessionPlan(count, activePool, undefined, dailyPlanOverride ?? undefined);
       startSession({ config: { drillCount: count, timed, activePool }, plan });
       router.push("/app/play");
     } catch (error) {
@@ -251,7 +261,7 @@ export function CommandCenter() {
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
           <MomentumCard signals={momentumSignals} />
-          <CoachBriefingCard loading={snapshotLoading} snapshot={snapshot} />
+          <CoachBriefingCard loading={snapshotLoading} snapshot={snapshot} onFollowUpConcept={handleFollowUpConcept} />
         </div>
 
         <FollowUpMonitorCard snapshot={snapshot} />
@@ -459,7 +469,15 @@ function MomentumCard({
   );
 }
 
-function CoachBriefingCard({ loading, snapshot }: { loading: boolean; snapshot: CommandCenterSnapshot | null }) {
+function CoachBriefingCard({
+  loading,
+  snapshot,
+  onFollowUpConcept,
+}: {
+  loading: boolean;
+  snapshot: CommandCenterSnapshot | null;
+  onFollowUpConcept: (concept: string) => void;
+}) {
   return (
     <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Coach Briefing</p>
@@ -480,6 +498,20 @@ function CoachBriefingCard({ loading, snapshot }: { loading: boolean; snapshot: 
           <p className="mt-2 text-sm leading-6 text-emerald-50">
             {snapshot?.coachBriefing.recommendation ?? "Run another balanced block and let the next set of reps sharpen the live target."}
           </p>
+          {snapshot?.coachBriefing.followUpConcepts.length ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {snapshot.coachBriefing.followUpConcepts.map((concept) => (
+                <button
+                  key={concept}
+                  type="button"
+                  onClick={() => onFollowUpConcept(concept)}
+                  className="rounded-full border border-emerald-500/20 bg-black/20 px-3 py-1 text-xs font-medium text-emerald-100 transition hover:border-emerald-400/35 hover:bg-emerald-500/16"
+                >
+                  {concept}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
       </div>
     </section>

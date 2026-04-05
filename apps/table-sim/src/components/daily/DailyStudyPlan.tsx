@@ -12,6 +12,7 @@ import type {
 } from "@/lib/daily-study-plan";
 import type { CalibrationSurfaceAdapter } from "@/lib/calibration-surface";
 import { fetchCalibrationSurface } from "@/lib/calibration-surface";
+import { buildDailyPlanSessionHref } from "@/lib/daily-plan-session-bridge";
 
 export function DailyStudyPlan() {
   const [bundle, setBundle] = useState<DailyStudyPlanBundle | null>(null);
@@ -88,7 +89,7 @@ export function DailyStudyPlan() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(14,116,67,0.14),rgba(3,7,18,0.98)_30%),linear-gradient(180deg,#020617_0%,#07111f_58%,#040816_100%)] px-4 py-6 sm:px-5 sm:py-8">
       <div className="mx-auto max-w-3xl space-y-6">
-        <PageHeader loading={loading} bundle={bundle} />
+        <PageHeader loading={loading} bundle={bundle} plan={plan} />
 
         {!loading && bundle?.state === "no_history" ? (
           <NoHistoryState plan={bundle.plan20} />
@@ -174,10 +175,14 @@ export function CalibrationSummaryPanel({
 function PageHeader({
   loading,
   bundle,
+  plan,
 }: {
   loading: boolean;
   bundle: DailyStudyPlanBundle | null;
+  plan: DailyStudyPlan | null;
 }) {
+  const startHref = plan ? buildDailyPlanSessionHref({ plan }) : "/app/session";
+
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -193,7 +198,7 @@ function PageHeader({
         )}
       </div>
       <Link
-        href="/app/session"
+        href={startHref}
         className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500"
       >
         Start Session
@@ -215,7 +220,7 @@ function NoHistoryState({ plan }: { plan: DailyStudyPlan }) {
         </p>
         {block?.destination && (
           <Link
-            href={block.destination}
+            href={toBlockHref(plan, block)}
             className="mt-5 inline-block rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-500"
           >
             {plan.firstAction.label}
@@ -287,6 +292,7 @@ function MainFocusCard({
   if (!plan) return null;
 
   const firstAction = plan.firstAction;
+  const firstActionHref = toFirstActionHref(plan);
 
   return (
     <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/30 px-5 py-4">
@@ -305,7 +311,7 @@ function MainFocusCard({
         </div>
         {firstAction.destination ? (
           <Link
-            href={firstAction.destination}
+            href={firstActionHref}
             className="shrink-0 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500"
           >
             {firstAction.label}
@@ -394,6 +400,7 @@ function BlockList({
       {plan.blocks.map((block, index) => (
         <BlockCard
           key={`${block.kind}-${index}`}
+          plan={plan}
           block={block}
           index={index}
           isCompleted={completedIndices.includes(index)}
@@ -406,11 +413,13 @@ function BlockList({
 
 // v4: expanded block card with action framing and completion toggle
 function BlockCard({
+  plan,
   block,
   index,
   isCompleted,
   onToggleComplete,
 }: {
+  plan: DailyStudyPlan;
   block: DailyPlanBlock;
   index: number;
   isCompleted: boolean;
@@ -492,7 +501,7 @@ function BlockCard({
   // Only make it a link if not completed (to avoid accidental navigation)
   if (block.destination && !isCompleted) {
     return (
-      <Link href={block.destination} className="block transition-opacity hover:opacity-90">
+      <Link href={toBlockHref(plan, block)} className="block transition-opacity hover:opacity-90">
         {cardContent}
       </Link>
     );
@@ -536,7 +545,7 @@ function SessionCompletePanel({ plan }: { plan: DailyStudyPlan }) {
       </p>
       <p className="mt-2 text-xs text-white/30">{plan.expectedOutcome}</p>
       <Link
-        href="/app/session"
+        href={buildDailyPlanSessionHref({ plan })}
         className="mt-4 inline-block rounded-lg border border-emerald-500/30 px-4 py-2 text-xs font-medium text-emerald-400 hover:bg-emerald-950/40"
       >
         Start another session
@@ -565,6 +574,24 @@ function WhyThisPlan({
       </p>
     </div>
   );
+}
+
+function toFirstActionHref(plan: DailyStudyPlan) {
+  const destination = plan.firstAction.destination;
+  if (!destination || destination !== "/app/session") {
+    return destination ?? "/app/session";
+  }
+  return buildDailyPlanSessionHref({ plan });
+}
+
+function toBlockHref(plan: DailyStudyPlan, block: DailyPlanBlock) {
+  if (!block.destination) {
+    return "/app/session";
+  }
+  if (block.destination !== "/app/session") {
+    return block.destination;
+  }
+  return buildDailyPlanSessionHref({ plan, block });
 }
 
 function UrgencyBadge({ signal }: { signal: string }) {

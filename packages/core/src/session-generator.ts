@@ -45,6 +45,7 @@ export interface SessionRequest {
   activePool?: WeaknessPool;
   weaknessThreshold?: number;
   minAttemptsForWeakness?: number;
+  focusConceptKey?: string;
 }
 
 export interface GeneratorInputs {
@@ -107,6 +108,7 @@ interface CandidateEntry {
   weaknessPriority: number;
   matchedWeaknessTargets: string[];
   dueAt?: string;
+  focusMatched: boolean;
 }
 
 const DEFAULT_REVIEW_RATIO = 0.6;
@@ -122,6 +124,7 @@ export function generateSessionPlan(
   const activePool = request.activePool ?? "baseline";
   const weaknessThreshold = request.weaknessThreshold ?? DEFAULT_WEAKNESS_THRESHOLD;
   const minAttemptsForWeakness = request.minAttemptsForWeakness ?? DEFAULT_MIN_ATTEMPTS_FOR_WEAKNESS;
+  const normalizedFocusConceptKey = normalizeFocusConceptKey(request.focusConceptKey);
 
   const drillMap = new Map(inputs.drills.map((drill) => [drill.drill_id, drill]));
   const srsMap = new Map(inputs.srs.map((row) => [row.drill_id, row]));
@@ -147,7 +150,15 @@ export function generateSessionPlan(
       const srs = srsMap.get(drill.drill_id);
       return srs ? new Date(srs.due_at).getTime() <= now.getTime() : false;
     })
-    .map((drill) => createCandidate(drill, attemptStatsByDrill, weaknessPriorityByDrill, srsMap.get(drill.drill_id)?.due_at))
+    .map((drill) =>
+      createCandidate(
+        drill,
+        attemptStatsByDrill,
+        weaknessPriorityByDrill,
+        normalizedFocusConceptKey,
+        srsMap.get(drill.drill_id)?.due_at
+      )
+    )
     .sort(compareReviewCandidates);
 
   const targetReviewCount = Math.min(
@@ -164,7 +175,9 @@ export function generateSessionPlan(
         const stats = attemptStatsByDrill.get(drill.drill_id);
         return Boolean(stats && stats.count > 0);
       })
-      .map((drill) => createCandidate(drill, attemptStatsByDrill, weaknessPriorityByDrill))
+      .map((drill) =>
+        createCandidate(drill, attemptStatsByDrill, weaknessPriorityByDrill, normalizedFocusConceptKey)
+      )
       .filter((candidate) => candidate.weaknessPriority > 0)
       .sort(compareReviewCandidates);
 
@@ -189,7 +202,9 @@ export function generateSessionPlan(
   if (planDrills.length < requestedCount) {
     const newCandidates = inputs.drills
       .filter((drill) => !selectedIds.has(drill.drill_id) && !srsMap.has(drill.drill_id))
-      .map((drill) => createCandidate(drill, attemptStatsByDrill, weaknessPriorityByDrill))
+      .map((drill) =>
+        createCandidate(drill, attemptStatsByDrill, weaknessPriorityByDrill, normalizedFocusConceptKey)
+      )
       .sort(compareNewCandidates);
 
     const weaknessNewCandidates = newCandidates.filter((candidate) => candidate.weaknessPriority > 0);
@@ -234,6 +249,16 @@ export function generateSessionPlan(
       activePool === "baseline"
         ? "Not enough attempt history to derive strong weakness targets yet."
         : `Not enough ${activePool} pool-specific history yet; session generator fell back to overall weakness signals.`
+    );
+  }
+  if (normalizedFocusConceptKey) {
+    const focusedSelectedCount = planDrills.filter((entry) =>
+      matchesFocusConcept(entry.drill, normalizedFocusConceptKey)
+    ).length;
+    notes.push(
+      focusedSelectedCount > 0
+        ? `Daily-plan focus prioritized concept:${normalizedFocusConceptKey} across ${focusedSelectedCount} selected drills.`
+        : `Daily-plan focus requested concept:${normalizedFocusConceptKey}, but no direct concept-matched drills were available; session fell back to the standard weakness mix.`
     );
   }
 
@@ -283,6 +308,7 @@ function createCandidate(
   drill: CanonicalDrill,
   attemptStatsByDrill: Map<string, AttemptStats>,
   weaknessPriorityByDrill: Map<string, { priority: number; keys: string[] }>,
+  focusConceptKey?: string | null,
   dueAt?: string
 ): CandidateEntry {
   const attemptStats = attemptStatsByDrill.get(drill.drill_id);
@@ -294,6 +320,7 @@ function createCandidate(
     weaknessPriority: weakness.priority,
     matchedWeaknessTargets: weakness.keys,
     dueAt,
+    focusMatched: matchesFocusConcept(drill, focusConceptKey),
   };
 }
 
@@ -328,6 +355,9 @@ function selectIntoPlan(
 function compareReviewCandidates(a: CandidateEntry, b: CandidateEntry): number {
   const dueDiff = compareOptionalDates(a.dueAt, b.dueAt);
   if (dueDiff !== 0) return dueDiff;
+  if (a.focusMatched !== b.focusMatched) {
+    return a.focusMatched ? -1 : 1;
+  }
   if (b.weaknessPriority !== a.weaknessPriority) {
     return b.weaknessPriority - a.weaknessPriority;
   }
@@ -338,6 +368,9 @@ function compareReviewCandidates(a: CandidateEntry, b: CandidateEntry): number {
 }
 
 function compareNewCandidates(a: CandidateEntry, b: CandidateEntry): number {
+  if (a.focusMatched !== b.focusMatched) {
+    return a.focusMatched ? -1 : 1;
+  }
   if (b.weaknessPriority !== a.weaknessPriority) {
     return b.weaknessPriority - a.weaknessPriority;
   }
@@ -352,6 +385,30 @@ function compareOptionalDates(a?: string, b?: string): number {
   if (!a) return 1;
   if (!b) return -1;
   return new Date(a).getTime() - new Date(b).getTime();
+}
+
+function normalizeFocusConceptKey(value?: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+  const normalized = value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  return normalized || null;
+}
+
+function matchesFocusConcept(drill: CanonicalDrill, focusConceptKey?: string | null): boolean {
+  const normalizedFocusConceptKey = normalizeFocusConceptKey(focusConceptKey);
+  if (!normalizedFocusConceptKey) {
+    return false;
+  }
+
+  if (drill.tags.includes(`concept:${normalizedFocusConceptKey}`)) {
+    return true;
+  }
+
+  return (drill.diagnostic_prompts ?? []).some((prompt) => {
+    const normalizedPromptConcept = normalizeFocusConceptKey(prompt.concept);
+    return normalizedPromptConcept === normalizedFocusConceptKey;
+  });
 }
 
 
