@@ -335,7 +335,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "ace-river-blocker-effect",
+        "prompt": "The ace rivers and villain fires 66% pot. Why does this card make calling more correct, not less?",
+        "type": "blocker",
+        "concept": "river bluff catching",
+        "expected_reasoning": "The ace gave hero top pair and simultaneously blocks AK/AQ — the hands most likely in villain's value range — which increases the proportion of bluffs in their betting range.",
+        "options": [
+          {
+            "id": "ace-increases-bluffs",
+            "label": "The ace blocks villain's strongest value hands (AK/AQ), so their betting range has more bluffs than it would on a blank river.",
+            "matches_expected": true
+          },
+          {
+            "id": "ace-is-just-top-pair",
+            "label": "Hero now has top pair so the call is correct purely based on hand strength — the blocker effect is irrelevant.",
+            "diagnosis": "blocker_blindness"
+          },
+          {
+            "id": "ace-favors-villain",
+            "label": "The ace is a scare card that mostly improves villain's range, so the call requires a very strong hand, not just top pair.",
+            "diagnosis": "range_construction_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_01_03",
@@ -408,7 +434,33 @@
     "difficulty": 3,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "four-liner-pool-b-fold",
+        "prompt": "The river completes a four-liner straight. You have top pair. Why is this a fold against Pool B?",
+        "type": "pool_assumption",
+        "concept": "river bluff catching",
+        "expected_reasoning": "Pool B under-bluffs large river bets, so when the board runs out this connected their 80% pot bet is weighted heavily toward straights and two-pair — top pair is below the defending threshold.",
+        "options": [
+          {
+            "id": "pool-b-underbluffs-connected",
+            "label": "Pool B under-bluffs large bets on connected runouts, so villain's range here is weighted toward made straights and strong hands — top pair is not ahead enough of that distribution.",
+            "matches_expected": true
+          },
+          {
+            "id": "top-pair-always-calls",
+            "label": "Top pair is a strong enough hand to call any reasonable river bet regardless of board texture.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "four-liner-increases-bluffs",
+            "label": "The four-liner actually increases villain's bluffing range because missed draws are common on straight-completing boards.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_02_01",
@@ -481,7 +533,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "overbet-no-pair-fold",
+        "prompt": "Villain overbets 150% pot on the turn and you have two overcards with no pair. What makes this a fold?",
+        "type": "pool_assumption",
+        "concept": "turn overbet defense",
+        "expected_reasoning": "Pool B under-bluffs overbets, so a 150% pot bet on the turn is heavily weighted toward strong made hands — two overcards with no pair have neither the equity nor the calling threshold to continue.",
+        "options": [
+          {
+            "id": "pool-b-underbluffs-overbets",
+            "label": "Pool B under-bluffs overbets, so this bet is value-heavy — hero has no pair and poor equity against that distribution.",
+            "matches_expected": true
+          },
+          {
+            "id": "overcards-have-outs",
+            "label": "Two overcards have 6 outs to top pair, which is enough equity to call even a large turn bet.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "overbet-means-bluff",
+            "label": "A 150% pot overbet is so polarizing that villain must have many bluffs to make it profitable, so calls with any equity are justified.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_02_02",
@@ -554,7 +632,33 @@
     "difficulty": 3,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "overpair-vs-overbet-call",
+        "prompt": "Villain overbets 125% pot on the turn and you have an overpair on a low board. Why is this a call?",
+        "type": "threshold",
+        "concept": "turn overbet defense",
+        "expected_reasoning": "88 is near the top of hero's range on a 7-5-3 board — even facing a value-weighted overbet, an overpair is too strong to fold when it is one of your best hands in this spot.",
+        "options": [
+          {
+            "id": "overpair-top-of-range",
+            "label": "88 is near the top of hero's range on this low board — folding an overpair to an overbet would be over-tightening when the hand is one of the strongest holdings hero can have here.",
+            "matches_expected": true
+          },
+          {
+            "id": "overbet-always-sets",
+            "label": "Pool B only overbets with sets and two pair, so 88 is beat and should fold to any overbet.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "overpair-needs-backdoors",
+            "label": "An overpair without a draw is too weak to call a large turn bet — hero needs additional equity to continue.",
+            "diagnosis": "threshold_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_02_03",
@@ -629,7 +733,33 @@
     "difficulty": 3,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "oesd-vs-overbet-equity",
+        "prompt": "Villain overbets 140% pot and you have an OESD. What justifies calling?",
+        "type": "threshold",
+        "concept": "turn overbet defense",
+        "expected_reasoning": "An OESD gives approximately 16% equity on the turn — the pot is offering enough to make calling correct, and a semi-bluff raise is also viable if stacks are deep enough.",
+        "options": [
+          {
+            "id": "oesd-equity-justifies-call",
+            "label": "8 outs to the straight gives roughly 16% equity and the pot odds from a call into a large bet are sufficient to continue.",
+            "matches_expected": true
+          },
+          {
+            "id": "overbet-means-fold-draws",
+            "label": "Pool B only overbets with made hands, so draws should always fold to overbets regardless of equity.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "oesd-too-weak",
+            "label": "16% equity is not enough to call a 140% pot overbet — the math does not work even with the straight draw.",
+            "diagnosis": "threshold_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_03_01",
@@ -702,7 +832,33 @@
     "difficulty": 3,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "missed-draw-river-bluff",
+        "prompt": "You missed both your flush and straight draw on the river. Why is raising as a bluff correct here?",
+        "type": "pool_assumption",
+        "concept": "river bluffing",
+        "expected_reasoning": "65s has zero showdown value on a missed board, and Pool B under-calls river raises — raising as a bluff is more profitable than checking because hero can credibly rep strong hands and villain's calling range is too tight.",
+        "options": [
+          {
+            "id": "zero-sdv-pool-b-undercalls",
+            "label": "With zero showdown value a bluff raise is better than a check — and Pool B under-calls river raises, making the bluff profitable against their tight calling frequency.",
+            "matches_expected": true
+          },
+          {
+            "id": "check-behind-missed",
+            "label": "Missed draws should always check behind on the river to avoid turning nothing into a bluff.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "pool-b-overcalls-raises",
+            "label": "Pool B calls too wide, so bluffing is actually unprofitable here — hero should check to minimize losses.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_03_02",
@@ -904,7 +1060,33 @@
           "note": "It is premium enough to polarize, even if only the king-high flush technically sits above it."
         }
       }
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "flush-overbet-value",
+        "prompt": "You made a queen-high flush and villain checks. Why is overbetting correct rather than a standard size?",
+        "type": "line_understanding",
+        "concept": "river value sizing",
+        "expected_reasoning": "A queen-high flush is a premium polar value hand on a board where straights also completed — overbetting extracts maximum value from worse flushes, made straights, two pair, and sticky bluff-catchers who will pay a large size.",
+        "options": [
+          {
+            "id": "flush-justifies-overbet",
+            "label": "A queen-high flush is strong enough to overbet for value — it gets called by worse flushes, straights, and two pair hands that will pay a large size.",
+            "matches_expected": true
+          },
+          {
+            "id": "flush-bets-small",
+            "label": "The completed straight board means villain's range is dangerous — betting small protects against check-raises from stronger flushes.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "check-back-flush",
+            "label": "Villain checked, so checking back with the flush is correct to induce a bet on future streets.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_03_03",
@@ -977,7 +1159,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "flush-raise-four-liner-value",
+        "prompt": "You made a flush on a four-liner board and villain bets 60% pot. Why raise for value rather than just call?",
+        "type": "line_understanding",
+        "concept": "river value raising",
+        "expected_reasoning": "The flush beats villain's made straights, and the four-liner board means villain can have straights that will call a raise — raising extracts more value than calling and is the correct line with a strong hand that beats the straight-completing board.",
+        "options": [
+          {
+            "id": "flush-beats-straights",
+            "label": "The flush beats all straights that complete the four-liner — villain may well have a straight that will call a raise, making raising correct for value.",
+            "matches_expected": true
+          },
+          {
+            "id": "just-call-flush",
+            "label": "Calling with the flush is correct because raising polarizes the range and folds out villain's bluffs.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "four-liner-means-fold",
+            "label": "The four-liner board makes any hand below the nut straight too risky to raise — fold instead of raising with just a flush.",
+            "diagnosis": "threshold_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_04_01",
@@ -1390,7 +1598,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "blank-turn-probe-check",
+        "prompt": "Villain checked back the flop and the turn is a blank. You have JT OOP. Why check rather than probe?",
+        "type": "street_shift",
+        "concept": "turn probe betting",
+        "expected_reasoning": "A blank turn on a dry board does not improve hero's range advantage or add pressure — JT has some equity but probing into a dry texture after a check-back is less effective than checking and re-evaluating on the river.",
+        "options": [
+          {
+            "id": "blank-turn-no-probe-advantage",
+            "label": "A blank turn on a dry board does not create a range advantage for a probe — checking and evaluating the river is more effective than betting into a texture that doesn't favor OOP aggression.",
+            "matches_expected": true
+          },
+          {
+            "id": "always-probe-after-checkback",
+            "label": "Villain checked back the flop, showing weakness — hero should always probe bet the turn after any flop check-back.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "jt-equity-justifies-probe",
+            "label": "JT has enough raw equity on any board to justify probing for value and fold equity on the turn.",
+            "diagnosis": "threshold_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_04_03",
@@ -1462,7 +1696,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "turned-nuts-wet-board-bet",
+        "prompt": "You flopped an OESD and turned the nuts on a 9-6-5-8 board. Why bet rather than slow-play?",
+        "type": "street_shift",
+        "concept": "turn value betting",
+        "expected_reasoning": "Hero turned the nuts on a wet board with many straight and flush draws — slow-playing gives free cards to drawing hands that will beat you on the river, so betting large now captures value and charges the draws.",
+        "options": [
+          {
+            "id": "nuts-wet-board-charge-draws",
+            "label": "Hero has the nuts on a wet board full of draws — betting large now extracts value and denies free cards to the many draws villain can hold.",
+            "matches_expected": true
+          },
+          {
+            "id": "slowplay-nuts",
+            "label": "Slow-playing the nuts is best to keep villain's range wide and extract more value on the river.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "check-to-induce",
+            "label": "Checking to induce a bluff is better than betting — villain will bet more often into a perceived weak range.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_05_01",
@@ -1535,7 +1795,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "tptk-oesd-checkraise-wet",
+        "prompt": "You have top pair + OESD on a wet 8-7-6 board facing a 33% c-bet. Why check-raise?",
+        "type": "pool_assumption",
+        "concept": "check-raising",
+        "expected_reasoning": "Top pair + OESD on a wet connected board is a premium check-raise hand — hero has equity when called and can credibly rep strong hands, and Pool B under-defends vs check-raises making it immediately profitable.",
+        "options": [
+          {
+            "id": "tptk-oesd-cr-premium",
+            "label": "Top pair + OESD has strong equity when called and the ability to rep strong hands — and Pool B under-defends vs check-raises, making the immediate fold equity high.",
+            "matches_expected": true
+          },
+          {
+            "id": "just-call-tptk",
+            "label": "Calling is better than check-raising because top pair does not need to build the pot on a wet board where hero can be dominated.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "pool-b-defends-cr",
+            "label": "Pool B calls check-raises too wide, so check-raising is unprofitable even with strong equity.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_05_02",
@@ -1608,7 +1894,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "ak3-range-disadvantage-fold",
+        "prompt": "You have 54hh (gutshot + backdoor flush) on AK3 rainbow facing a c-bet. Why fold rather than check-raise?",
+        "type": "range_construction",
+        "concept": "check-raising",
+        "expected_reasoning": "AK3 rainbow strongly favors BTN's opening range — check-raising on a board where villain has massive range advantage is unprofitable even with a weak draw, and weak draws should be folded on opponent-favored dry boards.",
+        "options": [
+          {
+            "id": "ak3-favors-btn-fold-draws",
+            "label": "AK3 rainbow is one of the most BTN-favored flop textures — check-raising weak draws on boards where villain has a huge range advantage is not profitable.",
+            "matches_expected": true
+          },
+          {
+            "id": "any-draw-checkraises",
+            "label": "Any draw with fold equity should check-raise — gutshots and backdoors are valid check-raise hands regardless of board texture.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "just-call-54",
+            "label": "Calling the c-bet with 54hh is the best line to realize backdoor equity cheaply.",
+            "diagnosis": "threshold_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_05_03",
@@ -1681,7 +1993,33 @@
     "difficulty": 1,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "two-pair-wet-checkraise-now",
+        "prompt": "You have two pair on a wet J-T-5 board facing a 50% c-bet. Why check-raise rather than call?",
+        "type": "street_shift",
+        "concept": "check-raising",
+        "expected_reasoning": "Two pair on a wet board must check-raise because many turn cards can kill action or counterfeit the hand — raising now charges draws, protects equity, and builds the pot before villain's range improves for free.",
+        "options": [
+          {
+            "id": "two-pair-wet-raise-now",
+            "label": "Two pair on a wet board needs to raise now — many turn cards can counterfeit the hand or kill action, so building the pot and charging draws is critical on the flop.",
+            "matches_expected": true
+          },
+          {
+            "id": "call-two-pair-protect",
+            "label": "Calling with two pair protects range balance and avoids over-building the pot with a vulnerable hand.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "two-pair-on-wet-is-medium",
+            "label": "Two pair on a connected board is a medium-strength hand — calling is sufficient and raising is too aggressive.",
+            "diagnosis": "threshold_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_06_01",
@@ -1753,7 +2091,33 @@
     "difficulty": 3,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "king-scare-card-triple-barrel",
+        "prompt": "The king rivers after two barrels and you have missed ace-high. Why is this the right card to triple barrel?",
+        "type": "pool_assumption",
+        "concept": "triple barrel bluffing",
+        "expected_reasoning": "The king is a premium scare card — hero can credibly rep AK, KQ, and KK, the hand has zero showdown value making a bluff strictly better than checking, and Pool B over-folds to third barrels on scary rivers.",
+        "options": [
+          {
+            "id": "king-scare-card-pool-b-folds",
+            "label": "The king lets hero rep AK/KQ/KK credibly, the hand has zero SDV making bluffing better than checking, and Pool B over-folds to third barrels.",
+            "matches_expected": true
+          },
+          {
+            "id": "check-missed-flush",
+            "label": "After missing the flush draw, hero should give up — continuing with a third barrel is a mistake with no equity.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "king-improves-villain",
+            "label": "The king improves villain's range with KQ and KJ hands, making it a bad bluff card.",
+            "diagnosis": "range_construction_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_06_02",
@@ -1825,7 +2189,33 @@
     "difficulty": 3,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "paired-river-rep-full-house",
+        "prompt": "The board pairs on the river after two barrels. Why does the paired card make this a good triple barrel spot?",
+        "type": "range_construction",
+        "concept": "triple barrel bluffing",
+        "expected_reasoning": "The paired river reduces villain's sets and trips combos while hero can credibly represent a full house — combined with Pool B over-folding to triple barrels on scary runouts, this card has strong bluffing equity.",
+        "options": [
+          {
+            "id": "paired-reduces-villain-fullhouses",
+            "label": "The paired card reduces villain's sets (which would have been trips) and lets hero rep a full house — Pool B over-folds to triple barrels on paired runouts.",
+            "matches_expected": true
+          },
+          {
+            "id": "paired-favors-villain",
+            "label": "A paired river is bad for bluffing because villain can have trips that they will not fold.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "give-up-after-two-calls",
+            "label": "Villain called twice, so they likely have a strong hand — triple barreling after two calls is -EV.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_06_03",
@@ -1897,7 +2287,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "four-liner-turned-value",
+        "prompt": "The river completes a four-liner and you have the straight. Is this a bluff or a value bet?",
+        "type": "line_understanding",
+        "concept": "river value betting",
+        "expected_reasoning": "The four-liner river gave hero the straight — this is a value bet, not a bluff. Hero should bet large to extract from villain's calling range of worse made hands, not treat this as a continuation of a bluff line.",
+        "options": [
+          {
+            "id": "straight-is-value-bet",
+            "label": "Hero made the straight on the river — this is a value bet targeting villain's worse made hands, not a bluff.",
+            "matches_expected": true
+          },
+          {
+            "id": "four-liner-always-bluff",
+            "label": "Hero has been barreling as a bluff and should continue treating this as a bluff regardless of what the river brought.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "check-back-straight-four-liner",
+            "label": "The four-liner means villain likely has a straight too — checking back is safest to avoid a cooler.",
+            "diagnosis": "threshold_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_07_01",
@@ -1970,7 +2386,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "small-donk-paired-king-fold",
+        "prompt": "Villain small-donks the river after the king pairs. You have AJ high. Why fold?",
+        "type": "pool_assumption",
+        "concept": "facing river donk bets",
+        "expected_reasoning": "A small donk on a paired king river is commonly a blocking bet with Kx — Pool B rarely donk-bluffs, so the donk range is heavily weighted toward value, and AJ with no showdown value cannot continue.",
+        "options": [
+          {
+            "id": "small-donk-kx-blocking-bet",
+            "label": "Pool B uses small donks as blocking bets with made hands like Kx — AJ has no showdown value against a range dominated by Kx and two-pair.",
+            "matches_expected": true
+          },
+          {
+            "id": "small-donk-is-weak",
+            "label": "A small donk bet usually means villain is weak and bluffing — calling or raising to exploit their bluff-heavy range is correct.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "aj-high-can-call-small",
+            "label": "AJ high beats enough bluffs to call a small river bet profitably.",
+            "diagnosis": "threshold_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_07_02",
@@ -2043,7 +2485,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "large-donk-ace-scare-fold",
+        "prompt": "Villain fires a 75% pot donk on the ace river. You have KQ high. Why fold rather than call?",
+        "type": "pool_assumption",
+        "concept": "facing river donk bets",
+        "expected_reasoning": "A large donk bet on a scare card ace river from Pool B is heavily value-weighted — villain has Ax hands they checked earlier to trap, and KQ with no showdown value cannot profitably call a large bet from that range.",
+        "options": [
+          {
+            "id": "large-donk-ace-value-heavy",
+            "label": "Pool B fires large donks on ace rivers with Ax they checked to trap earlier — KQ has no showdown value against that distribution.",
+            "matches_expected": true
+          },
+          {
+            "id": "ace-scare-means-bluff",
+            "label": "The ace is a scare card that blocks villain's value, so large donks on ace rivers are bluff-heavy and calling is correct.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "kq-can-bluff-catch",
+            "label": "KQ has backdoor showdown value and is close enough to call a 75% pot bet with a pure bluff-catch.",
+            "diagnosis": "threshold_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_07_03",
@@ -2265,7 +2733,33 @@
           "note": "Good enough at the small size in baseline, but not robust enough to survive every exploit pool shift."
         }
       }
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "small-donk-paired-queen-ak-call",
+        "prompt": "Villain small-donks the river after the queen pairs. You have AK high. Why call this one but fold the earlier AJ spot?",
+        "type": "blocker",
+        "concept": "facing river donk bets",
+        "expected_reasoning": "AK beats all missed draws and the paired queen reduces Qx combos in villain's donk range — the small sizing signals a block bet rather than strong value, and AK has enough showdown value to call given these factors.",
+        "options": [
+          {
+            "id": "ak-beats-draws-paired-reduces-qx",
+            "label": "AK beats all missed draws and holds decent showdown value, and the paired queen reduces the number of Qx hands in villain's range — the small donk is likely a block bet, not strong value.",
+            "matches_expected": true
+          },
+          {
+            "id": "always-fold-ace-high-donk",
+            "label": "Ace-high should always fold to any river donk bet regardless of sizing.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "paired-queen-favors-villain",
+            "label": "The paired queen means villain is more likely to have trips or a full house, making the call incorrect.",
+            "diagnosis": "range_construction_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_08_01",
@@ -2337,7 +2831,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "flush-draw-turn-delayed-cbet",
+        "prompt": "You checked back the flop and the turn brings a flush draw. Why is this a good delayed c-bet spot?",
+        "type": "pool_assumption",
+        "concept": "delayed c-betting",
+        "expected_reasoning": "The turn flush draw adds pressure to villain's check-call flop range and gives hero's delayed bet more credibility — combined with Pool B under-defending vs delayed c-bets, this turn is a high fold-equity spot.",
+        "options": [
+          {
+            "id": "flush-draw-pressures-checkcall",
+            "label": "The flush draw creates pressure on villain's flop check-call range and adds credibility to a delayed c-bet — Pool B under-defends on turns with new draws.",
+            "matches_expected": true
+          },
+          {
+            "id": "delayed-cbet-only-with-equity",
+            "label": "A delayed c-bet requires a draw or strong made hand — without a flush draw, hero should not bet the turn.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "flush-draw-favors-villain",
+            "label": "The flush draw helps villain's range more than hero's, so delayed c-betting on this turn is incorrect.",
+            "diagnosis": "range_construction_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_08_02",
@@ -2747,7 +3267,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "oesd-backdoor-delayed-semibluff",
+        "prompt": "You checked back K-9-2 with QJ and turned an OESD + backdoor flush on the ten. Why bet now?",
+        "type": "line_understanding",
+        "concept": "delayed c-betting semi-bluff",
+        "expected_reasoning": "The turn gave hero an OESD and backdoor flush draw — 8 straight outs plus backdoor equity makes this an excellent semi-bluff candidate, and the turn card with flush draws also adds range advantage for a delayed c-bet.",
+        "options": [
+          {
+            "id": "oesd-backdoor-turn-semibluff",
+            "label": "The turn gave hero an OESD plus backdoor flush draw — 8 straight outs and the flush draws on the turn make this the right card to launch a delayed semi-bluff.",
+            "matches_expected": true
+          },
+          {
+            "id": "checked-back-so-give-up",
+            "label": "Hero showed weakness by checking back the flop — betting the turn after a check-back with no made hand is inconsistent.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "oesd-only-calls",
+            "label": "An OESD is a calling hand, not a betting hand — hero should check and call a bet if villain bets the turn.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_09_01",
@@ -2819,7 +3365,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "tptk-small-value-bet-pool-b",
+        "prompt": "You have TPTK on the river and villain checks. Why bet small rather than large?",
+        "type": "pool_assumption",
+        "concept": "river value sizing",
+        "expected_reasoning": "TPTK is a medium-strength value hand — a small sizing gets called by more Ax hands and pocket pairs, and Pool B calls too wide vs small river bets making thin value small the most exploitative line.",
+        "options": [
+          {
+            "id": "tptk-small-exploits-pool-b",
+            "label": "TPTK is medium-strength value — small sizing gets called by more Ax hands and pocket pairs, and Pool B calls too wide vs small bets.",
+            "matches_expected": true
+          },
+          {
+            "id": "tptk-always-bet-large",
+            "label": "TPTK is a strong hand and should always be bet large to maximize value from any hand that calls.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "check-back-tptk",
+            "label": "TPTK is vulnerable — checking back to avoid a check-raise is safer than betting into an unknown range.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_09_02",
@@ -2891,7 +3463,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "set-nut-advantage-overbet",
+        "prompt": "You have a set on the river with a nut advantage. Why overbet rather than bet standard?",
+        "type": "range_construction",
+        "concept": "river value sizing",
+        "expected_reasoning": "A set carries a nut advantage on this board — overbetting is correct when hero has disproportionately more strong hands than villain, as it extracts maximum value from Jx, 6x, and overpairs that will call a large size.",
+        "options": [
+          {
+            "id": "nut-advantage-justifies-overbet",
+            "label": "Sets give hero a nut advantage — overbetting extracts maximum value from Jx, 6x, and overpairs that will call a large size because they cannot put hero on the nuts.",
+            "matches_expected": true
+          },
+          {
+            "id": "set-bets-small-induce",
+            "label": "Betting small with a set induces bluffs and keeps villain's range wide for more calls.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "nut-advantage-check",
+            "label": "Checking back with the nuts is best to induce a bluff from villain and allow them to build the pot.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_09_03",
@@ -2963,7 +3561,33 @@
     "difficulty": 3,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "trip-kings-paired-board-sizing",
+        "prompt": "You have trip kings on a king-paired board. Why size moderately rather than overbetting?",
+        "type": "range_construction",
+        "concept": "river value sizing",
+        "expected_reasoning": "The paired top card reduces villain's calling range significantly because many Kx hands are now impossible — moderate sizing (50-75%) gets value from 8x, pocket pairs, and the rare Kx while an overbet folds out exactly those hands.",
+        "options": [
+          {
+            "id": "paired-king-reduces-calls",
+            "label": "A paired king board reduces villain's calling range — moderate sizing targets 8x, pocket pairs, and the rare Kx, while overbetting folds out the same hands you want to extract from.",
+            "matches_expected": true
+          },
+          {
+            "id": "trips-always-overbet",
+            "label": "Trip kings is a nut hand and should always be overbet to extract maximum value.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "paired-board-check-back",
+            "label": "A paired king board is dangerous — villain may have quads or a full house, so checking back trips is safer.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_10_01",
@@ -3035,7 +3659,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "overpair-call-cr-wet-board",
+        "prompt": "You have QQ and face a check-raise on J-8-5. Why call rather than fold or re-raise?",
+        "type": "threshold",
+        "concept": "facing check-raises",
+        "expected_reasoning": "QQ is near the top of hero's range on J-8-5 — even though Pool B check-raises are value-heavy, an overpair is too strong to fold when it beats the draws and medium pairs in villain's check-raising range.",
+        "options": [
+          {
+            "id": "qq-top-of-range-call",
+            "label": "QQ is near the top of hero's range on this board — folding an overpair to a check-raise would be over-tightening when QQ beats many hands villain can check-raise with.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool-b-cr-always-sets",
+            "label": "Pool B only check-raises with sets and two pair, so QQ is behind and should fold to protect against future bets.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "reraise-qq",
+            "label": "QQ should re-raise the check-raise to charge draws and define villain's range immediately.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_10_02",
@@ -3107,7 +3757,33 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "ak-backdoor-fold-cr",
+        "prompt": "You have AK with only backdoor equity and face a check-raise on T-7-4. Why fold?",
+        "type": "pool_assumption",
+        "concept": "facing check-raises",
+        "expected_reasoning": "AKo has only backdoor equity on T-7-4 and Pool B check-raises are heavily value-weighted — continuing with just backdoors against a value-dense check-raising range is not profitable.",
+        "options": [
+          {
+            "id": "backdoor-only-fold-poolb-cr",
+            "label": "AKo only has backdoor equity and Pool B check-raises heavily skew toward value on T-7-4 — there is not enough equity or fold equity to continue.",
+            "matches_expected": true
+          },
+          {
+            "id": "ak-high-can-float",
+            "label": "AK has overcard equity and can float the check-raise to realize equity on later streets.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "reraise-ak-fold-equity",
+            "label": "Re-raising AKo on a dry board generates fold equity against draws in villain's check-raise range.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "d_10_03",
@@ -3181,6 +3857,32 @@
     "difficulty": 2,
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "oesd-call-cr-correct-price",
+        "prompt": "You have an OESD and face a check-raise on 8-5-3. Why call rather than fold or re-raise?",
+        "type": "threshold",
+        "concept": "facing check-raises",
+        "expected_reasoning": "An OESD gives approximately 32% equity by river — calling the check-raise is correct because the pot odds work, and a semi-bluff re-raise is also viable given fold equity against Pool B's defending range.",
+        "options": [
+          {
+            "id": "oesd-equity-correct-price",
+            "label": "8 outs gives roughly 32% equity by river — calling the check-raise is correct on the price, and re-raising as a semi-bluff is also viable given Pool B's tendency to over-fold.",
+            "matches_expected": true
+          },
+          {
+            "id": "fold-draw-vs-cr",
+            "label": "Draws should always fold to check-raises because the check-raise signals a strong made hand that dominates the draw.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "oesd-not-enough-equity",
+            "label": "32% equity is not sufficient to call a check-raise — the raise amount makes the call unprofitable.",
+            "diagnosis": "threshold_error"
+          }
+        ]
+      }
+    ]
   }
 ]

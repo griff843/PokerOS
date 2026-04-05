@@ -14,7 +14,7 @@ function main() {
   const rawArgs = process.argv.slice(2);
   const jsonOutput = rawArgs.includes("--json");
   const positionalArgs = rawArgs.filter((arg) => !arg.startsWith("--"));
-  const input = positionalArgs[0] ?? "content/drills/live_cash_gold_btn_bb_river.json";
+  const input = positionalArgs[0] ?? "content/drills";
   const resolved = path.resolve(process.cwd(), input);
 
   if (!fs.existsSync(resolved)) {

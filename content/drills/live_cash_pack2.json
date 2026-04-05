@@ -12,57 +12,134 @@
       "players_to_flop": 2,
       "hero_position": "CO",
       "villain_position": "HJ",
-      "hero_hand": ["Kh", "Jd"],
+      "hero_hand": [
+        "Kh",
+        "Jd"
+      ],
       "effective_stack_bb": 100,
       "action_history": [
-        { "street": "preflop", "player": "UTG", "action": "limp", "size_bb": 1 },
-        { "street": "preflop", "player": "UTG1", "action": "limp", "size_bb": 1 },
-        { "street": "preflop", "player": "HJ", "action": "limp", "size_bb": 1 }
+        {
+          "street": "preflop",
+          "player": "UTG",
+          "action": "limp",
+          "size_bb": 1
+        },
+        {
+          "street": "preflop",
+          "player": "UTG1",
+          "action": "limp",
+          "size_bb": 1
+        },
+        {
+          "street": "preflop",
+          "player": "HJ",
+          "action": "limp",
+          "size_bb": 1
+        }
       ]
     },
     "decision_point": {
       "street": "preflop",
-      "facing": { "action": "limp", "size_bb": 1 },
+      "facing": {
+        "action": "limp",
+        "size_bb": 1
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Fold" },
-      { "key": "CALL", "label": "Limp Behind" },
-      { "key": "RAISE", "label": "Iso-Raise" }
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Limp Behind"
+      },
+      {
+        "key": "RAISE",
+        "label": "Iso-Raise"
+      }
     ],
     "answer": {
       "correct": "RAISE",
       "accepted": [],
-      "required_tags": ["iso_raise_live"],
+      "required_tags": [
+        "iso_raise_live"
+      ],
       "explanation": "KJo is a strong iso-raise candidate from CO vs passive live limpers. Size to 5-6x (25-30) to get heads-up IP. Limping behind concedes initiative and inflates a multiway pot with a hand that plays better HU."
     },
     "answer_by_pool": {
       "A": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["iso_raise_live"],
+        "required_tags": [
+          "iso_raise_live"
+        ],
         "explanation": "Pool A may flat or 3-bet iso-raises, but KJo is still strong enough to iso from CO. Size up to deny squeeze callers."
       },
       "B": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["iso_raise_live"],
+        "required_tags": [
+          "iso_raise_live"
+        ],
         "explanation": "Pool B passive limpers fold to ISO or call one at a time. Get HU with KJo IP — clear iso-raise."
       },
       "C": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["iso_raise_live"],
+        "required_tags": [
+          "iso_raise_live"
+        ],
         "explanation": "Pool C aggro players may squeeze, but KJo still iso-raises profitably from CO. Be prepared for a squeeze and have a plan."
       }
     },
-    "tags": ["street:preflop", "pot:limp", "position:ip", "spot:co_vs_limpers"],
+    "tags": [
+      "street:preflop",
+      "pot:limp",
+      "position:ip",
+      "spot:co_vs_limpers"
+    ],
     "difficulty": 1,
     "coaching_context": {
-      "common_mistakes": ["Limping behind with strong hands, forfeiting initiative", "Under-sizing iso-raise and getting multiple callers"],
-      "population_note": "Live limpers often fold to large iso-raises or call with dominated hands — both outcomes are profitable for KJo."
+      "common_mistakes": [
+        "Limping behind with strong hands, forfeiting initiative",
+        "Under-sizing iso-raise and getting multiple callers"
+      ],
+      "population_note": "Live limpers often fold to large iso-raises or call with dominated hands — both outcomes are profitable for KJo.",
+      "key_concept": "KJo is a strong iso-raise candidate from CO vs passive live limpers.",
+      "difficulty_reason": "CO Iso-Raise vs 3 Limpers — KJo is difficult because many players default to limping behind with strong hands, forfeiting initiative, even though KJo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "KJo iso-raises to 5-6x from CO to get heads-up in position — limping behind inflates a multiway pot with a hand that dominates passive limpers but plays poorly against multiple callers."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "co-iso-raise-vs",
+        "prompt": "What makes iso-raise the highest-EV line here instead of taking the passive option?",
+        "type": "line_understanding",
+        "concept": "iso-raising",
+        "expected_reasoning": "The key is the preflop range and position dynamic: this spot gains too much from initiative, fold equity, isolation, or value extraction to passively continue.",
+        "options": [
+          {
+            "id": "passive_line",
+            "label": "Flatting or checking keeps weaker hands in, so aggression mostly burns value or fold equity.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "initiative_edge",
+            "label": "The spot is driven by the preflop range and position dynamic, so building the pot or isolating now captures more value than a passive line.",
+            "matches_expected": true
+          },
+          {
+            "id": "fear_adjustment",
+            "label": "Because this is a baseline live pool, the hand should usually avoid aggression and protect against getting played back at.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_iso01_02",
@@ -77,56 +154,128 @@
       "players_to_flop": 2,
       "hero_position": "BTN",
       "villain_position": "CO",
-      "hero_hand": ["Ac", "9d"],
+      "hero_hand": [
+        "Ac",
+        "9d"
+      ],
       "effective_stack_bb": 100,
       "action_history": [
-        { "street": "preflop", "player": "MP", "action": "limp", "size_bb": 1 },
-        { "street": "preflop", "player": "CO", "action": "limp", "size_bb": 1 }
+        {
+          "street": "preflop",
+          "player": "MP",
+          "action": "limp",
+          "size_bb": 1
+        },
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "limp",
+          "size_bb": 1
+        }
       ]
     },
     "decision_point": {
       "street": "preflop",
-      "facing": { "action": "limp", "size_bb": 1 },
+      "facing": {
+        "action": "limp",
+        "size_bb": 1
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Fold" },
-      { "key": "CALL", "label": "Limp Behind" },
-      { "key": "RAISE", "label": "Iso-Raise" }
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Limp Behind"
+      },
+      {
+        "key": "RAISE",
+        "label": "Iso-Raise"
+      }
     ],
     "answer": {
       "correct": "RAISE",
       "accepted": [],
-      "required_tags": ["iso_raise_live"],
+      "required_tags": [
+        "iso_raise_live"
+      ],
       "explanation": "A9o on BTN vs 2 passive limpers is a textbook iso-raise. You have position, a top-pair-capable hand, and dominated limpers. Raise to 4-5x to get heads-up."
     },
     "answer_by_pool": {
       "A": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["iso_raise_live"],
+        "required_tags": [
+          "iso_raise_live"
+        ],
         "explanation": "Competent players may 3-bet iso-raises from the blinds — A9o has good enough equity to continue. Still iso."
       },
       "B": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["iso_raise_live"],
+        "required_tags": [
+          "iso_raise_live"
+        ],
         "explanation": "Passive recs limp-call dominated hands constantly. Iso-raise A9o for value IP — this is free money."
       },
       "C": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["iso_raise_live"],
+        "required_tags": [
+          "iso_raise_live"
+        ],
         "explanation": "Even aggro pools iso-raise A9o profitably from BTN. Their 3-bets don't dominate A9o often enough to deter."
       }
     },
-    "tags": ["street:preflop", "pot:limp", "position:ip", "spot:btn_vs_limpers"],
+    "tags": [
+      "street:preflop",
+      "pot:limp",
+      "position:ip",
+      "spot:btn_vs_limpers"
+    ],
     "difficulty": 1,
     "coaching_context": {
-      "common_mistakes": ["Limping A9o behind and surrendering positional edge", "Over-folding in fear of 3-bet squeezes"],
-      "population_note": "A9o crushes passive limper ranges. Iso-raise is mandatory — every limp-behind costs expected value."
+      "common_mistakes": [
+        "Limping A9o behind and surrendering positional edge",
+        "Over-folding in fear of 3-bet squeezes"
+      ],
+      "population_note": "A9o crushes passive limper ranges. Iso-raise is mandatory — every limp-behind costs expected value.",
+      "key_concept": "A9o on BTN vs 2 passive limpers is a textbook iso-raise.",
+      "difficulty_reason": "BTN Iso-Raise vs 2 Limpers — A9o is difficult because many players default to limping A9o behind and surrendering positional edge, even though A9o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Iso-Raise works because A9o is either too dominated or too awkward on later streets to justify continuing more aggressively."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "btn-iso-raise-vs",
+        "prompt": "What makes iso-raise the highest-EV line here instead of taking the passive option?",
+        "type": "line_understanding",
+        "concept": "iso-raising",
+        "expected_reasoning": "The key is the preflop range and position dynamic: this spot gains too much from initiative, fold equity, isolation, or value extraction to passively continue.",
+        "options": [
+          {
+            "id": "passive_line",
+            "label": "Flatting or checking keeps weaker hands in, so aggression mostly burns value or fold equity.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "initiative_edge",
+            "label": "The spot is driven by the preflop range and position dynamic, so building the pot or isolating now captures more value than a passive line.",
+            "matches_expected": true
+          },
+          {
+            "id": "fear_adjustment",
+            "label": "Because this is a baseline live pool, the hand should usually avoid aggression and protect against getting played back at.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_iso01_03",
@@ -141,58 +290,145 @@
       "players_to_flop": 3,
       "hero_position": "BTN",
       "villain_position": "CO",
-      "hero_hand": ["8s", "7s"],
+      "hero_hand": [
+        "8s",
+        "7s"
+      ],
       "effective_stack_bb": 100,
       "action_history": [
-        { "street": "preflop", "player": "UTG", "action": "limp", "size_bb": 1 },
-        { "street": "preflop", "player": "UTG1", "action": "limp", "size_bb": 1 },
-        { "street": "preflop", "player": "HJ", "action": "limp", "size_bb": 1 },
-        { "street": "preflop", "player": "CO", "action": "limp", "size_bb": 1 }
+        {
+          "street": "preflop",
+          "player": "UTG",
+          "action": "limp",
+          "size_bb": 1
+        },
+        {
+          "street": "preflop",
+          "player": "UTG1",
+          "action": "limp",
+          "size_bb": 1
+        },
+        {
+          "street": "preflop",
+          "player": "HJ",
+          "action": "limp",
+          "size_bb": 1
+        },
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "limp",
+          "size_bb": 1
+        }
       ]
     },
     "decision_point": {
       "street": "preflop",
-      "facing": { "action": "limp", "size_bb": 1 },
+      "facing": {
+        "action": "limp",
+        "size_bb": 1
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Fold" },
-      { "key": "CALL", "label": "Limp Behind" },
-      { "key": "RAISE", "label": "Iso-Raise to 7x" }
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Limp Behind"
+      },
+      {
+        "key": "RAISE",
+        "label": "Iso-Raise to 7x"
+      }
     ],
     "answer": {
       "correct": "CALL",
       "accepted": [],
-      "required_tags": ["iso_raise_live", "multiway_context"],
+      "required_tags": [
+        "iso_raise_live",
+        "multiway_context"
+      ],
       "explanation": "With 4 limpers, iso-raising 87s bloats the pot multiway even vs a 7x size. 87s is a speculative suited connector that thrives with implied odds and position. Limp behind, see a cheap multiway flop, and extract big when you hit."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["iso_raise_live", "multiway_context"],
+        "required_tags": [
+          "iso_raise_live",
+          "multiway_context"
+        ],
         "explanation": "Competent players recognize 4-limper spots favor limping behind with speculative hands. Iso-raise inflates pot vs too many opponents."
       },
       "B": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["iso_raise_live", "multiway_context"],
+        "required_tags": [
+          "iso_raise_live",
+          "multiway_context"
+        ],
         "explanation": "Passive limpers rarely fold to even large iso-raises with 4 players in. Limp, get your implied odds, and flop big."
       },
       "C": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["iso_raise_live", "multiway_context"],
+        "required_tags": [
+          "iso_raise_live",
+          "multiway_context"
+        ],
         "explanation": "Aggro pool in the blinds can squeeze a 7x iso-raise, putting 87s in an awful spot. Limp behind and avoid the squeeze."
       }
     },
-    "tags": ["street:preflop", "pot:limp", "position:ip", "spot:btn_vs_limpers", "decision:iso_sizing"],
+    "tags": [
+      "street:preflop",
+      "pot:limp",
+      "position:ip",
+      "spot:btn_vs_limpers",
+      "decision:iso_sizing"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Iso-raising every limped pot regardless of how many limpers", "Sizing too small vs 4 limpers and getting called by everyone"],
-      "population_note": "The iso-raise threshold tightens sharply with 4+ limpers. Suited connectors prefer multiway implied-odds spots over being the isolation aggressor."
+      "common_mistakes": [
+        "Iso-raising every limped pot regardless of how many limpers",
+        "Sizing too small vs 4 limpers and getting called by everyone"
+      ],
+      "population_note": "The iso-raise threshold tightens sharply with 4+ limpers. Suited connectors prefer multiway implied-odds spots over being the isolation aggressor.",
+      "key_concept": "With 4 limpers, iso-raising 87s bloats the pot multiway even vs a 7x size.",
+      "difficulty_reason": "BTN Facing 4 Limpers — 87s, Iso or Limp? is difficult because many players default to iso-raising every limped pot regardless of how many limpers, even though 87s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Limp Behind works because 87s makes its money by realizing implied odds and getting paid when it connects cleanly, not by forcing a bigger pot now."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "btn-facing-4-limpers",
+        "prompt": "Why does limp behind outperform folding or raising in this spot?",
+        "type": "line_understanding",
+        "concept": "iso-raising",
+        "expected_reasoning": "This combo sits in the continue region because the preflop range and position dynamic keeps enough worse hands, bluffs, or realizable equity in play without needing to escalate the pot.",
+        "options": [
+          {
+            "id": "too_weak_fold",
+            "label": "The combo is below threshold here, so continuing mostly pays off stronger hands.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "continue_bucket",
+            "label": "The right read is that the preflop range and position dynamic keeps this hand high enough in the continuing range, but not strong enough to prefer a raise.",
+            "matches_expected": true
+          },
+          {
+            "id": "must_raise",
+            "label": "If the hand is good enough to continue, it should usually raise now rather than call.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_iso02_01",
@@ -207,64 +443,160 @@
       "players_to_flop": 2,
       "hero_position": "BTN",
       "villain_position": "CO",
-      "hero_hand": ["Kc", "Js"],
+      "hero_hand": [
+        "Kc",
+        "Js"
+      ],
       "effective_stack_bb": 94,
       "board": {
-        "flop": ["Kd", "7c", "2s"],
+        "flop": [
+          "Kd",
+          "7c",
+          "2s"
+        ],
         "turn": "4d",
         "river": null
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "raise", "size_bb": 6 },
-        { "street": "preflop", "player": "CO", "action": "call", "size_bb": 6 },
-        { "street": "flop", "player": "CO", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "check" },
-        { "street": "turn", "player": "CO", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 6
+        },
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "call",
+          "size_bb": 6
+        },
+        {
+          "street": "flop",
+          "player": "CO",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "CO",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "turn",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Small (~1/3 pot)" },
-      { "key": "RAISE", "label": "Bet Big (~2/3 pot)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (~1/3 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet Big (~2/3 pot)"
+      }
     ],
     "answer": {
       "correct": "RAISE",
-      "accepted": ["CALL"],
-      "required_tags": ["delayed_cbet"],
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "delayed_cbet"
+      ],
       "explanation": "Classic delayed c-bet with TPTK on a dry board. CO checked twice — their range is capped to weak pairs and floats. Fire 2/3 pot: extract value from Kx-worse, 7x, and deny any backdoor equity."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
-        "accepted": ["RAISE"],
-        "required_tags": ["delayed_cbet"],
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Competent players may have slow-played Kx or 77/22 — use medium sizing (1/2 pot) to extract value without over-building the pot with TPTK."
       },
       "B": {
         "correct": "RAISE",
-        "accepted": ["CALL"],
-        "required_tags": ["delayed_cbet"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Passive recs check-call with Kx-worse, 7x, even naked gutshots. Bet 2/3 pot for maximum value — their range is capped and sticky."
       },
       "C": {
         "correct": "RAISE",
-        "accepted": ["CALL"],
-        "required_tags": ["delayed_cbet"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Aggro pool players also show down weak holdings after two checks. Bet big and fold out their air-heavy range."
       }
     },
-    "tags": ["street:turn", "pot:srp", "position:ip", "spot:delayed_cbet", "decision:barrel"],
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:delayed_cbet",
+      "decision:barrel"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Checking back the turn again and giving free cards", "Betting too small and allowing floats to realize equity cheaply"],
-      "population_note": "Two checks from a passive rec signals weakness. The delayed c-bet is the primary value extraction tool in iso pots — don't sleep through it."
+      "common_mistakes": [
+        "Checking back the turn again and giving free cards",
+        "Betting too small and allowing floats to realize equity cheaply"
+      ],
+      "population_note": "Two checks from a passive rec signals weakness. The delayed c-bet is the primary value extraction tool in iso pots — don't sleep through it.",
+      "key_concept": "Classic delayed c-bet with TPTK on a dry board. A shifts to bet small (~1/3 pot) when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "Iso Pot IP — Blank Turn After Checking Back Dry Flop is difficult because many players default to checking back the turn again and giving free cards, even though KJo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Bet Big (~2/3 pot) works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "iso-pot-ip-blank",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "delayed c-betting",
+        "expected_reasoning": "The critical update is how the dry texture shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with the dry texture.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_iso02_02",
@@ -279,64 +611,154 @@
       "players_to_flop": 2,
       "hero_position": "BTN",
       "villain_position": "CO",
-      "hero_hand": ["Ks", "Qs"],
+      "hero_hand": [
+        "Ks",
+        "Qs"
+      ],
       "effective_stack_bb": 95,
       "board": {
-        "flop": ["Jh", "6c", "2s"],
+        "flop": [
+          "Jh",
+          "6c",
+          "2s"
+        ],
         "turn": "4s",
         "river": null
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "raise", "size_bb": 5 },
-        { "street": "preflop", "player": "CO", "action": "call", "size_bb": 5 },
-        { "street": "flop", "player": "CO", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "check" },
-        { "street": "turn", "player": "CO", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 5
+        },
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "call",
+          "size_bb": 5
+        },
+        {
+          "street": "flop",
+          "player": "CO",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "CO",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "turn",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Small (~1/3 pot)" },
-      { "key": "RAISE", "label": "Bet Large (~2/3 pot or more)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (~1/3 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet Large (~2/3 pot or more)"
+      }
     ],
     "answer": {
       "correct": "RAISE",
       "accepted": [],
-      "required_tags": ["delayed_cbet"],
+      "required_tags": [
+        "delayed_cbet"
+      ],
       "explanation": "Hero has the nut flush and CO checked. Bet large — CO's range is capped to Jx, 6x, and occasional floats. The nut flush is a building hand; extract maximum value now before the river might kill action."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
-        "accepted": ["RAISE"],
-        "required_tags": ["delayed_cbet"],
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Competent players may hold Ax♠ as a float. Medium sizing invites action and sets up river shove."
       },
       "B": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["delayed_cbet"],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Passive recs never fold Jx or Ax facing a turn bet. Bet 2/3-3/4 pot and set up a river value bet."
       },
       "C": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["delayed_cbet"],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Gambly pool players call off stack with top pair. Build pot aggressively with nut flush."
       }
     },
-    "tags": ["street:turn", "pot:srp", "position:ip", "spot:delayed_cbet", "decision:value_bet"],
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:delayed_cbet",
+      "decision:value_bet"
+    ],
     "difficulty": 1,
     "coaching_context": {
-      "common_mistakes": ["Slowplaying the nut flush and giving CO a free river", "Betting too small and allowing river to kill action"],
-      "population_note": "Nut-flush on turn is a value emergency — build now. Live recs pay off top pair vs flush-completing boards far too often."
+      "common_mistakes": [
+        "Slowplaying the nut flush and giving CO a free river",
+        "Betting too small and allowing river to kill action"
+      ],
+      "population_note": "Nut-flush on turn is a value emergency — build now. Live recs pay off top pair vs flush-completing boards far too often.",
+      "key_concept": "Hero has the nut flush and CO checked. A shifts to bet small (~1/3 pot) when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "Iso Pot IP — Flush Completes on Turn After Checking Flop is difficult because many players default to slowplaying the nut flush and giving CO a free river, even though KQs changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Bet Large (~2/3 pot or more) works because the earlier checks cap villain enough that this hand can value-bet or pressure the middle of the range immediately."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "iso-pot-ip-flush",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "delayed c-betting",
+        "expected_reasoning": "The critical update is how the flush-completing card shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with the flush-completing card.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_iso02_03",
@@ -351,64 +773,152 @@
       "players_to_flop": 2,
       "hero_position": "BTN",
       "villain_position": "CO",
-      "hero_hand": ["Ad", "Qh"],
+      "hero_hand": [
+        "Ad",
+        "Qh"
+      ],
       "effective_stack_bb": 94,
       "board": {
-        "flop": ["Ts", "7c", "3d"],
+        "flop": [
+          "Ts",
+          "7c",
+          "3d"
+        ],
         "turn": "Th",
         "river": null
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "raise", "size_bb": 6 },
-        { "street": "preflop", "player": "CO", "action": "call", "size_bb": 6 },
-        { "street": "flop", "player": "CO", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "check" },
-        { "street": "turn", "player": "CO", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "raise",
+          "size_bb": 6
+        },
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "call",
+          "size_bb": 6
+        },
+        {
+          "street": "flop",
+          "player": "CO",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "CO",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "turn",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Small (~1/3 pot)" },
-      { "key": "RAISE", "label": "Barrel (~2/3 pot)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (~1/3 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Barrel (~2/3 pot)"
+      }
     ],
     "answer": {
       "correct": "FOLD",
       "accepted": [],
-      "required_tags": ["delayed_cbet"],
+      "required_tags": [
+        "delayed_cbet"
+      ],
       "explanation": "The paired T improves CO's limp-calling range (Tx trips, Tx two-pair). Hero has AQ with no pair, no draw — no equity, no fold equity. Checking back preserves showdown value and avoids a check-raise bluff-catch situation."
     },
     "answer_by_pool": {
       "A": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["delayed_cbet"],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Competent player may check-raise the turn with trips. AQ has reverse implied odds — check and reassess river."
       },
       "B": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["delayed_cbet"],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Passive recs call down with Tx on paired boards. Bluffing has no merit — check back AQ and take showdown when river blanks."
       },
       "C": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["delayed_cbet"],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Aggro pool may check-raise the T — AQ can't continue. Check back and give up unless the river provides equity."
       }
     },
-    "tags": ["street:turn", "pot:srp", "position:ip", "spot:no_cbet", "decision:give_up"],
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:no_cbet",
+      "decision:give_up"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Auto-stabbing turn after any two-check sequence regardless of board texture", "Bluffing into a board that dramatically improves villain's range"],
-      "population_note": "The delayed c-bet requires a range-awareness check. When the turn improves the calling range, checking back is not passive — it's correct."
+      "common_mistakes": [
+        "Auto-stabbing turn after any two-check sequence regardless of board texture",
+        "Bluffing into a board that dramatically improves villain's range"
+      ],
+      "population_note": "The delayed c-bet requires a range-awareness check. When the turn improves the calling range, checking back is not passive — it's correct.",
+      "key_concept": "The paired T improves CO's limp-calling range (Tx trips, Tx two-pair).",
+      "difficulty_reason": "Iso Pot IP — Turn Pairs the Top Card, Hits Villain Range is difficult because many players default to auto-stabbing turn after any two-check sequence regardless of board texture, even though AQo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Check Back works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "iso-pot-ip-turn",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "delayed c-betting",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_bb01_01",
@@ -423,55 +933,124 @@
       "players_to_flop": 2,
       "hero_position": "BB",
       "villain_position": "BTN",
-      "hero_hand": ["Kc", "9d"],
+      "hero_hand": [
+        "Kc",
+        "9d"
+      ],
       "effective_stack_bb": 100,
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        }
       ]
     },
     "decision_point": {
       "street": "preflop",
-      "facing": { "action": "open", "size_bb": 3 },
+      "facing": {
+        "action": "open",
+        "size_bb": 3
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Fold" },
-      { "key": "CALL", "label": "Call" },
-      { "key": "RAISE", "label": "3-Bet" }
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "3-Bet"
+      }
     ],
     "answer": {
       "correct": "CALL",
       "accepted": [],
-      "required_tags": ["bb_defend_live"],
+      "required_tags": [
+        "bb_defend_live"
+      ],
       "explanation": "K9o is a comfortable BB defend vs a standard BTN 3x open in a live pool. The pot odds are favorable (calling 2bb into a 4.5bb pot) and K9o has enough equity vs a wide BTN range to realize post-flop."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["bb_defend_live"],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "BTN opens wide vs BB — K9o has fine equity and position isn't a huge disadvantage in live games. Call and play post-flop."
       },
       "B": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["bb_defend_live"],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Passive BTN opens a wide range but rarely 4-bets — calling K9o is standard and profitable."
       },
       "C": {
         "correct": "FOLD",
-        "accepted": ["CALL"],
-        "required_tags": ["bb_defend_live"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Tight aggro BTN opens a value-heavy range. K9o is dominated often enough that folding becomes correct. Calling is a modest error."
       }
     },
-    "tags": ["street:preflop", "pot:srp", "position:oop", "spot:bb_vs_btn"],
+    "tags": [
+      "street:preflop",
+      "pot:srp",
+      "position:oop",
+      "spot:bb_vs_btn"
+    ],
     "difficulty": 1,
     "coaching_context": {
-      "common_mistakes": ["Over-folding BB vs wide BTN opens, surrendering pot equity", "3-betting K9o without a clear exploit reason"],
-      "population_note": "Live BTN ranges are wide vs BB. K9o defends comfortably. Folding is giving up free equity."
+      "common_mistakes": [
+        "Over-folding BB vs wide BTN opens, surrendering pot equity",
+        "3-betting K9o without a clear exploit reason"
+      ],
+      "population_note": "Live BTN ranges are wide vs BB. K9o defends comfortably. Folding is giving up free equity.",
+      "key_concept": "K9o is a comfortable BB defend vs a standard BTN 3x open in a live pool. C shifts to fold when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "BB Defend vs BTN Open — K9o is difficult because many players default to over-folding BB vs wide BTN opens, surrendering pot equity, even though K9o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "K9o defends the BB because the pot odds (calling 2bb into 4.5bb) are favorable and K9o has enough equity against a wide BTN opening range to realize post-flop without being dominated."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-defend-vs-btn",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "big blind defense",
+        "expected_reasoning": "The right answer comes from threshold discipline: the preflop range and position dynamic leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because the preflop range and position dynamic determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_bb01_02",
@@ -486,55 +1065,124 @@
       "players_to_flop": 2,
       "hero_position": "BB",
       "villain_position": "BTN",
-      "hero_hand": ["Th", "8h"],
+      "hero_hand": [
+        "Th",
+        "8h"
+      ],
       "effective_stack_bb": 100,
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        }
       ]
     },
     "decision_point": {
       "street": "preflop",
-      "facing": { "action": "open", "size_bb": 3 },
+      "facing": {
+        "action": "open",
+        "size_bb": 3
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Fold" },
-      { "key": "CALL", "label": "Call" },
-      { "key": "RAISE", "label": "3-Bet" }
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "3-Bet"
+      }
     ],
     "answer": {
       "correct": "CALL",
       "accepted": [],
-      "required_tags": ["bb_defend_live"],
+      "required_tags": [
+        "bb_defend_live"
+      ],
       "explanation": "T8s in the BB vs a standard BTN open is a defend. The suited connector has strong implied odds, good blockers, and thrives in deep live games. Folding surrenders too much equity to a wide range."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["bb_defend_live"],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "BTN opens wide — T8s defends comfortably. Implied odds are strong at 100bb."
       },
       "B": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["bb_defend_live"],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Passive BTN rarely fires multiple streets — T8s has great implied odds against their top-pair-heavy value regions."
       },
       "C": {
         "correct": "CALL",
-        "accepted": ["FOLD"],
-        "required_tags": ["bb_defend_live"],
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Tight BTN narrows the range, making T8s implied odds slightly thinner. Calling is still fine; folding is marginal."
       }
     },
-    "tags": ["street:preflop", "pot:srp", "position:oop", "spot:bb_vs_btn"],
+    "tags": [
+      "street:preflop",
+      "pot:srp",
+      "position:oop",
+      "spot:bb_vs_btn"
+    ],
     "difficulty": 1,
     "coaching_context": {
-      "common_mistakes": ["Folding T8s out of fear of being OOP", "Over-estimating the positional disadvantage for live cash at 100bb"],
-      "population_note": "Suited connectors in the BB are strong defends vs wide BTN ranges. The implied odds at live stakes more than compensate for the positional disadvantage."
+      "common_mistakes": [
+        "Folding T8s out of fear of being OOP",
+        "Over-estimating the positional disadvantage for live cash at 100bb"
+      ],
+      "population_note": "Suited connectors in the BB are strong defends vs wide BTN ranges. The implied odds at live stakes more than compensate for the positional disadvantage.",
+      "key_concept": "T8s in the BB vs a standard BTN open is a defend.",
+      "difficulty_reason": "BB Defend vs BTN Open — T8s is difficult because many players default to folding T8s out of fear of being OOP, even though T8s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call works because T8s makes its money by realizing implied odds and getting paid when it connects cleanly, not by forcing a bigger pot now."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-defend-vs-btn",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "big blind defense",
+        "expected_reasoning": "The right answer comes from threshold discipline: the preflop range and position dynamic leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because the preflop range and position dynamic determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_bb01_03",
@@ -549,55 +1197,129 @@
       "players_to_flop": 2,
       "hero_position": "BB",
       "villain_position": "BTN",
-      "hero_hand": ["Qs", "Jh"],
+      "hero_hand": [
+        "Qs",
+        "Jh"
+      ],
       "effective_stack_bb": 100,
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 4 }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 4
+        }
       ]
     },
     "decision_point": {
       "street": "preflop",
-      "facing": { "action": "open", "size_bb": 4 },
+      "facing": {
+        "action": "open",
+        "size_bb": 4
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Fold" },
-      { "key": "CALL", "label": "Call" },
-      { "key": "RAISE", "label": "3-Bet" }
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "3-Bet"
+      }
     ],
     "answer": {
       "correct": "CALL",
-      "accepted": ["RAISE"],
-      "required_tags": ["bb_defend_live"],
+      "accepted": [
+        "RAISE"
+      ],
+      "required_tags": [
+        "bb_defend_live"
+      ],
       "explanation": "QJo is a strong enough hand to defend vs most BTN opens. Calling is default — flat and play post-flop. 3-betting is viable as an exploit if BTN folds too often, but QJo doesn't have the blocker structure for a pure 3-bet bluff."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["bb_defend_live"],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Competent BTN 4-bets strong holdings, making QJo a better call than 3-bet. Realize equity post-flop."
       },
       "B": {
         "correct": "RAISE",
-        "accepted": ["CALL"],
-        "required_tags": ["bb_defend_live"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Passive BTN rarely 4-bets. 3-betting QJo exploits their fold-to-3-bet tendency. Calling is also fine."
       },
       "C": {
         "correct": "FOLD",
-        "accepted": ["CALL"],
-        "required_tags": ["bb_defend_live"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Tight BTN raises a value-heavy range. QJo is dominated often enough that folding is correct. Calling is a modest mistake."
       }
     },
-    "tags": ["street:preflop", "pot:srp", "position:oop", "spot:bb_vs_btn", "decision:3bet_or_flat"],
+    "tags": [
+      "street:preflop",
+      "pot:srp",
+      "position:oop",
+      "spot:bb_vs_btn",
+      "decision:3bet_or_flat"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Auto-3-betting QJo without considering BTN's 4-bet range", "Folding QJo to a 4bb open in live games"],
-      "population_note": "The default is to call with QJo in BB. The 3-bet exploit is only justified when the BTN over-folds to 3-bets — know your player before blasting."
+      "common_mistakes": [
+        "Auto-3-betting QJo without considering BTN's 4-bet range",
+        "Folding QJo to a 4bb open in live games"
+      ],
+      "population_note": "The default is to call with QJo in BB. The 3-bet exploit is only justified when the BTN over-folds to 3-bets — know your player before blasting.",
+      "key_concept": "QJo is a strong enough hand to defend vs most BTN opens. B shifts to 3-bet; and C shifts to fold.",
+      "difficulty_reason": "BB vs BTN 4x Open — QJo, Call or 3-Bet? is difficult because many players default to auto-3-betting QJo without considering BTN's 4-bet range, even though QJo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call works because QJo lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-vs-btn-4x",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "big blind defense",
+        "expected_reasoning": "The right answer comes from threshold discipline: the preflop range and position dynamic leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because the preflop range and position dynamic determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_bb02_01",
@@ -612,55 +1334,126 @@
       "players_to_flop": 2,
       "hero_position": "BB",
       "villain_position": "SB",
-      "hero_hand": ["Jd", "8s"],
+      "hero_hand": [
+        "Jd",
+        "8s"
+      ],
       "effective_stack_bb": 100,
       "action_history": [
-        { "street": "preflop", "player": "SB", "action": "limp", "size_bb": 1 }
+        {
+          "street": "preflop",
+          "player": "SB",
+          "action": "limp",
+          "size_bb": 1
+        }
       ]
     },
     "decision_point": {
       "street": "preflop",
-      "facing": { "action": "limp", "size_bb": 1 },
+      "facing": {
+        "action": "limp",
+        "size_bb": 1
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check" },
-      { "key": "CALL", "label": "Raise Small (~3bb)" },
-      { "key": "RAISE", "label": "Raise Large (~5bb)" }
+      {
+        "key": "FOLD",
+        "label": "Check"
+      },
+      {
+        "key": "CALL",
+        "label": "Raise Small (~3bb)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise Large (~5bb)"
+      }
     ],
     "answer": {
       "correct": "FOLD",
-      "accepted": ["CALL"],
-      "required_tags": ["bb_defend_live"],
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "bb_defend_live"
+      ],
       "explanation": "J8o vs SB limp can check or raise small. Checking is fine — see a free flop, play well post. J8o doesn't need to raise here as a default, though a small raise is acceptable as an exploit when SB is passive."
     },
     "answer_by_pool": {
       "A": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["bb_defend_live"],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "SB's limping range is unclear — checking with J8o avoids inflating the pot OOP with a marginal hand."
       },
       "B": {
         "correct": "CALL",
-        "accepted": ["FOLD"],
-        "required_tags": ["bb_defend_live"],
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Passive SB rarely plays back to a BB raise. J8o raises small for pot control and information."
       },
       "C": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["bb_defend_live"],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Aggro SB may 3-bet a BB raise. Checking J8o avoids the squeeze and keeps a cheap pot."
       }
     },
-    "tags": ["street:preflop", "pot:limp", "position:ip", "spot:bb_vs_sb_limp"],
+    "tags": [
+      "street:preflop",
+      "pot:limp",
+      "position:ip",
+      "spot:bb_vs_sb_limp"
+    ],
     "difficulty": 1,
     "coaching_context": {
-      "common_mistakes": ["Over-raising marginal hands vs SB limps, building a big pot OOP", "Under-raising when SB is consistently passive and exploitable"],
-      "population_note": "BB is IP vs SB in a limped pot — this is one of the few spots BB has position. Checking is the default; small raising is a reasonable exploit vs passive SBs."
+      "common_mistakes": [
+        "Over-raising marginal hands vs SB limps, building a big pot OOP",
+        "Under-raising when SB is consistently passive and exploitable"
+      ],
+      "population_note": "BB is IP vs SB in a limped pot — this is one of the few spots BB has position. Checking is the default; small raising is a reasonable exploit vs passive SBs.",
+      "key_concept": "J8o vs SB limp can check or raise small. B shifts to raise small (~3bb) when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "BB vs SB Limp — J8o, Check or Raise? is difficult because many players default to over-raising marginal hands vs SB limps, building a big pot OOP, even though J8o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "J8o checks to see a free flop against a SB limp — there is no default reason to raise, and checking preserves optionality while avoiding building a bigger pot with a speculative hand out of position."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-vs-sb-limp",
+        "prompt": "What is the clearest reason this combo falls on the folding side of the line?",
+        "type": "line_understanding",
+        "concept": "blind-vs-blind defense",
+        "expected_reasoning": "The combo is too dominated or too low in the threshold once you account for the preflop range and position dynamic, so continuing would over-defend the spot.",
+        "options": [
+          {
+            "id": "realize_anyway",
+            "label": "Position, disguise, or live-player mistakes are enough that this hand should still continue.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "below_threshold",
+            "label": "Once you weigh the preflop range and position dynamic, this hand lands below the profitable continue bucket and should be released.",
+            "matches_expected": true
+          },
+          {
+            "id": "aggressive_solution",
+            "label": "The better adjustment is to turn the combo into an aggressive continue instead of folding.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_bb02_02",
@@ -675,55 +1468,128 @@
       "players_to_flop": 2,
       "hero_position": "BB",
       "villain_position": "SB",
-      "hero_hand": ["Ac", "5d"],
+      "hero_hand": [
+        "Ac",
+        "5d"
+      ],
       "effective_stack_bb": 100,
       "action_history": [
-        { "street": "preflop", "player": "SB", "action": "raise", "size_bb": 3 }
+        {
+          "street": "preflop",
+          "player": "SB",
+          "action": "raise",
+          "size_bb": 3
+        }
       ]
     },
     "decision_point": {
       "street": "preflop",
-      "facing": { "action": "raise", "size_bb": 3 },
+      "facing": {
+        "action": "raise",
+        "size_bb": 3
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Fold" },
-      { "key": "CALL", "label": "Call" },
-      { "key": "RAISE", "label": "3-Bet" }
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "3-Bet"
+      }
     ],
     "answer": {
       "correct": "CALL",
-      "accepted": ["RAISE"],
-      "required_tags": ["bb_defend_live"],
+      "accepted": [
+        "RAISE"
+      ],
+      "required_tags": [
+        "bb_defend_live"
+      ],
       "explanation": "A5o is a standard BB defend vs a SB 3x steal. You have an ace-high hand with equity vs a wide SB stealing range. Call and play post-flop. 3-betting is a viable semi-bluff if SB folds frequently to 3-bets."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["bb_defend_live"],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Wide SB steal range — A5o has live equity. Call and play post-flop. 3-betting risks being dominated."
       },
       "B": {
         "correct": "RAISE",
-        "accepted": ["CALL"],
-        "required_tags": ["bb_defend_live"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Passive SB folds too often to 3-bets. A5o is a strong 3-bet bluff candidate — exploit fold equity."
       },
       "C": {
         "correct": "FOLD",
-        "accepted": ["CALL"],
-        "required_tags": ["bb_defend_live"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Tight SB raises a value-heavy range. A5o is often dominated. Folding is correct; calling is a modest mistake."
       }
     },
-    "tags": ["street:preflop", "pot:srp", "position:oop", "spot:bb_vs_sb_raise"],
+    "tags": [
+      "street:preflop",
+      "pot:srp",
+      "position:oop",
+      "spot:bb_vs_sb_raise"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Folding A5o to a standard SB steal, conceding too much", "3-betting without any read on SB's fold-to-3-bet frequency"],
-      "population_note": "SB steals wide in live cash. A5o has ace-high equity and a wheel blocker — standard defend. Adjust to 3-bet exploit only when you have a confirmed passive profile on SB."
+      "common_mistakes": [
+        "Folding A5o to a standard SB steal, conceding too much",
+        "3-betting without any read on SB's fold-to-3-bet frequency"
+      ],
+      "population_note": "SB steals wide in live cash. A5o has ace-high equity and a wheel blocker — standard defend. Adjust to 3-bet exploit only when you have a confirmed passive profile on SB.",
+      "key_concept": "A5o is a standard BB defend vs a SB 3x steal. B shifts to 3-bet; and C shifts to fold.",
+      "difficulty_reason": "BB vs SB 3x Steal — A5o, Defend or Fold? is difficult because many players default to folding A5o to a standard SB steal, conceding too much, even though A5o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call works because A5o lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-vs-sb-3x",
+        "prompt": "Why does call outperform folding or raising in this spot?",
+        "type": "line_understanding",
+        "concept": "blind-vs-blind defense",
+        "expected_reasoning": "This combo sits in the continue region because the preflop range and position dynamic keeps enough worse hands, bluffs, or realizable equity in play without needing to escalate the pot.",
+        "options": [
+          {
+            "id": "too_weak_fold",
+            "label": "The combo is below threshold here, so continuing mostly pays off stronger hands.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "continue_bucket",
+            "label": "The right read is that the preflop range and position dynamic keeps this hand high enough in the continuing range, but not strong enough to prefer a raise.",
+            "matches_expected": true
+          },
+          {
+            "id": "must_raise",
+            "label": "If the hand is good enough to continue, it should usually raise now rather than call.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_bb02_03",
@@ -738,55 +1604,129 @@
       "players_to_flop": 2,
       "hero_position": "BB",
       "villain_position": "SB",
-      "hero_hand": ["Kh", "Qd"],
+      "hero_hand": [
+        "Kh",
+        "Qd"
+      ],
       "effective_stack_bb": 100,
       "action_history": [
-        { "street": "preflop", "player": "SB", "action": "limp", "size_bb": 1 }
+        {
+          "street": "preflop",
+          "player": "SB",
+          "action": "limp",
+          "size_bb": 1
+        }
       ]
     },
     "decision_point": {
       "street": "preflop",
-      "facing": { "action": "limp", "size_bb": 1 },
+      "facing": {
+        "action": "limp",
+        "size_bb": 1
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check" },
-      { "key": "CALL", "label": "Raise Small (~3bb)" },
-      { "key": "RAISE", "label": "Raise Large (~5-6bb)" }
+      {
+        "key": "FOLD",
+        "label": "Check"
+      },
+      {
+        "key": "CALL",
+        "label": "Raise Small (~3bb)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise Large (~5-6bb)"
+      }
     ],
     "answer": {
       "correct": "RAISE",
-      "accepted": ["CALL"],
-      "required_tags": ["bb_defend_live"],
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "bb_defend_live"
+      ],
       "explanation": "KQo is too strong to check vs a SB limp. Raise to 4-5bb to get value from a dominated SB range and play a bigger pot with a strong hand. Checking gives away a free flop with a premium holding."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
-        "accepted": ["RAISE"],
-        "required_tags": ["bb_defend_live"],
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Competent SB may have limped strong hands. Raise small to get information; don't bloat the pot without knowing their range."
       },
       "B": {
         "correct": "RAISE",
-        "accepted": ["CALL"],
-        "required_tags": ["bb_defend_live"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Passive SB limps wide — KQo dominates most of their range. Raise to 5bb and play a bigger pot in position."
       },
       "C": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["bb_defend_live"],
+        "required_tags": [
+          "bb_defend_live"
+        ],
         "explanation": "Aggro SB may 3-bet, but KQo calls and plays a 3-bet pot fine. Still raise — don't give free flops."
       }
     },
-    "tags": ["street:preflop", "pot:limp", "position:ip", "spot:bb_vs_sb_limp", "decision:bb_iso"],
+    "tags": [
+      "street:preflop",
+      "pot:limp",
+      "position:ip",
+      "spot:bb_vs_sb_limp",
+      "decision:bb_iso"
+    ],
     "difficulty": 1,
     "coaching_context": {
-      "common_mistakes": ["Checking KQo vs SB limp and giving away a free flop", "Under-raising KQo when the BB has IP advantage vs SB"],
-      "population_note": "BB is IP vs SB. KQo is a mandatory raise — checking is a significant leak that surrenders EV with a dominant hand."
+      "common_mistakes": [
+        "Checking KQo vs SB limp and giving away a free flop",
+        "Under-raising KQo when the BB has IP advantage vs SB"
+      ],
+      "population_note": "BB is IP vs SB. KQo is a mandatory raise — checking is a significant leak that surrenders EV with a dominant hand.",
+      "key_concept": "KQo is too strong to check vs a SB limp. A shifts to raise small (~3bb) when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "BB vs SB Limp — KQo, Raise or Check? is difficult because many players default to checking KQo vs SB limp and giving away a free flop, even though KQo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Raise Large (~5-6bb) works because KQo is either too dominated or too awkward on later streets to justify continuing more aggressively."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-vs-sb-limp",
+        "prompt": "What makes raise large (~5-6bb) the highest-EV line here instead of taking the passive option?",
+        "type": "line_understanding",
+        "concept": "blind-vs-blind defense",
+        "expected_reasoning": "The key is the preflop range and position dynamic: this spot gains too much from initiative, fold equity, isolation, or value extraction to passively continue.",
+        "options": [
+          {
+            "id": "passive_line",
+            "label": "Flatting or checking keeps weaker hands in, so aggression mostly burns value or fold equity.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "initiative_edge",
+            "label": "The spot is driven by the preflop range and position dynamic, so building the pot or isolating now captures more value than a passive line.",
+            "matches_expected": true
+          },
+          {
+            "id": "fear_adjustment",
+            "label": "Because this is a baseline live pool, the hand should usually avoid aggression and protect against getting played back at.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_srp06_01",
@@ -801,64 +1741,158 @@
       "players_to_flop": 2,
       "hero_position": "BTN",
       "villain_position": "BB",
-      "hero_hand": ["As", "Kh"],
+      "hero_hand": [
+        "As",
+        "Kh"
+      ],
       "effective_stack_bb": 97,
       "board": {
-        "flop": ["Kd", "5c", "2s"],
+        "flop": [
+          "Kd",
+          "5c",
+          "2s"
+        ],
         "turn": "3h",
         "river": null
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "check" },
-        { "street": "turn", "player": "BB", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "turn",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Small (~1/3 pot)" },
-      { "key": "RAISE", "label": "Bet 2/3 Pot" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (~1/3 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet 2/3 Pot"
+      }
     ],
     "answer": {
       "correct": "RAISE",
-      "accepted": ["CALL"],
-      "required_tags": ["delayed_cbet"],
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "delayed_cbet"
+      ],
       "explanation": "BB checked twice on a dry board — their range is capped to weak pairs and floats. Fire the delayed c-bet with TPTK. Bet 2/3 to extract value and deny any backdoor draws. Checking back again is too passive."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
-        "accepted": ["RAISE"],
-        "required_tags": ["delayed_cbet"],
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Competent BB may have slow-played a set. Bet 1/2 pot to extract value while managing the pot size with TPTK."
       },
       "B": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["delayed_cbet"],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Passive BB's double-check range is very weak. Bet 2/3 pot — they call with every Kx-worse and most pairs."
       },
       "C": {
         "correct": "RAISE",
-        "accepted": ["CALL"],
-        "required_tags": ["delayed_cbet"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Aggro BB checked twice — even they are capped. Bet and fold them off their air or extract from weak made hands."
       }
     },
-    "tags": ["street:turn", "pot:srp", "position:ip", "spot:delayed_cbet", "decision:barrel"],
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:delayed_cbet",
+      "decision:barrel"
+    ],
     "difficulty": 1,
     "coaching_context": {
-      "common_mistakes": ["Checking back TPTK on blank turns after two-check sequences", "Betting too small and allowing floats to chase cheap rivers"],
-      "population_note": "BB double-checking a K-high dry board is one of the clearest delayed c-bet triggers. Don't sleep through value with top pair top kicker."
+      "common_mistakes": [
+        "Checking back TPTK on blank turns after two-check sequences",
+        "Betting too small and allowing floats to chase cheap rivers"
+      ],
+      "population_note": "BB double-checking a K-high dry board is one of the clearest delayed c-bet triggers. Don't sleep through value with top pair top kicker.",
+      "key_concept": "BB checked twice on a dry board — their range is capped to weak pairs and floats. A shifts to bet small (~1/3 pot) when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "Delayed C-Bet IP — Blank Turn After Dry Flop Check-Through is difficult because many players default to checking back TPTK on blank turns after two-check sequences, even though AKo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Bet 2/3 Pot works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "delayed-c-bet-ip",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "delayed c-betting",
+        "expected_reasoning": "The critical update is how the dry texture shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with the dry texture.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_srp06_02",
@@ -873,64 +1907,156 @@
       "players_to_flop": 2,
       "hero_position": "BTN",
       "villain_position": "BB",
-      "hero_hand": ["Ks", "Qs"],
+      "hero_hand": [
+        "Ks",
+        "Qs"
+      ],
       "effective_stack_bb": 97,
       "board": {
-        "flop": ["Js", "7s", "2d"],
+        "flop": [
+          "Js",
+          "7s",
+          "2d"
+        ],
         "turn": "4s",
         "river": null
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "check" },
-        { "street": "turn", "player": "BB", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "turn",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Medium (~1/2 pot)" },
-      { "key": "RAISE", "label": "Bet Large (~3/4 pot)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Medium (~1/2 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet Large (~3/4 pot)"
+      }
     ],
     "answer": {
       "correct": "RAISE",
-      "accepted": ["CALL"],
-      "required_tags": ["delayed_cbet"],
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "delayed_cbet"
+      ],
       "explanation": "Hero flopped the nut flush draw and made it on the turn. BB checked again — they may have Jx, Ax♠ floats, or two-pair. Build the pot now with a 3/4-pot bet to set up a river shove. Don't let the hand play small."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
-        "accepted": ["RAISE"],
-        "required_tags": ["delayed_cbet"],
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Competent BB may have Ax♠ and call a big turn bet. Medium sizing is fine — sets up river value."
       },
       "B": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["delayed_cbet"],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Passive BB calls off with Jx, Ax♠, even naked pairs on flush boards. Bet large and set up river extraction."
       },
       "C": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["delayed_cbet"],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Aggro pool calls nutted hands or check-raises smaller — bet large to commit stacks with the best hand."
       }
     },
-    "tags": ["street:turn", "pot:srp", "position:ip", "spot:delayed_cbet", "decision:value_bet"],
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:delayed_cbet",
+      "decision:value_bet"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Slowplaying the nut flush after checking back a draw on the flop", "Betting too small and missing stack-building opportunity"],
-      "population_note": "You have the nuts and position — now is the time to build. The delayed c-bet with a nutted hand is a stack-building opportunity, not a trap setup."
+      "common_mistakes": [
+        "Slowplaying the nut flush after checking back a draw on the flop",
+        "Betting too small and missing stack-building opportunity"
+      ],
+      "population_note": "You have the nuts and position — now is the time to build. The delayed c-bet with a nutted hand is a stack-building opportunity, not a trap setup.",
+      "key_concept": "Hero flopped the nut flush draw and made it on the turn. A shifts to bet medium (~1/2 pot) when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "Delayed C-Bet IP — Nut Flush Draw Checks Flop, Flush Hits Turn is difficult because many players default to slowplaying the nut flush after checking back a draw on the flop, even though KQs changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Hero made the nut flush on the turn and BB checked again — a 3/4-pot bet now sets up a river shove and extracts from Jx, Ax♠ floats, and two-pair hands that will not fold on this card."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "delayed-c-bet-ip",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "delayed c-betting",
+        "expected_reasoning": "The critical update is how the flush-completing card shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with the flush-completing card.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_srp06_03",
@@ -945,64 +2071,152 @@
       "players_to_flop": 2,
       "hero_position": "BTN",
       "villain_position": "BB",
-      "hero_hand": ["Ad", "Qh"],
+      "hero_hand": [
+        "Ad",
+        "Qh"
+      ],
       "effective_stack_bb": 97,
       "board": {
-        "flop": ["Ts", "7d", "3c"],
+        "flop": [
+          "Ts",
+          "7d",
+          "3c"
+        ],
         "turn": "Th",
         "river": null
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "check" },
-        { "street": "turn", "player": "BB", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "turn",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Small (bluff)" },
-      { "key": "RAISE", "label": "Barrel Big (bluff)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (bluff)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Barrel Big (bluff)"
+      }
     ],
     "answer": {
       "correct": "FOLD",
       "accepted": [],
-      "required_tags": ["delayed_cbet"],
+      "required_tags": [
+        "delayed_cbet"
+      ],
       "explanation": "The T pairing the board significantly improves BB's BB defending range (Tx combos become trips). AQ has no equity and no fold equity against a range that has improved. Check back and take a free river — AQ has showdown value vs a complete bluff by the river."
     },
     "answer_by_pool": {
       "A": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["delayed_cbet"],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Competent BB may check-raise the T with trips. AQ has zero equity after that — check back."
       },
       "B": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["delayed_cbet"],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Passive BB calls down with Tx — bluffing has no merit. Check back and give up gracefully."
       },
       "C": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["delayed_cbet"],
+        "required_tags": [
+          "delayed_cbet"
+        ],
         "explanation": "Aggro BB check-raises the turn with Tx for value. AQ can't continue — check and fold to a lead."
       }
     },
-    "tags": ["street:turn", "pot:srp", "position:ip", "spot:no_cbet", "decision:give_up"],
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:ip",
+      "spot:no_cbet",
+      "decision:give_up"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Firing the delayed c-bet mechanically on any two-check sequence", "Bluffing into boards that improved the calling range dramatically"],
-      "population_note": "Delayed c-bets require range awareness. A paired top card on the turn is a red flag — BB's range strengthened, not weakened. Check back."
+      "common_mistakes": [
+        "Firing the delayed c-bet mechanically on any two-check sequence",
+        "Bluffing into boards that improved the calling range dramatically"
+      ],
+      "population_note": "Delayed c-bets require range awareness. A paired top card on the turn is a red flag — BB's range strengthened, not weakened. Check back.",
+      "key_concept": "The T pairing the board significantly improves BB's BB defending range (Tx combos become trips).",
+      "difficulty_reason": "Delayed C-Bet IP — Turn Pairs Top Card, Hits BB Range is difficult because many players default to firing the delayed c-bet mechanically on any two-check sequence, even though AQo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Check Back works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "delayed-c-bet-ip",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "delayed c-betting",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_srp07_01",
@@ -1017,63 +2231,157 @@
       "players_to_flop": 2,
       "hero_position": "BB",
       "villain_position": "BTN",
-      "hero_hand": ["Qh", "Td"],
+      "hero_hand": [
+        "Qh",
+        "Td"
+      ],
       "effective_stack_bb": 97,
       "board": {
-        "flop": ["Qc", "8s", "4d"],
+        "flop": [
+          "Qc",
+          "8s",
+          "4d"
+        ],
         "turn": "2c",
         "river": null
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "turn",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check" },
-      { "key": "CALL", "label": "Lead Small (~1/3 pot)" },
-      { "key": "RAISE", "label": "Lead Large (~2/3 pot)" }
+      {
+        "key": "FOLD",
+        "label": "Check"
+      },
+      {
+        "key": "CALL",
+        "label": "Lead Small (~1/3 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Lead Large (~2/3 pot)"
+      }
     ],
     "answer": {
       "correct": "CALL",
-      "accepted": ["FOLD"],
-      "required_tags": ["delayed_cbet", "probe_bet_turn"],
+      "accepted": [
+        "FOLD"
+      ],
+      "required_tags": [
+        "delayed_cbet",
+        "probe_bet_turn"
+      ],
       "explanation": "BTN checked back a Q-high flop — their range is capped to weak holdings, missed overs, or occasional slow-plays. Leading small with TPTK is a profitable probe to deny free cards and extract value. Large lead or check are also reasonable depending on pool read."
     },
     "answer_by_pool": {
       "A": {
         "correct": "FOLD",
-        "accepted": ["CALL"],
-        "required_tags": ["delayed_cbet", "probe_bet_turn"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "delayed_cbet",
+          "probe_bet_turn"
+        ],
         "explanation": "Competent BTN may have slow-played Qx or flopped a set. Checking with TPTK gives you information — lead is a thin line."
       },
       "B": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["delayed_cbet", "probe_bet_turn"],
+        "required_tags": [
+          "delayed_cbet",
+          "probe_bet_turn"
+        ],
         "explanation": "Passive BTN rarely raises when they're beat. Small lead extracts value from 8x, 4x, and air floats."
       },
       "C": {
         "correct": "CALL",
-        "accepted": ["RAISE"],
-        "required_tags": ["delayed_cbet", "probe_bet_turn"],
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "delayed_cbet",
+          "probe_bet_turn"
+        ],
         "explanation": "Aggro BTN checks back range-wide sometimes. Small lead charges their equity — large lead risks fold from hands you beat."
       }
     },
-    "tags": ["street:turn", "pot:srp", "position:oop", "spot:oop_probe", "decision:lead_turn"],
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:oop_probe",
+      "decision:lead_turn"
+    ],
     "difficulty": 3,
     "coaching_context": {
-      "common_mistakes": ["Checking top pair again after BTN shows weakness", "Leading too large and folding hands you beat"],
-      "population_note": "OOP probes are underutilized in live cash. When the BTN checks back a board that favors them, they've shown weakness — small leads exploit passive BTNs profitably."
+      "common_mistakes": [
+        "Checking top pair again after BTN shows weakness",
+        "Leading too large and folding hands you beat"
+      ],
+      "population_note": "OOP probes are underutilized in live cash. When the BTN checks back a board that favors them, they've shown weakness — small leads exploit passive BTNs profitably.",
+      "key_concept": "BTN checked back a Q-high flop — their range is capped to weak holdings, missed overs, or occasional slow-plays. A shifts to check when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "OOP Turn Probe — BTN Checks Flop, Blank Turn, TP Hero Leads is difficult because many players default to checking top pair again after BTN shows weakness, even though QTo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Lead Small (~1/3 pot) works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "oop-turn-probe-btn",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn probing",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_srp07_02",
@@ -1088,63 +2396,147 @@
       "players_to_flop": 2,
       "hero_position": "BB",
       "villain_position": "BTN",
-      "hero_hand": ["Kc", "Tc"],
+      "hero_hand": [
+        "Kc",
+        "Tc"
+      ],
       "effective_stack_bb": 97,
       "board": {
-        "flop": ["As", "9d", "6c"],
+        "flop": [
+          "As",
+          "9d",
+          "6c"
+        ],
         "turn": "2h",
         "river": null
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "turn",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check" },
-      { "key": "CALL", "label": "Probe Small (bluff)" },
-      { "key": "RAISE", "label": "Probe Large (bluff)" }
+      {
+        "key": "FOLD",
+        "label": "Check"
+      },
+      {
+        "key": "CALL",
+        "label": "Probe Small (bluff)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Probe Large (bluff)"
+      }
     ],
     "answer": {
       "correct": "FOLD",
       "accepted": [],
-      "required_tags": ["probe_bet_turn"],
+      "required_tags": [
+        "probe_bet_turn"
+      ],
       "explanation": "Hero has no equity and no draw on an ace-high board. Bluffing OOP into a BTN range that often includes Ax (checked back for deception or on a dry flop) is poor bluff selection. Check and give up — take the free river, fold to any bet."
     },
     "answer_by_pool": {
       "A": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["probe_bet_turn"],
+        "required_tags": [
+          "probe_bet_turn"
+        ],
         "explanation": "Competent BTN checks back Ax often — bluffing KTo into an A-high board is low fold equity. Check."
       },
       "B": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["probe_bet_turn"],
+        "required_tags": [
+          "probe_bet_turn"
+        ],
         "explanation": "Passive BTN calls down with pairs — no fold equity with KTo. Check and take free river."
       },
       "C": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["probe_bet_turn"],
+        "required_tags": [
+          "probe_bet_turn"
+        ],
         "explanation": "Aggro BTN may check-raise or call and barrel — probing with no equity is losing in both scenarios."
       }
     },
-    "tags": ["street:turn", "pot:srp", "position:oop", "spot:oop_probe", "decision:give_up"],
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:oop_probe",
+      "decision:give_up"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Probe-bluffing with no equity or fold equity, burning chips", "Confusing BTN check-back (showing weakness) with a mandate to bluff"],
-      "population_note": "OOP bluffing requires fold equity. On an A-high board where BTN might have checked back Ax, KTo has none. Check and preserve stack."
+      "common_mistakes": [
+        "Probe-bluffing with no equity or fold equity, burning chips",
+        "Confusing BTN check-back (showing weakness) with a mandate to bluff"
+      ],
+      "population_note": "OOP bluffing requires fold equity. On an A-high board where BTN might have checked back Ax, KTo has none. Check and preserve stack.",
+      "key_concept": "Hero has no equity and no draw on an ace-high board.",
+      "difficulty_reason": "OOP Turn Probe — BTN Checks Flop, Air, Check or Bluff? is difficult because many players default to probe-bluffing with no equity or fold equity, burning chips, even though KTs changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Check works because KTs lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "oop-turn-probe-btn",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn probing",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_srp07_03",
@@ -1159,63 +2551,151 @@
       "players_to_flop": 2,
       "hero_position": "BB",
       "villain_position": "BTN",
-      "hero_hand": ["Kh", "9d"],
+      "hero_hand": [
+        "Kh",
+        "9d"
+      ],
       "effective_stack_bb": 97,
       "board": {
-        "flop": ["Jc", "Th", "5d"],
+        "flop": [
+          "Jc",
+          "Th",
+          "5d"
+        ],
         "turn": "Qs",
         "river": null
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "turn",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check (slowplay)" },
-      { "key": "CALL", "label": "Lead Medium (~1/2 pot)" },
-      { "key": "RAISE", "label": "Lead Large (~2/3-3/4 pot)" }
+      {
+        "key": "FOLD",
+        "label": "Check (slowplay)"
+      },
+      {
+        "key": "CALL",
+        "label": "Lead Medium (~1/2 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Lead Large (~2/3-3/4 pot)"
+      }
     ],
     "answer": {
       "correct": "RAISE",
-      "accepted": ["CALL"],
-      "required_tags": ["probe_bet_turn"],
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "probe_bet_turn"
+      ],
       "explanation": "Hero has the nut straight OOP. The turn Q♠ gives BTN many connected hands (KJ, AK) that will call a large lead. Build the pot now — a big OOP lead with the nuts is correct. Slowplaying risks a blank river killing action."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
-        "accepted": ["RAISE"],
-        "required_tags": ["probe_bet_turn"],
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "probe_bet_turn"
+        ],
         "explanation": "Competent BTN may fold to a large OOP lead — medium sizing builds the pot while keeping their range wide."
       },
       "B": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["probe_bet_turn"],
+        "required_tags": [
+          "probe_bet_turn"
+        ],
         "explanation": "Passive BTN calls off with KJx, two-pair, sets — lead large and extract maximum from their sticky range."
       },
       "C": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["probe_bet_turn"],
+        "required_tags": [
+          "probe_bet_turn"
+        ],
         "explanation": "Aggro BTN may raise the lead — that's fine, you have the nuts. Lead large and stack off."
       }
     },
-    "tags": ["street:turn", "pot:srp", "position:oop", "spot:oop_donk", "decision:value_lead"],
+    "tags": [
+      "street:turn",
+      "pot:srp",
+      "position:oop",
+      "spot:oop_donk",
+      "decision:value_lead"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Slowplaying the nut straight OOP and losing action on a blank river", "Leading too small and underbuilding with a strong hand"],
-      "population_note": "OOP value leads are underutilized. When BTN shows weakness and hero has the nuts on a connected board, lead big — BTN's J-T-Q connected range pays off."
+      "common_mistakes": [
+        "Slowplaying the nut straight OOP and losing action on a blank river",
+        "Leading too small and underbuilding with a strong hand"
+      ],
+      "population_note": "OOP value leads are underutilized. When BTN shows weakness and hero has the nuts on a connected board, lead big — BTN's J-T-Q connected range pays off.",
+      "key_concept": "Hero has the nut straight OOP. A shifts to lead medium (~1/2 pot) when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "OOP Turn Lead — BTN Checks Flop, Hero Hits Nut Straight on Turn is difficult because many players default to slowplaying the nut straight OOP and losing action on a blank river, even though K9o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Hero has the nut straight OOP and the turn Q♠ gives BTN connected hands (KJ, AK) that will call a large lead — slowplaying risks a blank river killing all action when the hand is at peak value now."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "oop-turn-lead-btn",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn probing",
+        "expected_reasoning": "The critical update is how the straight-completing card shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with the straight-completing card.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_rv01_01",
@@ -1230,67 +2710,176 @@
       "players_to_flop": 2,
       "hero_position": "BTN",
       "villain_position": "BB",
-      "hero_hand": ["7d", "6d"],
+      "hero_hand": [
+        "7d",
+        "6d"
+      ],
       "effective_stack_bb": 90,
       "board": {
-        "flop": ["Kh", "7c", "2d"],
+        "flop": [
+          "Kh",
+          "7c",
+          "2d"
+        ],
         "turn": "4s",
         "river": "3c"
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "bet", "size_pct_pot": 50 },
-        { "street": "flop", "player": "BB", "action": "call" },
-        { "street": "turn", "player": "BB", "action": "check" },
-        { "street": "turn", "player": "BTN", "action": "check" },
-        { "street": "river", "player": "BB", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "river",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Small (~1/3 pot)" },
-      { "key": "RAISE", "label": "Bet Large (~2/3 pot)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (~1/3 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet Large (~2/3 pot)"
+      }
     ],
     "answer": {
       "correct": "CALL",
-      "accepted": ["FOLD"],
-      "required_tags": ["river_thin_value"],
+      "accepted": [
+        "FOLD"
+      ],
+      "required_tags": [
+        "river_thin_value"
+      ],
       "explanation": "Second pair on a K-7-2-4-3 dry board is thin but viable vs a passive rec. They called flop and checked twice — their range includes 7x-worse, 2x, and busted straight draws. Small bet extracts from the bottom of their range. Check is also reasonable."
     },
     "answer_by_pool": {
       "A": {
         "correct": "FOLD",
-        "accepted": ["CALL"],
-        "required_tags": ["river_thin_value"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "river_thin_value"
+        ],
         "explanation": "Competent player's river check range includes hands that beat second pair. Check back — too thin."
       },
       "B": {
         "correct": "CALL",
-        "accepted": ["FOLD"],
-        "required_tags": ["river_thin_value"],
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "river_thin_value"
+        ],
         "explanation": "Passive recs call river with pairs, 6x, busted draws. Small bet at 1/3 pot extracts from the bottom of their range."
       },
       "C": {
         "correct": "CALL",
-        "accepted": ["FOLD"],
-        "required_tags": ["river_thin_value"],
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "river_thin_value"
+        ],
         "explanation": "Aggro pool checks down more often on blank rivers — second pair small bet is a fine exploit."
       }
     },
-    "tags": ["street:river", "pot:srp", "position:ip", "spot:thin_value", "decision:river_value"],
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:thin_value",
+      "decision:river_value"
+    ],
     "difficulty": 3,
     "coaching_context": {
-      "common_mistakes": ["Betting second pair too large and getting called by better hands", "Always checking back thin hands and leaving value on the table"],
-      "population_note": "Live recs call river with a wide range of made hands. Second pair IP vs a passive player who checked twice is a small-bet spot — not a check-back by default."
+      "common_mistakes": [
+        "Betting second pair too large and getting called by better hands",
+        "Always checking back thin hands and leaving value on the table"
+      ],
+      "population_note": "Live recs call river with a wide range of made hands. Second pair IP vs a passive player who checked twice is a small-bet spot — not a check-back by default.",
+      "key_concept": "Second pair on a K-7-2-4-3 dry board is thin but viable vs a passive rec. A shifts to check back when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "River Thin Value — Second Pair on Dry Board vs Passive Rec is difficult because many players default to betting second pair too large and getting called by better hands, even though 76s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "A small probe targets villain's 7x-worse, 2x, and busted draw holdings after they called flop and checked twice — larger sizing only gets called by hands that beat second pair."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "river-thin-value-second",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "river thin value",
+        "expected_reasoning": "The right answer comes from threshold discipline: the dry texture leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because the dry texture determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_rv01_02",
@@ -1305,66 +2894,166 @@
       "players_to_flop": 2,
       "hero_position": "BTN",
       "villain_position": "BB",
-      "hero_hand": ["Jh", "9s"],
+      "hero_hand": [
+        "Jh",
+        "9s"
+      ],
       "effective_stack_bb": 92,
       "board": {
-        "flop": ["Js", "7d", "3c"],
+        "flop": [
+          "Js",
+          "7d",
+          "3c"
+        ],
         "turn": "5h",
         "river": "2d"
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "check" },
-        { "street": "turn", "player": "BB", "action": "check" },
-        { "street": "turn", "player": "BTN", "action": "check" },
-        { "street": "river", "player": "BB", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "river",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Small (~1/3 pot)" },
-      { "key": "RAISE", "label": "Bet Medium (~1/2 pot)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (~1/3 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet Medium (~1/2 pot)"
+      }
     ],
     "answer": {
       "correct": "CALL",
       "accepted": [],
-      "required_tags": ["river_thin_value"],
+      "required_tags": [
+        "river_thin_value"
+      ],
       "explanation": "Villain checked three streets — their range is capped to weak Jx, pairs under J, and missed draws. TPWK is ahead of most of that. Small bet at 1/3 pot extracts thin value while managing risk of check-raise from slow-played strong hands."
     },
     "answer_by_pool": {
       "A": {
         "correct": "FOLD",
-        "accepted": ["CALL"],
-        "required_tags": ["river_thin_value"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "river_thin_value"
+        ],
         "explanation": "Competent player checks back with stronger Jx hands sometimes. Check — too thin vs a thinking opponent."
       },
       "B": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["river_thin_value"],
+        "required_tags": [
+          "river_thin_value"
+        ],
         "explanation": "Passive rec checks down with Jx-worse, 7x, even Ax air. Small bet wins often — extract it."
       },
       "C": {
         "correct": "CALL",
-        "accepted": ["FOLD"],
-        "required_tags": ["river_thin_value"],
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "river_thin_value"
+        ],
         "explanation": "Aggro pool also checks down with marginal holdings. Small probe to get called by worse Jx."
       }
     },
-    "tags": ["street:river", "pot:srp", "position:ip", "spot:thin_value", "decision:river_value"],
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:thin_value",
+      "decision:river_value"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Checking back TPWK on rivers where villain's range is capped by passive play", "Over-betting and getting called only by better hands"],
-      "population_note": "Triple-checked boards signal capped ranges. TPWK IP is a small-bet value spot in most live pools — the key is sizing down to maximize call frequency."
+      "common_mistakes": [
+        "Checking back TPWK on rivers where villain's range is capped by passive play",
+        "Over-betting and getting called only by better hands"
+      ],
+      "population_note": "Triple-checked boards signal capped ranges. TPWK IP is a small-bet value spot in most live pools — the key is sizing down to maximize call frequency.",
+      "key_concept": "Villain checked three streets — their range is capped to weak Jx, pairs under J, and missed draws. A shifts to check back when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "River Thin Value — TPWK on Jack-High Board is difficult because many players default to checking back TPWK on rivers where villain's range is capped by passive play, even though J9o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Bet Small (~1/3 pot) works because the earlier checks cap villain enough that this hand can value-bet or pressure the middle of the range immediately."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "river-thin-value-tpwk",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "river thin value",
+        "expected_reasoning": "The right answer comes from threshold discipline: how the river line changed range density leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because how the river line changed range density determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_rv01_03",
@@ -1379,67 +3068,177 @@
       "players_to_flop": 2,
       "hero_position": "BTN",
       "villain_position": "BB",
-      "hero_hand": ["Ad", "3c"],
+      "hero_hand": [
+        "Ad",
+        "3c"
+      ],
       "effective_stack_bb": 87,
       "board": {
-        "flop": ["Ac", "8d", "5h"],
+        "flop": [
+          "Ac",
+          "8d",
+          "5h"
+        ],
         "turn": "Ks",
         "river": "2c"
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "bet", "size_pct_pot": 60 },
-        { "street": "flop", "player": "BB", "action": "call" },
-        { "street": "turn", "player": "BB", "action": "check" },
-        { "street": "turn", "player": "BTN", "action": "check" },
-        { "street": "river", "player": "BB", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 60
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "river",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Small (~1/3 pot)" },
-      { "key": "RAISE", "label": "Bet Medium-Large (~1/2-2/3 pot)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (~1/3 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet Medium-Large (~1/2-2/3 pot)"
+      }
     ],
     "answer": {
       "correct": "RAISE",
-      "accepted": ["CALL"],
-      "required_tags": ["river_thin_value", "merge_vs_passive"],
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "river_thin_value",
+        "merge_vs_passive"
+      ],
       "explanation": "Villain called a flop c-bet and checked turn and river — their range is capped. TPNK is ahead of 8x, 5x, 2x, and Kx-without-ace. Bet medium-large: passive recs can't fold Ax-weaker, paired boards, or medium pairs. Extract maximum."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
-        "accepted": ["FOLD"],
-        "required_tags": ["river_thin_value"],
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "river_thin_value"
+        ],
         "explanation": "Competent player's flop call includes AJ+, 2P, sets — TPNK is thin vs their range. Bet small or check."
       },
       "B": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["river_thin_value", "merge_vs_passive"],
+        "required_tags": [
+          "river_thin_value",
+          "merge_vs_passive"
+        ],
         "explanation": "Passive rec calls with Ax, 8x, 5x — they cannot fold top pair. Size up to 2/3 pot and get paid."
       },
       "C": {
         "correct": "RAISE",
-        "accepted": ["CALL"],
-        "required_tags": ["river_thin_value", "merge_vs_passive"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "river_thin_value",
+          "merge_vs_passive"
+        ],
         "explanation": "Aggro pool calls down wide on blank runouts. Medium-large sizing extracts value from their calling range."
       }
     },
-    "tags": ["street:river", "pot:srp", "position:ip", "spot:thin_value_sizing", "decision:river_sizing"],
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:thin_value_sizing",
+      "decision:river_sizing"
+    ],
     "difficulty": 3,
     "coaching_context": {
-      "common_mistakes": ["Defaulting to small sizing with any thin value hand", "Checking back TPNK when villain's range is demonstrably capped"],
-      "population_note": "Against passive pools, TPNK can often size up on river when the runout is blank. Their capped range cannot fold top pair — exploit it."
+      "common_mistakes": [
+        "Defaulting to small sizing with any thin value hand",
+        "Checking back TPNK when villain's range is demonstrably capped"
+      ],
+      "population_note": "Against passive pools, TPNK can often size up on river when the runout is blank. Their capped range cannot fold top pair — exploit it.",
+      "key_concept": "Villain called a flop c-bet and checked turn and river — their range is capped. A shifts to bet small (~1/3 pot) when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "River Thin Value — TPNK, Size Up vs Passive Pool is difficult because many players default to defaulting to small sizing with any thin value hand, even though A3o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Bet Medium-Large (~1/2-2/3 pot) works because the earlier checks cap villain enough that this hand can value-bet or pressure the middle of the range immediately."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "river-thin-value-tpnk",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "river thin value",
+        "expected_reasoning": "The right answer comes from threshold discipline: how the river line changed range density leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because how the river line changed range density determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_rv02_01",
@@ -1454,68 +3253,179 @@
       "players_to_flop": 2,
       "hero_position": "BTN",
       "villain_position": "BB",
-      "hero_hand": ["Qh", "Qc"],
+      "hero_hand": [
+        "Qh",
+        "Qc"
+      ],
       "effective_stack_bb": 85,
       "board": {
-        "flop": ["Qs", "Jd", "9c"],
+        "flop": [
+          "Qs",
+          "Jd",
+          "9c"
+        ],
         "turn": "3h",
         "river": "2s"
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "bet", "size_pct_pot": 40 },
-        { "street": "flop", "player": "BB", "action": "call" },
-        { "street": "turn", "player": "BB", "action": "check" },
-        { "street": "turn", "player": "BTN", "action": "bet", "size_pct_pot": 50 },
-        { "street": "turn", "player": "BB", "action": "call" },
-        { "street": "river", "player": "BB", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 40
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "river",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Medium (~1/2 pot)" },
-      { "key": "RAISE", "label": "Bet Large (~pot or overbet)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Medium (~1/2 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet Large (~pot or overbet)"
+      }
     ],
     "answer": {
       "correct": "RAISE",
       "accepted": [],
-      "required_tags": ["river_thin_value", "underfold_exploit"],
+      "required_tags": [
+        "river_thin_value",
+        "underfold_exploit"
+      ],
       "explanation": "Hero has top set on a dry runout. Villain called two streets — their range includes QJ, JJ, 9x, and is sticky. Bet large or overbet: live recs cannot fold two pair or overpairs to large river bets. Maximize extraction."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
-        "accepted": ["RAISE"],
-        "required_tags": ["river_thin_value"],
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "river_thin_value"
+        ],
         "explanation": "Competent player may have QJ, sets — medium sizing keeps their bluff-catching range in. Don't overbet a wet flop runout."
       },
       "B": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["river_thin_value", "underfold_exploit"],
+        "required_tags": [
+          "river_thin_value",
+          "underfold_exploit"
+        ],
         "explanation": "Passive rec two-street callers don't fold QJ or JJ to river bets. Bet pot-sized or overbet — they'll call."
       },
       "C": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["river_thin_value", "underfold_exploit"],
+        "required_tags": [
+          "river_thin_value",
+          "underfold_exploit"
+        ],
         "explanation": "Gambly pool calls off with top pair on river regularly. Overbet and extract max vs their under-folding tendency."
       }
     },
-    "tags": ["street:river", "pot:srp", "position:ip", "spot:value_sizing", "decision:river_sizing"],
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:value_sizing",
+      "decision:river_sizing"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Using medium sizing with nutted hands and leaving value on the table", "Being too conservative vs sticky pools that don't fold top pair"],
-      "population_note": "Sticky live pools calling two streets on a connected board signal an inability to fold. Size up with strong hands — the calling frequency doesn't drop enough to justify going small."
+      "common_mistakes": [
+        "Using medium sizing with nutted hands and leaving value on the table",
+        "Being too conservative vs sticky pools that don't fold top pair"
+      ],
+      "population_note": "Sticky live pools calling two streets on a connected board signal an inability to fold. Size up with strong hands — the calling frequency doesn't drop enough to justify going small.",
+      "key_concept": "Hero has top set on a dry runout. A shifts to bet medium (~1/2 pot) when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "River Sizing vs Sticky Pool — Strong Hand, Go Big is difficult because many players default to using medium sizing with nutted hands and leaving value on the table, even though QQ changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Top set vs a sticky live rec who called two streets warrants a large bet or overbet — live recs cannot fold two pair or overpairs to big river bets, so max-sizing extracts the most from a calling range that will not adjust."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "river-sizing-vs-sticky",
+        "prompt": "What explains why this sizing or line is preferred instead of treating the spot as pure?",
+        "type": "mix_reasoning",
+        "concept": "river sizing",
+        "expected_reasoning": "The right reasoning is mix-aware: how the river line changed range density makes one line primary, but nearby sizings or checks can still retain some EV depending on range composition.",
+        "options": [
+          {
+            "id": "always_pure_other",
+            "label": "The authored line is too fancy; one simpler line should always dominate regardless of range composition.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "primary_not_random",
+            "label": "The spot is not random, but how the river line changed range density makes the preferred line best while leaving some EV in adjacent options.",
+            "matches_expected": true
+          },
+          {
+            "id": "blocker_only",
+            "label": "One blocker detail alone should force the entire strategy into the opposite action or sizing.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_rv02_02",
@@ -1530,67 +3440,174 @@
       "players_to_flop": 2,
       "hero_position": "BTN",
       "villain_position": "BB",
-      "hero_hand": ["9h", "8h"],
+      "hero_hand": [
+        "9h",
+        "8h"
+      ],
       "effective_stack_bb": 90,
       "board": {
-        "flop": ["Ac", "9s", "4d"],
+        "flop": [
+          "Ac",
+          "9s",
+          "4d"
+        ],
         "turn": "Td",
         "river": "5c"
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "bet", "size_pct_pot": 40 },
-        { "street": "flop", "player": "BB", "action": "call" },
-        { "street": "turn", "player": "BB", "action": "check" },
-        { "street": "turn", "player": "BTN", "action": "check" },
-        { "street": "river", "player": "BB", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 40
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "river",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Small (~1/4-1/3 pot)" },
-      { "key": "RAISE", "label": "Bet Large (~2/3 pot)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (~1/4-1/3 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet Large (~2/3 pot)"
+      }
     ],
     "answer": {
       "correct": "CALL",
-      "accepted": ["FOLD"],
-      "required_tags": ["river_thin_value"],
+      "accepted": [
+        "FOLD"
+      ],
+      "required_tags": [
+        "river_thin_value"
+      ],
       "explanation": "Second pair on an ace-high board is thin. A small probe at 1/4-1/3 pot targets villain's 4x, 5x, and air holdings. Large sizing only gets called by Ax and better 9x. Keep it small or check — don't spew into a range that beats you."
     },
     "answer_by_pool": {
       "A": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["river_thin_value"],
+        "required_tags": [
+          "river_thin_value"
+        ],
         "explanation": "Competent player's flop-call range includes Ax heavily — second pair is too thin for any bet."
       },
       "B": {
         "correct": "CALL",
-        "accepted": ["FOLD"],
-        "required_tags": ["river_thin_value"],
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "river_thin_value"
+        ],
         "explanation": "Passive rec calls with 4x, 5x, worse pairs — small probe at 1/3 pot captures some value. Don't bet large."
       },
       "C": {
         "correct": "FOLD",
-        "accepted": ["CALL"],
-        "required_tags": ["river_thin_value"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "river_thin_value"
+        ],
         "explanation": "Aggro pool calls river with Ax and check-raise bluffs are a concern — check is safer with second pair."
       }
     },
-    "tags": ["street:river", "pot:srp", "position:ip", "spot:thin_value_sizing", "decision:river_sizing"],
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:thin_value_sizing",
+      "decision:river_sizing"
+    ],
     "difficulty": 3,
     "coaching_context": {
-      "common_mistakes": ["Bet-sizing second pair the same as strong hands", "Going large with thin value and getting called only by better hands"],
-      "population_note": "Sizing discipline is critical for thin river value. Second pair on ace-high boards requires small sizing to be profitable — the calling range for larger bets beats you."
+      "common_mistakes": [
+        "Bet-sizing second pair the same as strong hands",
+        "Going large with thin value and getting called only by better hands"
+      ],
+      "population_note": "Sizing discipline is critical for thin river value. Second pair on ace-high boards requires small sizing to be profitable — the calling range for larger bets beats you.",
+      "key_concept": "Second pair on an ace-high board is thin. A shifts to check back; and C shifts to check back.",
+      "difficulty_reason": "River Sizing vs Sticky Pool — Second Pair, Keep It Small is difficult because many players default to bet-sizing second pair the same as strong hands, even though 98s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "A 1/4-1/3 pot probe targets 4x, 5x, and air on the river — larger sizing only gets called by Ax and better 9x, making a small bet the highest-EV line with second pair on an ace-high board."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "river-sizing-vs-sticky",
+        "prompt": "What explains why this sizing or line is preferred instead of treating the spot as pure?",
+        "type": "mix_reasoning",
+        "concept": "river sizing",
+        "expected_reasoning": "The right reasoning is mix-aware: how the river line changed range density makes one line primary, but nearby sizings or checks can still retain some EV depending on range composition.",
+        "options": [
+          {
+            "id": "always_pure_other",
+            "label": "The authored line is too fancy; one simpler line should always dominate regardless of range composition.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "primary_not_random",
+            "label": "The spot is not random, but how the river line changed range density makes the preferred line best while leaving some EV in adjacent options.",
+            "matches_expected": true
+          },
+          {
+            "id": "blocker_only",
+            "label": "One blocker detail alone should force the entire strategy into the opposite action or sizing.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_rv02_03",
@@ -1605,68 +3622,181 @@
       "players_to_flop": 2,
       "hero_position": "BTN",
       "villain_position": "BB",
-      "hero_hand": ["Ks", "Kd"],
+      "hero_hand": [
+        "Ks",
+        "Kd"
+      ],
       "effective_stack_bb": 80,
       "board": {
-        "flop": ["Kc", "Jc", "5d"],
+        "flop": [
+          "Kc",
+          "Jc",
+          "5d"
+        ],
         "turn": "8d",
         "river": "2s"
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "bet", "size_pct_pot": 50 },
-        { "street": "flop", "player": "BB", "action": "call" },
-        { "street": "turn", "player": "BB", "action": "check" },
-        { "street": "turn", "player": "BTN", "action": "bet", "size_pct_pot": 60 },
-        { "street": "turn", "player": "BB", "action": "call" },
-        { "street": "river", "player": "BB", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 60
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "river",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Pot-Sized Bet" },
-      { "key": "RAISE", "label": "Overbet (1.5x-2x pot)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Pot-Sized Bet"
+      },
+      {
+        "key": "RAISE",
+        "label": "Overbet (1.5x-2x pot)"
+      }
     ],
     "answer": {
       "correct": "RAISE",
-      "accepted": ["CALL"],
-      "required_tags": ["river_thin_value", "underfold_exploit"],
+      "accepted": [
+        "CALL"
+      ],
+      "required_tags": [
+        "river_thin_value",
+        "underfold_exploit"
+      ],
       "explanation": "Hero has top set and villain is range-capped (checked back river, couldn't have turned flush or straight). Villain's range is KJ, JJ, 8x, 5x. Overbet: KJ, JJ cannot fold vs an IP overbet in a live pool. Extract maximum vs their capped sticky range."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
-        "accepted": ["RAISE"],
-        "required_tags": ["river_thin_value"],
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "river_thin_value"
+        ],
         "explanation": "Competent player may fold KJ to a 2x overbet — pot-sized bet keeps their marginal holdings in."
       },
       "B": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["river_thin_value", "underfold_exploit"],
+        "required_tags": [
+          "river_thin_value",
+          "underfold_exploit"
+        ],
         "explanation": "Passive recs call off with KJ, JJ, top pair routinely. Overbet them — their under-folding is the exploit."
       },
       "C": {
         "correct": "RAISE",
         "accepted": [],
-        "required_tags": ["river_thin_value", "underfold_exploit"],
+        "required_tags": [
+          "river_thin_value",
+          "underfold_exploit"
+        ],
         "explanation": "Gambly pool calls large bets with any pair. Overbet with the nuts."
       }
     },
-    "tags": ["street:river", "pot:srp", "position:ip", "spot:overbet", "decision:river_overbet"],
+    "tags": [
+      "street:river",
+      "pot:srp",
+      "position:ip",
+      "spot:overbet",
+      "decision:river_overbet"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Using standard sizing when villain is range-capped and sticky", "Fearing that large bets fold out their value hands"],
-      "population_note": "The overbet is unlocked when villain is capped and sticky. Live passive pools cannot fold two pair or overpairs to river overbets — exploit it with your nutted range."
+      "common_mistakes": [
+        "Using standard sizing when villain is range-capped and sticky",
+        "Fearing that large bets fold out their value hands"
+      ],
+      "population_note": "The overbet is unlocked when villain is capped and sticky. Live passive pools cannot fold two pair or overpairs to river overbets — exploit it with your nutted range.",
+      "key_concept": "Hero has top set and villain is range-capped (checked back river, couldn't have turned flush or straight). A shifts to pot-sized bet when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "River Overbet — Nutted Hand vs Capped Range is difficult because many players default to using standard sizing when villain is range-capped and sticky, even though KK changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Overbet (1.5x-2x pot) works because the earlier checks cap villain enough that this hand can value-bet or pressure the middle of the range immediately."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "river-overbet-nutted-hand",
+        "prompt": "What explains why this sizing or line is preferred instead of treating the spot as pure?",
+        "type": "mix_reasoning",
+        "concept": "river sizing",
+        "expected_reasoning": "The right reasoning is mix-aware: the polarized sizing makes one line primary, but nearby sizings or checks can still retain some EV depending on range composition.",
+        "options": [
+          {
+            "id": "always_pure_other",
+            "label": "The authored line is too fancy; one simpler line should always dominate regardless of range composition.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "primary_not_random",
+            "label": "The spot is not random, but the polarized sizing makes the preferred line best while leaving some EV in adjacent options.",
+            "matches_expected": true
+          },
+          {
+            "id": "blocker_only",
+            "label": "One blocker detail alone should force the entire strategy into the opposite action or sizing.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_mw02_01",
@@ -1681,68 +3811,180 @@
       "players_to_flop": 3,
       "hero_position": "BTN",
       "villain_position": "BB",
-      "hero_hand": ["Ac", "As"],
+      "hero_hand": [
+        "Ac",
+        "As"
+      ],
       "effective_stack_bb": 85,
       "board": {
-        "flop": ["7s", "4d", "2c"],
+        "flop": [
+          "7s",
+          "4d",
+          "2c"
+        ],
         "turn": "9s",
         "river": null
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "MP", "action": "call", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "MP", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "bet", "size_pct_pot": 40 },
-        { "street": "flop", "player": "MP", "action": "call" },
-        { "street": "flop", "player": "BB", "action": "fold" },
-        { "street": "turn", "player": "MP", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "MP",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "MP",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 40
+        },
+        {
+          "street": "flop",
+          "player": "MP",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "fold"
+        },
+        {
+          "street": "turn",
+          "player": "MP",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "turn",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Small (~1/4-1/3 pot)" },
-      { "key": "RAISE", "label": "Bet Large (~2/3 pot)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (~1/4-1/3 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet Large (~2/3 pot)"
+      }
     ],
     "answer": {
       "correct": "CALL",
-      "accepted": ["FOLD"],
-      "required_tags": ["multiway_turn_discipline"],
+      "accepted": [
+        "FOLD"
+      ],
+      "required_tags": [
+        "multiway_turn_discipline"
+      ],
       "explanation": "Overpair in what became HU after BB folded — small protection bet is correct. Turn 9♠ adds a flush draw and gives MP potential two-pair with 97. Bet small (1/3 pot) to deny equity and extract thin value; large sizing bloats the pot vs sets and two-pair."
     },
     "answer_by_pool": {
       "A": {
         "correct": "FOLD",
-        "accepted": ["CALL"],
-        "required_tags": ["multiway_turn_discipline"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "multiway_turn_discipline"
+        ],
         "explanation": "Competent player calls flop with sets, two-pair, draws. Aces face tough reverse implied odds — check and control pot."
       },
       "B": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["multiway_turn_discipline"],
+        "required_tags": [
+          "multiway_turn_discipline"
+        ],
         "explanation": "Passive MP often floats flop with pairs or draws. Small bet charges them and extracts thin value."
       },
       "C": {
         "correct": "CALL",
-        "accepted": ["RAISE"],
-        "required_tags": ["multiway_turn_discipline"],
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "multiway_turn_discipline"
+        ],
         "explanation": "Gambly MP may raise small bet with two pair — that's information you can use. Bet small, fold to raise."
       }
     },
-    "tags": ["street:turn", "pot:multiway", "position:ip", "spot:multiway_barrel", "decision:multiway_sizing"],
+    "tags": [
+      "street:turn",
+      "pot:multiway",
+      "position:ip",
+      "spot:multiway_barrel",
+      "decision:multiway_sizing"
+    ],
     "difficulty": 3,
     "coaching_context": {
-      "common_mistakes": ["Betting large with overpairs in multiway pots", "Checking back completely and giving free equity to draws"],
-      "population_note": "Multiway overpairs demand sizing discipline. Small protection bets serve dual purpose: extract value from worse pairs and charge draws. Large bets pot-commit you vs hands that have you crushed."
+      "common_mistakes": [
+        "Betting large with overpairs in multiway pots",
+        "Checking back completely and giving free equity to draws"
+      ],
+      "population_note": "Multiway overpairs demand sizing discipline. Small protection bets serve dual purpose: extract value from worse pairs and charge draws. Large bets pot-commit you vs hands that have you crushed.",
+      "key_concept": "Overpair in what became HU after BB folded — small protection bet is correct. A shifts to check back when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "Multiway Turn — Overpair on Low Board, Protection Bet or Check? is difficult because many players default to betting large with overpairs in multiway pots, even though AA changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Bet Small (~1/4-1/3 pot) works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "multiway-turn-overpair-on",
+        "prompt": "Which range fact matters most when deciding this spot?",
+        "type": "range_construction",
+        "concept": "multiway turn discipline",
+        "expected_reasoning": "Correct reasoning starts with range construction: how the turn changed range advantage changes which value hands, draws, and marginal continues still make sense.",
+        "options": [
+          {
+            "id": "hand_label_only",
+            "label": "The combo should be played mainly by its absolute hand strength, not by the range interaction.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "range_shape",
+            "label": "The decision comes from how how the turn changed range advantage reshapes both ranges, not just from hero's hand label.",
+            "matches_expected": true
+          },
+          {
+            "id": "one_blocker",
+            "label": "A single blocker effect outweighs the broader range picture here.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_mw02_02",
@@ -1757,69 +3999,183 @@
       "players_to_flop": 3,
       "hero_position": "BTN",
       "villain_position": "MP",
-      "hero_hand": ["Js", "Td"],
+      "hero_hand": [
+        "Js",
+        "Td"
+      ],
       "effective_stack_bb": 82,
       "board": {
-        "flop": ["Jh", "9c", "6d"],
+        "flop": [
+          "Jh",
+          "9c",
+          "6d"
+        ],
         "turn": "5d",
         "river": null
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "MP", "action": "call", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "MP", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "bet", "size_pct_pot": 50 },
-        { "street": "flop", "player": "MP", "action": "call" },
-        { "street": "flop", "player": "BB", "action": "call" },
-        { "street": "turn", "player": "BB", "action": "check" },
-        { "street": "turn", "player": "MP", "action": "bet", "size_bb": 8 }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "MP",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "MP",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 50
+        },
+        {
+          "street": "flop",
+          "player": "MP",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "MP",
+          "action": "bet",
+          "size_bb": 8
+        }
       ]
     },
     "decision_point": {
       "street": "turn",
-      "facing": { "action": "bet", "size_bb": 8 },
+      "facing": {
+        "action": "bet",
+        "size_bb": 8
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Fold" },
-      { "key": "CALL", "label": "Call" },
-      { "key": "RAISE", "label": "Raise" }
+      {
+        "key": "FOLD",
+        "label": "Fold"
+      },
+      {
+        "key": "CALL",
+        "label": "Call"
+      },
+      {
+        "key": "RAISE",
+        "label": "Raise"
+      }
     ],
     "answer": {
       "correct": "CALL",
       "accepted": [],
-      "required_tags": ["multiway_turn_discipline"],
+      "required_tags": [
+        "multiway_turn_discipline"
+      ],
       "explanation": "TPTK + gutshot (8 outs to straight) has too much equity to fold vs a small MP donk. Call and see river. Raising is too thin multiway — MP has a wide donk range but could have 78s, 97s, sets that dominate. Call and realize equity."
     },
     "answer_by_pool": {
       "A": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["multiway_turn_discipline"],
+        "required_tags": [
+          "multiway_turn_discipline"
+        ],
         "explanation": "Competent donk range includes sets/two-pair and draws — raising TPTK is too loose. Call with equity."
       },
       "B": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["multiway_turn_discipline"],
+        "required_tags": [
+          "multiway_turn_discipline"
+        ],
         "explanation": "Passive MP donk range is value-heavy (JX, two-pair, draws). TPTK + gutshot has enough equity to call the small size."
       },
       "C": {
         "correct": "CALL",
-        "accepted": ["RAISE"],
-        "required_tags": ["multiway_turn_discipline"],
+        "accepted": [
+          "RAISE"
+        ],
+        "required_tags": [
+          "multiway_turn_discipline"
+        ],
         "explanation": "Aggro MP may donk wide including bluffs. Call or small raise to define — don't over-commit."
       }
     },
-    "tags": ["street:turn", "pot:multiway", "position:ip", "spot:multiway_call", "decision:vs_donk"],
+    "tags": [
+      "street:turn",
+      "pot:multiway",
+      "position:ip",
+      "spot:multiway_call",
+      "decision:vs_donk"
+    ],
     "difficulty": 3,
     "coaching_context": {
-      "common_mistakes": ["Folding TPTK + gutshot to a small multiway donk bet", "Over-raising multiway without the top of your range"],
-      "population_note": "Multiway donk bets are frequently value-heavy in live pools. TPTK + straight draw has too much equity to fold small sizing — call and reassess river."
+      "common_mistakes": [
+        "Folding TPTK + gutshot to a small multiway donk bet",
+        "Over-raising multiway without the top of your range"
+      ],
+      "population_note": "Multiway donk bets are frequently value-heavy in live pools. TPTK + straight draw has too much equity to fold small sizing — call and reassess river.",
+      "key_concept": "TPTK + gutshot (8 outs to straight) has too much equity to fold vs a small MP donk.",
+      "difficulty_reason": "Multiway Turn — TPTK + Gutshot vs MP Donk Bet is difficult because many players default to folding TPTK + gutshot to a small multiway donk bet, even though JTo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "TPTK + 8 outs to the straight has too much equity to fold against a small multiway donk — raising is too thin with sets and two-pair in villain's donk range, so calling and realizing equity on the river is correct."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "multiway-turn-tptk-gutshot",
+        "prompt": "Which range fact matters most when deciding this spot?",
+        "type": "range_construction",
+        "concept": "multiway turn discipline",
+        "expected_reasoning": "Correct reasoning starts with range construction: how the turn changed range advantage changes which value hands, draws, and marginal continues still make sense.",
+        "options": [
+          {
+            "id": "hand_label_only",
+            "label": "The combo should be played mainly by its absolute hand strength, not by the range interaction.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "range_shape",
+            "label": "The decision comes from how how the turn changed range advantage reshapes both ranges, not just from hero's hand label.",
+            "matches_expected": true
+          },
+          {
+            "id": "one_blocker",
+            "label": "A single blocker effect outweighs the broader range picture here.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_mw02_03",
@@ -1834,67 +4190,168 @@
       "players_to_flop": 3,
       "hero_position": "BTN",
       "villain_position": "BB",
-      "hero_hand": ["8s", "9s"],
+      "hero_hand": [
+        "8s",
+        "9s"
+      ],
       "effective_stack_bb": 87,
       "board": {
-        "flop": ["Qs", "Jd", "7d"],
+        "flop": [
+          "Qs",
+          "Jd",
+          "7d"
+        ],
         "turn": "Ts",
         "river": null
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "HJ", "action": "call", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "HJ", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "check" },
-        { "street": "turn", "player": "BB", "action": "check" },
-        { "street": "turn", "player": "HJ", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "HJ",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "HJ",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "HJ",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "turn",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Semi-Bluff Small" },
-      { "key": "RAISE", "label": "Semi-Bluff Large" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Semi-Bluff Small"
+      },
+      {
+        "key": "RAISE",
+        "label": "Semi-Bluff Large"
+      }
     ],
     "answer": {
       "correct": "FOLD",
       "accepted": [],
-      "required_tags": ["multiway_turn_discipline"],
+      "required_tags": [
+        "multiway_turn_discipline"
+      ],
       "explanation": "Q-J-7-T is an extremely connected board. Two opponents in multiway shrink fold equity to near zero — live players never fold two pair, sets, or straights. Semi-bluffing an OESD here has no merit. Check back and take the free river."
     },
     "answer_by_pool": {
       "A": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["multiway_turn_discipline"],
+        "required_tags": [
+          "multiway_turn_discipline"
+        ],
         "explanation": "Competent players check connected boards with strong holdings. Semi-bluffing vs 2 opponents on Q-J-7-T has near-zero fold equity."
       },
       "B": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["multiway_turn_discipline"],
+        "required_tags": [
+          "multiway_turn_discipline"
+        ],
         "explanation": "Passive recs call down with any pair or draw. Zero fold equity with OESD vs 2 players — check."
       },
       "C": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["multiway_turn_discipline"],
+        "required_tags": [
+          "multiway_turn_discipline"
+        ],
         "explanation": "Aggro pool may check-raise semi-bluffs — putting 89s in a terrible spot. Check back."
       }
     },
-    "tags": ["street:turn", "pot:multiway", "position:ip", "spot:multiway_give_up", "decision:check_back"],
+    "tags": [
+      "street:turn",
+      "pot:multiway",
+      "position:ip",
+      "spot:multiway_give_up",
+      "decision:check_back"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Semi-bluffing draws into multiway pots with highly connected boards", "Confusing HU fold equity logic with multiway realities"],
-      "population_note": "Multiway semi-bluffing rules: fold equity drops sharply with 2+ opponents, especially on connected boards where calling ranges are strong. Take free cards — don't bluff."
+      "common_mistakes": [
+        "Semi-bluffing draws into multiway pots with highly connected boards",
+        "Confusing HU fold equity logic with multiway realities"
+      ],
+      "population_note": "Multiway semi-bluffing rules: fold equity drops sharply with 2+ opponents, especially on connected boards where calling ranges are strong. Take free cards — don't bluff.",
+      "key_concept": "Q-J-7-T is an extremely connected board.",
+      "difficulty_reason": "Multiway Turn — Semi-Bluff or Check on Dangerous Board? is difficult because many players default to semi-bluffing draws into multiway pots with highly connected boards, even though 89s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Check Back works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "multiway-turn-semi-bluff",
+        "prompt": "Which range fact matters most when deciding this spot?",
+        "type": "range_construction",
+        "concept": "multiway turn discipline",
+        "expected_reasoning": "Correct reasoning starts with range construction: how the turn changed range advantage changes which value hands, draws, and marginal continues still make sense.",
+        "options": [
+          {
+            "id": "hand_label_only",
+            "label": "The combo should be played mainly by its absolute hand strength, not by the range interaction.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "range_shape",
+            "label": "The decision comes from how how the turn changed range advantage reshapes both ranges, not just from hero's hand label.",
+            "matches_expected": true
+          },
+          {
+            "id": "one_blocker",
+            "label": "A single blocker effect outweighs the broader range picture here.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_mw03_01",
@@ -1909,70 +4366,188 @@
       "players_to_flop": 3,
       "hero_position": "BTN",
       "villain_position": "CO",
-      "hero_hand": ["Td", "9d"],
+      "hero_hand": [
+        "Td",
+        "9d"
+      ],
       "effective_stack_bb": 78,
       "board": {
-        "flop": ["As", "Tc", "5d"],
+        "flop": [
+          "As",
+          "Tc",
+          "5d"
+        ],
         "turn": "3h",
         "river": "2s"
       },
       "action_history": [
-        { "street": "preflop", "player": "HJ", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "CO", "action": "call", "size_bb": 3 },
-        { "street": "preflop", "player": "BTN", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "HJ", "action": "bet", "size_pct_pot": 40 },
-        { "street": "flop", "player": "CO", "action": "call" },
-        { "street": "flop", "player": "BTN", "action": "call" },
-        { "street": "turn", "player": "HJ", "action": "check" },
-        { "street": "turn", "player": "CO", "action": "check" },
-        { "street": "turn", "player": "BTN", "action": "check" },
-        { "street": "river", "player": "HJ", "action": "check" },
-        { "street": "river", "player": "CO", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "HJ",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "CO",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "HJ",
+          "action": "bet",
+          "size_pct_pot": 40
+        },
+        {
+          "street": "flop",
+          "player": "CO",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "HJ",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "CO",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "HJ",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "CO",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "river",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Small (~1/4 pot)" },
-      { "key": "RAISE", "label": "Bet Large (~2/3 pot)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (~1/4 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet Large (~2/3 pot)"
+      }
     ],
     "answer": {
       "correct": "FOLD",
       "accepted": [],
-      "required_tags": ["multiway_turn_discipline", "river_thin_value"],
+      "required_tags": [
+        "multiway_turn_discipline",
+        "river_thin_value"
+      ],
       "explanation": "Second pair on an A-high board in a 3-way pot is far too thin to bet. Both opponents checked two streets — their range still includes Ax, which beats second pair. Check back and take a free showdown. Betting risks being called by better and fold equity is minimal."
     },
     "answer_by_pool": {
       "A": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["multiway_turn_discipline", "river_thin_value"],
+        "required_tags": [
+          "multiway_turn_discipline",
+          "river_thin_value"
+        ],
         "explanation": "Multiway river with second pair is a clear check. At least one opponent likely has Ax."
       },
       "B": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["multiway_turn_discipline", "river_thin_value"],
+        "required_tags": [
+          "multiway_turn_discipline",
+          "river_thin_value"
+        ],
         "explanation": "Passive recs check Ax for pot control. Second pair calling range beats hero too often to bet."
       },
       "C": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["multiway_turn_discipline", "river_thin_value"],
+        "required_tags": [
+          "multiway_turn_discipline",
+          "river_thin_value"
+        ],
         "explanation": "Gambly players also check strong hands — check back second pair and protect showdown value."
       }
     },
-    "tags": ["street:river", "pot:multiway", "position:ip", "spot:multiway_river", "decision:check_back"],
+    "tags": [
+      "street:river",
+      "pot:multiway",
+      "position:ip",
+      "spot:multiway_river",
+      "decision:check_back"
+    ],
     "difficulty": 2,
     "coaching_context": {
-      "common_mistakes": ["Thin-value betting in multiway river pots with marginal hands", "Applying HU thin-value logic to 3-way rivers"],
-      "population_note": "Multiway river thin value thresholds are much higher than HU. Second pair vs two opponents who both checked Ax-heavy boards is a clear check — protect your showdown equity."
+      "common_mistakes": [
+        "Thin-value betting in multiway river pots with marginal hands",
+        "Applying HU thin-value logic to 3-way rivers"
+      ],
+      "population_note": "Multiway river thin value thresholds are much higher than HU. Second pair vs two opponents who both checked Ax-heavy boards is a clear check — protect your showdown equity.",
+      "key_concept": "Second pair on an A-high board in a 3-way pot is far too thin to bet.",
+      "difficulty_reason": "Multiway River — Second Pair, Check or Thin Value? is difficult because many players default to thin-value betting in multiway river pots with marginal hands, even though T9s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Check Back works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "multiway-river-second-pair",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "multiway river discipline",
+        "expected_reasoning": "The right answer comes from threshold discipline: how the river line changed range density leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because how the river line changed range density determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_mw03_02",
@@ -1987,72 +4562,203 @@
       "players_to_flop": 3,
       "hero_position": "BTN",
       "villain_position": "BB",
-      "hero_hand": ["Kh", "Qd"],
+      "hero_hand": [
+        "Kh",
+        "Qd"
+      ],
       "effective_stack_bb": 82,
       "board": {
-        "flop": ["Kc", "7s", "2d"],
+        "flop": [
+          "Kc",
+          "7s",
+          "2d"
+        ],
         "turn": "4h",
         "river": "Jc"
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "MP", "action": "call", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "MP", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "bet", "size_pct_pot": 40 },
-        { "street": "flop", "player": "MP", "action": "call" },
-        { "street": "flop", "player": "BB", "action": "call" },
-        { "street": "turn", "player": "BB", "action": "check" },
-        { "street": "turn", "player": "MP", "action": "check" },
-        { "street": "turn", "player": "BTN", "action": "check" },
-        { "street": "river", "player": "BB", "action": "check" },
-        { "street": "river", "player": "MP", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "MP",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "MP",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "bet",
+          "size_pct_pot": 40
+        },
+        {
+          "street": "flop",
+          "player": "MP",
+          "action": "call"
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "call"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "MP",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "MP",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "river",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back" },
-      { "key": "CALL", "label": "Bet Small (~1/4-1/3 pot)" },
-      { "key": "RAISE", "label": "Bet Large (~2/3 pot)" }
+      {
+        "key": "FOLD",
+        "label": "Check Back"
+      },
+      {
+        "key": "CALL",
+        "label": "Bet Small (~1/4-1/3 pot)"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bet Large (~2/3 pot)"
+      }
     ],
     "answer": {
       "correct": "CALL",
-      "accepted": ["FOLD"],
-      "required_tags": ["multiway_turn_discipline", "river_thin_value"],
+      "accepted": [
+        "FOLD"
+      ],
+      "required_tags": [
+        "multiway_turn_discipline",
+        "river_thin_value"
+      ],
       "explanation": "TPGK in multiway where both opponents checked every street is a small-bet spot. A 1/3-pot bet extracts thin value from Kx-worse, 7x, Jx. Large sizing is wrong — check-raises are more likely 3-way and large bets only get called by hands that beat or tie you."
     },
     "answer_by_pool": {
       "A": {
         "correct": "FOLD",
-        "accepted": ["CALL"],
-        "required_tags": ["multiway_turn_discipline"],
+        "accepted": [
+          "CALL"
+        ],
+        "required_tags": [
+          "multiway_turn_discipline"
+        ],
         "explanation": "Competent players check Kx sets and two-pair — TPGK is a marginal value bet in 3-way. Check is safer."
       },
       "B": {
         "correct": "CALL",
         "accepted": [],
-        "required_tags": ["multiway_turn_discipline", "river_thin_value"],
+        "required_tags": [
+          "multiway_turn_discipline",
+          "river_thin_value"
+        ],
         "explanation": "Passive recs check Kx-worse, 7x, Jx. Small bet extracts from the bottom of their range — don't go large."
       },
       "C": {
         "correct": "CALL",
-        "accepted": ["FOLD"],
-        "required_tags": ["multiway_turn_discipline", "river_thin_value"],
+        "accepted": [
+          "FOLD"
+        ],
+        "required_tags": [
+          "multiway_turn_discipline",
+          "river_thin_value"
+        ],
         "explanation": "Aggro pool checks down medium-strength hands too. Small bet acceptable; check also fine."
       }
     },
-    "tags": ["street:river", "pot:multiway", "position:ip", "spot:multiway_river_value", "decision:thin_value"],
+    "tags": [
+      "street:river",
+      "pot:multiway",
+      "position:ip",
+      "spot:multiway_river_value",
+      "decision:thin_value"
+    ],
     "difficulty": 3,
     "coaching_context": {
-      "common_mistakes": ["Checking back TPGK in multiway when the runout is dry and both opponents checked", "Betting large with TPGK in 3-way and getting raised off the best hand"],
-      "population_note": "Multiway TPGK river value requires small sizing discipline. The sweet spot is 1/3 pot — captures calls from worse Kx and pairs while minimizing exposure to check-raises."
+      "common_mistakes": [
+        "Checking back TPGK in multiway when the runout is dry and both opponents checked",
+        "Betting large with TPGK in 3-way and getting raised off the best hand"
+      ],
+      "population_note": "Multiway TPGK river value requires small sizing discipline. The sweet spot is 1/3 pot — captures calls from worse Kx and pairs while minimizing exposure to check-raises.",
+      "key_concept": "TPGK in multiway where both opponents checked every street is a small-bet spot. A shifts to check back when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "Multiway River — Top Pair, Small Value Bet in 3-Way is difficult because many players default to checking back TPGK in multiway when the runout is dry and both opponents checked, even though KQo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "A 1/3-pot bet extracts thin value from Kx-worse, 7x, and Jx in a 3-way checked-to pot — large sizing is wrong because check-raises are more likely multiway and your hand does not warrant building a big pot."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "multiway-river-top-pair",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "multiway river discipline",
+        "expected_reasoning": "The right answer comes from threshold discipline: how the river line changed range density leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because how the river line changed range density determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc2_mw03_03",
@@ -2067,69 +4773,183 @@
       "players_to_flop": 3,
       "hero_position": "BTN",
       "villain_position": "BB",
-      "hero_hand": ["As", "Ks"],
+      "hero_hand": [
+        "As",
+        "Ks"
+      ],
       "effective_stack_bb": 80,
       "board": {
-        "flop": ["9s", "8d", "4c"],
+        "flop": [
+          "9s",
+          "8d",
+          "4c"
+        ],
         "turn": "3s",
         "river": "7h"
       },
       "action_history": [
-        { "street": "preflop", "player": "BTN", "action": "open", "size_bb": 3 },
-        { "street": "preflop", "player": "MP", "action": "call", "size_bb": 3 },
-        { "street": "preflop", "player": "BB", "action": "call", "size_bb": 3 },
-        { "street": "flop", "player": "BB", "action": "check" },
-        { "street": "flop", "player": "MP", "action": "check" },
-        { "street": "flop", "player": "BTN", "action": "check" },
-        { "street": "turn", "player": "BB", "action": "check" },
-        { "street": "turn", "player": "MP", "action": "check" },
-        { "street": "turn", "player": "BTN", "action": "check" },
-        { "street": "river", "player": "BB", "action": "check" },
-        { "street": "river", "player": "MP", "action": "check" }
+        {
+          "street": "preflop",
+          "player": "BTN",
+          "action": "open",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "MP",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "preflop",
+          "player": "BB",
+          "action": "call",
+          "size_bb": 3
+        },
+        {
+          "street": "flop",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "MP",
+          "action": "check"
+        },
+        {
+          "street": "flop",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "MP",
+          "action": "check"
+        },
+        {
+          "street": "turn",
+          "player": "BTN",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "BB",
+          "action": "check"
+        },
+        {
+          "street": "river",
+          "player": "MP",
+          "action": "check"
+        }
       ]
     },
     "decision_point": {
       "street": "river",
-      "facing": { "action": "check" },
+      "facing": {
+        "action": "check"
+      },
       "sizing_buttons_enabled": false
     },
     "options": [
-      { "key": "FOLD", "label": "Check Back (give up)" },
-      { "key": "CALL", "label": "Bluff Small" },
-      { "key": "RAISE", "label": "Bluff Large" }
+      {
+        "key": "FOLD",
+        "label": "Check Back (give up)"
+      },
+      {
+        "key": "CALL",
+        "label": "Bluff Small"
+      },
+      {
+        "key": "RAISE",
+        "label": "Bluff Large"
+      }
     ],
     "answer": {
       "correct": "FOLD",
       "accepted": [],
-      "required_tags": ["multiway_turn_discipline", "river_thin_value"],
+      "required_tags": [
+        "multiway_turn_discipline",
+        "river_thin_value"
+      ],
       "explanation": "Bluffing into two opponents on a 9-8-4-3-7 connected river is -EV regardless of pool. Both need to fold; live pools almost never fold multiway rivers with any pair. Check back and accept the loss — bluffing multiway with no equity is a pure spew."
     },
     "answer_by_pool": {
       "A": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["multiway_turn_discipline"],
+        "required_tags": [
+          "multiway_turn_discipline"
+        ],
         "explanation": "Competent players check back strong hands in multiway — bluffing two opponents requires both to fold. Near-impossible on 9-8-4-3-7."
       },
       "B": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["multiway_turn_discipline"],
+        "required_tags": [
+          "multiway_turn_discipline"
+        ],
         "explanation": "Passive recs call rivers with any pair. Zero fold equity vs two players — don't bluff."
       },
       "C": {
         "correct": "FOLD",
         "accepted": [],
-        "required_tags": ["multiway_turn_discipline"],
+        "required_tags": [
+          "multiway_turn_discipline"
+        ],
         "explanation": "Even aggro pools: bluffing two opponents simultaneously on a connected board is nearly impossible. Check."
       }
     },
-    "tags": ["street:river", "pot:multiway", "position:ip", "spot:multiway_give_up", "decision:check_back"],
+    "tags": [
+      "street:river",
+      "pot:multiway",
+      "position:ip",
+      "spot:multiway_give_up",
+      "decision:check_back"
+    ],
     "difficulty": 1,
     "coaching_context": {
-      "common_mistakes": ["Bluffing missed draws into multiway pots on connected boards", "Treating multiway bluffing like a HU opportunity"],
-      "population_note": "The fundamental multiway bluff rule: both opponents need to fold. On connected boards with live pools, this never happens. Take the free showdown — preserve stack discipline."
+      "common_mistakes": [
+        "Bluffing missed draws into multiway pots on connected boards",
+        "Treating multiway bluffing like a HU opportunity"
+      ],
+      "population_note": "The fundamental multiway bluff rule: both opponents need to fold. On connected boards with live pools, this never happens. Take the free showdown — preserve stack discipline.",
+      "key_concept": "Bluffing into two opponents on a 9-8-4-3-7 connected river is -EV regardless of pool.",
+      "difficulty_reason": "Multiway River — Missed Draw, Bluff or Give Up? is difficult because many players default to bluffing missed draws into multiway pots on connected boards, even though AKs changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Check Back (give up) works because AKs lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
-    "metadata": { "source": "manual" }
+    "metadata": {
+      "source": "manual"
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "multiway-river-missed-draw",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "multiway river discipline",
+        "expected_reasoning": "The right answer comes from threshold discipline: how the river line changed range density leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because how the river line changed range density determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   }
 ]

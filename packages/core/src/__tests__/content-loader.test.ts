@@ -1,10 +1,12 @@
-﻿import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import Database from "better-sqlite3";
 import { runMigrations, getAllNodes, getAllDrills } from "@poker-coach/db";
 import { loadNodes, loadDrills, loadAllContent, CanonicalDrillSchema } from "../index";
+import { readCanonicalDrillsFromDirectory } from "../drills";
 import path from "node:path";
 
 const CONTENT_DIR = path.resolve(__dirname, "../../../../content");
+const EXPECTED_DRILL_COUNT = readCanonicalDrillsFromDirectory(path.join(CONTENT_DIR, "drills")).length;
 
 describe("content-loader", () => {
   let db: Database.Database;
@@ -34,13 +36,13 @@ describe("content-loader", () => {
 
     const drillsDir = path.join(CONTENT_DIR, "drills");
     const count1 = loadDrills(db, drillsDir);
-    expect(count1).toBe(153);
-    expect(getAllDrills(db)).toHaveLength(153);
+    expect(count1).toBe(EXPECTED_DRILL_COUNT);
+    expect(getAllDrills(db)).toHaveLength(EXPECTED_DRILL_COUNT);
     expect(CanonicalDrillSchema.parse(JSON.parse(getAllDrills(db)[0].content_json)).drill_id).toBeTruthy();
 
     const count2 = loadDrills(db, drillsDir);
-    expect(count2).toBe(153);
-    expect(getAllDrills(db)).toHaveLength(153);
+    expect(count2).toBe(EXPECTED_DRILL_COUNT);
+    expect(getAllDrills(db)).toHaveLength(EXPECTED_DRILL_COUNT);
   });
 
   it("loads truth-rich exemplar drills with authored history, steps, and pool contrast", () => {
@@ -73,7 +75,7 @@ describe("content-loader", () => {
   it("loads all content with loadAllContent", () => {
     const result = loadAllContent(db, CONTENT_DIR);
     expect(result.nodes).toBe(51);
-    expect(result.drills).toBe(153);
+    expect(result.drills).toBe(EXPECTED_DRILL_COUNT);
   });
 
   it("returns 0 for non-existent directories", () => {

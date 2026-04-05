@@ -107,11 +107,40 @@
         "Over-folding AJo vs wide live 3-bet ranges",
         "Auto-4-betting without blockers"
       ],
-      "live_pool_notes": "Live rec players often 3-bet only JJ+/AK making folding AJo correct vs tightest profiles. Identify their range before calling off stacks."
+      "live_pool_notes": "Live rec players often 3-bet only JJ+/AK making folding AJo correct vs tightest profiles. Identify their range before calling off stacks.",
+      "key_concept": "AJo has strong equity IP in a 3-bet pot but not enough blockers to 4-bet/fold profitably vs a value-heavy live pool. C shifts to fold when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "BTN vs BB 3-Bet — Premium Flat or 4-Bet? is difficult because many players default to over-folding AJo vs wide live 3-bet ranges, even though AJo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call works because AJo has enough equity to continue but not the blocker structure to turn the hand into a profitable 4-bet or raise."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "btn-vs-bb-3",
+        "prompt": "Which population assumption should actually drive this decision?",
+        "type": "pool_assumption",
+        "concept": "preflop 3-bet defense",
+        "expected_reasoning": "Correct reasoning uses the right live-pool assumption without abandoning baseline combo placement or positional logic.",
+        "options": [
+          {
+            "id": "extreme_read",
+            "label": "Assume the pool is at an extreme and let that flip the action even if the combo placement is weak.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "calibrated_pool",
+            "label": "Use a calibrated read on the live rec pool while still respecting the combo's baseline role in the node.",
+            "matches_expected": true
+          },
+          {
+            "id": "ignore_pool",
+            "label": "Ignore live-pool behavior entirely because baseline theory should always dominate this spot.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_pf01_02",
@@ -223,11 +252,40 @@
         "Folding KQs IP vs any 3-bet",
         "Never 4-bet bluffing with suited connectors/broadway blockers"
       ],
-      "live_pool_notes": "Note whether villain is protecting a strong range. In very tight live games KQs call can be thin."
+      "live_pool_notes": "Note whether villain is protecting a strong range. In very tight live games KQs call can be thin.",
+      "key_concept": "KQs plays great IP in a 3-bet pot — strong post-flop equity, top pair value, backdoor nut flushes. A shifts to 4-bet; and C shifts to fold.",
+      "difficulty_reason": "BTN vs BB 3-Bet — KQs Decision is difficult because many players default to folding KQs IP vs any 3-bet, even though KQs changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call works because KQs realizes equity well in position and keeps dominated hands or live mistakes in the pot."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "btn-vs-bb-3",
+        "prompt": "Which population assumption should actually drive this decision?",
+        "type": "pool_assumption",
+        "concept": "preflop 3-bet defense",
+        "expected_reasoning": "Correct reasoning uses the right live-pool assumption without abandoning baseline combo placement or positional logic.",
+        "options": [
+          {
+            "id": "extreme_read",
+            "label": "Assume the pool is at an extreme and let that flip the action even if the combo placement is weak.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "calibrated_pool",
+            "label": "Use a calibrated read on the baseline live pool while still respecting the combo's baseline role in the node.",
+            "matches_expected": true
+          },
+          {
+            "id": "ignore_pool",
+            "label": "Ignore live-pool behavior entirely because baseline theory should always dominate this spot.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_pf01_03",
@@ -335,11 +393,40 @@
         "Auto-folding all pocket pairs to 3-bets",
         "Calling off deep with pairs vs tight live 3-bettors"
       ],
-      "live_pool_notes": "Implied odds improve significantly against live players who stack off with overpairs on connected boards."
+      "live_pool_notes": "Implied odds improve significantly against live players who stack off with overpairs on connected boards.",
+      "key_concept": "66 IP can set-mine profitably at 100bb — you need to flop a set (~12% of the time) and stack villain. C shifts to fold when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "BTN vs BB 3-Bet — 66 Cold Call or Fold? is difficult because many players default to auto-folding all pocket pairs to 3-bets, even though 66 changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call works because 66 makes its money by realizing implied odds and getting paid when it connects cleanly, not by forcing a bigger pot now."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "btn-vs-bb-3",
+        "prompt": "Which population assumption should actually drive this decision?",
+        "type": "pool_assumption",
+        "concept": "preflop 3-bet defense",
+        "expected_reasoning": "Correct reasoning uses the right live-pool assumption without abandoning baseline combo placement or positional logic.",
+        "options": [
+          {
+            "id": "extreme_read",
+            "label": "Assume the pool is at an extreme and let that flip the action even if the combo placement is weak.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "calibrated_pool",
+            "label": "Use a calibrated read on the baseline live pool while still respecting the combo's baseline role in the node.",
+            "matches_expected": true
+          },
+          {
+            "id": "ignore_pool",
+            "label": "Ignore live-pool behavior entirely because baseline theory should always dominate this spot.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_pf02_01",
@@ -447,11 +534,40 @@
         "Defending ATo OOP vs all 3-bets due to ace strength illusion",
         "Calling off wide OOP and losing equity realization"
       ],
-      "live_pool_notes": "Live BTN 3-bets are often more linear than solver solutions — factor in whether opponent is 3-betting only nutted hands or a wider range."
+      "live_pool_notes": "Live BTN 3-bets are often more linear than solver solutions — factor in whether opponent is 3-betting only nutted hands or a wider range.",
+      "key_concept": "ATo OOP vs IP 3-bet is a classic leak. A shifts to call when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "CO vs BTN 3-Bet — ATo Defense is difficult because many players default to defending ATo OOP vs all 3-bets due to ace strength illusion, even though ATo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Fold works because ATo is either too dominated or too awkward on later streets to justify continuing more aggressively."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "co-vs-btn-3",
+        "prompt": "Which population assumption should actually drive this decision?",
+        "type": "pool_assumption",
+        "concept": "preflop 3-bet defense",
+        "expected_reasoning": "Correct reasoning uses the right live-pool assumption without abandoning baseline combo placement or positional logic.",
+        "options": [
+          {
+            "id": "extreme_read",
+            "label": "Assume the pool is at an extreme and let that flip the action even if the combo placement is weak.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "calibrated_pool",
+            "label": "Use a calibrated read on the out-of-position defense while still respecting the combo's baseline role in the node.",
+            "matches_expected": true
+          },
+          {
+            "id": "ignore_pool",
+            "label": "Ignore live-pool behavior entirely because baseline theory should always dominate this spot.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_pf02_02",
@@ -555,11 +671,40 @@
         "Calling QJo/KJo OOP vs 3-bets due to connectedness",
         "Overvaluing suited-connector-style hands in 3-bet pots OOP"
       ],
-      "live_pool_notes": "One of the most common live leaks: defending dominated OOPbroadway hands. Folding quickly protects your post-flop session-wide edge."
+      "live_pool_notes": "One of the most common live leaks: defending dominated OOPbroadway hands. Folding quickly protects your post-flop session-wide edge.",
+      "key_concept": "QJo is a clear fold OOP vs BTN 3-bet.",
+      "difficulty_reason": "CO vs BTN 3-Bet — QJo Marginal Spot is difficult because many players default to calling QJo/KJo OOP vs 3-bets due to connectedness, even though QJo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Fold works because QJo is either too dominated or too awkward on later streets to justify continuing more aggressively."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "co-vs-btn-3",
+        "prompt": "Which population assumption should actually drive this decision?",
+        "type": "pool_assumption",
+        "concept": "preflop 3-bet defense",
+        "expected_reasoning": "Correct reasoning uses the right live-pool assumption without abandoning baseline combo placement or positional logic.",
+        "options": [
+          {
+            "id": "extreme_read",
+            "label": "Assume the pool is at an extreme and let that flip the action even if the combo placement is weak.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "calibrated_pool",
+            "label": "Use a calibrated read on the out-of-position defense while still respecting the combo's baseline role in the node.",
+            "matches_expected": true
+          },
+          {
+            "id": "ignore_pool",
+            "label": "Ignore live-pool behavior entirely because baseline theory should always dominate this spot.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_pf02_03",
@@ -671,11 +816,40 @@
         "Auto-folding TT to BTN 3-bet",
         "Always 4-betting TT and getting it in bad vs nutted ranges"
       ],
-      "live_pool_notes": "Read the 3-bettor. A tight older player holding TT 3-bet from BTN is rare — adjust accordingly."
+      "live_pool_notes": "Read the 3-bettor. A tight older player holding TT 3-bet from BTN is rare — adjust accordingly.",
+      "key_concept": "TT can call or 4-bet depending on pool read. C shifts to fold when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "CO vs BTN 3-Bet — TT Flat or 4-Bet? is difficult because many players default to auto-folding TT to BTN 3-bet, even though TT changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "TT has set-mining equity and enough high-card value to flat OOP — 4-betting is only correct when villain's range is specifically AA/KK/AK, and without blockers to those hands the flat is the safer default."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "co-vs-btn-3",
+        "prompt": "Which population assumption should actually drive this decision?",
+        "type": "pool_assumption",
+        "concept": "preflop 3-bet defense",
+        "expected_reasoning": "Correct reasoning uses the right live-pool assumption without abandoning baseline combo placement or positional logic.",
+        "options": [
+          {
+            "id": "extreme_read",
+            "label": "Assume the pool is at an extreme and let that flip the action even if the combo placement is weak.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "calibrated_pool",
+            "label": "Use a calibrated read on the out-of-position defense while still respecting the combo's baseline role in the node.",
+            "matches_expected": true
+          },
+          {
+            "id": "ignore_pool",
+            "label": "Ignore live-pool behavior entirely because baseline theory should always dominate this spot.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp01_01",
@@ -798,11 +972,40 @@
         "Over-sizing c-bets on dry low-SPR boards",
         "Checking back top pair on boards where you have clear range advantage"
       ],
-      "live_pool_notes": "Live players often call small bets light and fold to large bets with weak made hands. Small sizing keeps their calling range wide."
+      "live_pool_notes": "Live players often call small bets light and fold to large bets with weak made hands. Small sizing keeps their calling range wide.",
+      "key_concept": "K72r with TPTK is a classic small c-bet board. C shifts to bet 75%+ pot when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "SRP Flop C-Bet IP — Dry Board Size is difficult because many players default to over-sizing c-bets on dry low-SPR boards, even though AKo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Small c-bet (25-33%) on K72r applies range-wide pressure at low cost — you hold range advantage on this dry king-high board and a large sizing burns EV without gaining anything extra from hands that aren't continuing anyway."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-flop-c-bet",
+        "prompt": "Why does bet 33% pot outperform folding or raising in this spot?",
+        "type": "line_understanding",
+        "concept": "flop c-bet discipline",
+        "expected_reasoning": "This combo sits in the continue region because the dry texture keeps enough worse hands, bluffs, or realizable equity in play without needing to escalate the pot.",
+        "options": [
+          {
+            "id": "too_weak_fold",
+            "label": "The combo is below threshold here, so continuing mostly pays off stronger hands.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "continue_bucket",
+            "label": "The right read is that the dry texture keeps this hand high enough in the continuing range, but not strong enough to prefer a raise.",
+            "matches_expected": true
+          },
+          {
+            "id": "must_raise",
+            "label": "If the hand is good enough to continue, it should usually raise now rather than call.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp01_02",
@@ -925,11 +1128,40 @@
         "Only c-betting made hands on dry boards",
         "Checking back all air and losing future bluff turns"
       ],
-      "live_pool_notes": "Small c-bets with backdoor hands keep your bluffing range functional on later streets."
+      "live_pool_notes": "Small c-bets with backdoor hands keep your bluffing range functional on later streets.",
+      "key_concept": "JJ9h has backdoor potential and two overcards. C shifts to check back when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "SRP Flop C-Bet IP — Dry Board with Air is difficult because many players default to only c-betting made hands on dry boards, even though J9s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Bet small (33%) works because J9s lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-flop-c-bet",
+        "prompt": "Why does bet small (33%) outperform folding or raising in this spot?",
+        "type": "line_understanding",
+        "concept": "flop c-bet discipline",
+        "expected_reasoning": "This combo sits in the continue region because the dry texture keeps enough worse hands, bluffs, or realizable equity in play without needing to escalate the pot.",
+        "options": [
+          {
+            "id": "too_weak_fold",
+            "label": "The combo is below threshold here, so continuing mostly pays off stronger hands.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "continue_bucket",
+            "label": "The right read is that the dry texture keeps this hand high enough in the continuing range, but not strong enough to prefer a raise.",
+            "matches_expected": true
+          },
+          {
+            "id": "must_raise",
+            "label": "If the hand is good enough to continue, it should usually raise now rather than call.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp01_03",
@@ -1052,11 +1284,40 @@
         "Auto-betting every flop as BTN PFA",
         "Not recognizing BB-favored low connected boards"
       ],
-      "live_pool_notes": "Live players rarely fold two pair / straight combos on 654 — save your barrel for better texture turns."
+      "live_pool_notes": "Live players rarely fold two pair / straight combos on 654 — save your barrel for better texture turns.",
+      "key_concept": "654r is a BB-favored board — BB defends wide and retains many straights and two-pairs. A shifts to bet 33% when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "SRP Flop C-Bet IP — Range Advantage Check Back is difficult because many players default to auto-betting every flop as BTN PFA, even though AQo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "AQo checks back on 654r because BB retains straights, two-pairs, and connected hands on this BB-favored board — c-betting here forfeits range protection and gives equity away to the exact hands that beat you."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-flop-c-bet",
+        "prompt": "What is the clearest reason this combo falls on the folding side of the line?",
+        "type": "line_understanding",
+        "concept": "flop c-bet discipline",
+        "expected_reasoning": "The combo is too dominated or too low in the threshold once you account for the flop texture, so continuing would over-defend the spot.",
+        "options": [
+          {
+            "id": "realize_anyway",
+            "label": "Position, disguise, or live-player mistakes are enough that this hand should still continue.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "below_threshold",
+            "label": "Once you weigh the flop texture, this hand lands below the profitable continue bucket and should be released.",
+            "matches_expected": true
+          },
+          {
+            "id": "aggressive_solution",
+            "label": "The better adjustment is to turn the combo into an aggressive continue instead of folding.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp02_01",
@@ -1183,11 +1444,40 @@
         "Betting too small on wet boards with nut draws",
         "Checking nut flush draws to 'keep pot small' — this wastes equity"
       ],
-      "live_pool_notes": "Live players often call off with dominated flush draws. Large bets extract from them while protecting your equity."
+      "live_pool_notes": "Live players often call off with dominated flush draws. Large bets extract from them while protecting your equity.",
+      "key_concept": "QTh8d is wet and connected, but BTN holds the nut flush draw + two overcards — absolute nut advantage here. B shifts to bet 50-67% pot; and C shifts to bet 50-67% pot.",
+      "difficulty_reason": "SRP Flop C-Bet IP — Wet Board Nut Advantage is difficult because many players default to betting too small on wet boards with nut draws, even though AKs changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Bet 100%+ pot works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-flop-c-bet",
+        "prompt": "Which range fact matters most when deciding this spot?",
+        "type": "range_construction",
+        "concept": "wet-board c-betting",
+        "expected_reasoning": "Correct reasoning starts with range construction: the wet board and condensed continue range changes which value hands, draws, and marginal continues still make sense.",
+        "options": [
+          {
+            "id": "hand_label_only",
+            "label": "The combo should be played mainly by its absolute hand strength, not by the range interaction.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "range_shape",
+            "label": "The decision comes from how the wet board and condensed continue range reshapes both ranges, not just from hero's hand label.",
+            "matches_expected": true
+          },
+          {
+            "id": "one_blocker",
+            "label": "A single blocker effect outweighs the broader range picture here.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp02_02",
@@ -1306,11 +1596,40 @@
         "Bluffing wet boards with pure air",
         "Over-bluffing connected boards where BB has strong equity"
       ],
-      "live_pool_notes": "Live players call down with pair+draw combos. Don't waste chips bluffing total air on coordinated boards."
+      "live_pool_notes": "Live players call down with pair+draw combos. Don't waste chips bluffing total air on coordinated boards.",
+      "key_concept": "K4o with no flush draw or pair on Jc9c6h is almost pure air.",
+      "difficulty_reason": "SRP Wet Board — Marginal Hand Check Back is difficult because many players default to bluffing wet boards with pure air, even though K4s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Check back works because K4s realizes equity well in position and keeps dominated hands or live mistakes in the pot."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-wet-board-marginal",
+        "prompt": "Which range fact matters most when deciding this spot?",
+        "type": "range_construction",
+        "concept": "wet-board c-betting",
+        "expected_reasoning": "Correct reasoning starts with range construction: the wet board and condensed continue range changes which value hands, draws, and marginal continues still make sense.",
+        "options": [
+          {
+            "id": "hand_label_only",
+            "label": "The combo should be played mainly by its absolute hand strength, not by the range interaction.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "range_shape",
+            "label": "The decision comes from how the wet board and condensed continue range reshapes both ranges, not just from hero's hand label.",
+            "matches_expected": true
+          },
+          {
+            "id": "one_blocker",
+            "label": "A single blocker effect outweighs the broader range picture here.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp02_03",
@@ -1437,11 +1756,40 @@
         "Betting too small with top two on wet boards and getting outdrawn",
         "Slow-playing strong made hands on boards with many draws"
       ],
-      "live_pool_notes": "Live draw-chasers pay off large bets on the flop — protect your equity and build the pot."
+      "live_pool_notes": "Live draw-chasers pay off large bets on the flop — protect your equity and build the pot.",
+      "key_concept": "Top two on a wet board demands protection. A shifts to bet 50-67%; and C shifts to bet 50-67%.",
+      "difficulty_reason": "SRP Wet Board — Two-Pair C-Bet Size is difficult because many players default to betting too small with top two on wet boards and getting outdrawn, even though J9s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Top two on a wet board demands a large sizing (75-100%+) to make straight and flush draws pay incorrect odds — a smaller c-bet lets BB float any draw and realize equity cheaply against a hand that needs protection."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-wet-board-two",
+        "prompt": "Which range fact matters most when deciding this spot?",
+        "type": "range_construction",
+        "concept": "wet-board c-betting",
+        "expected_reasoning": "Correct reasoning starts with range construction: the wet board and condensed continue range changes which value hands, draws, and marginal continues still make sense.",
+        "options": [
+          {
+            "id": "hand_label_only",
+            "label": "The combo should be played mainly by its absolute hand strength, not by the range interaction.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "range_shape",
+            "label": "The decision comes from how the wet board and condensed continue range reshapes both ranges, not just from hero's hand label.",
+            "matches_expected": true
+          },
+          {
+            "id": "one_blocker",
+            "label": "A single blocker effect outweighs the broader range picture here.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp03_01",
@@ -1578,11 +1926,40 @@
         "Auto-barreling turns without equity improvement",
         "Turning missed backdoors into bluffs on connected boards"
       ],
-      "live_pool_notes": "Live players call down wide on turns. Recognize brick turns and save your chips for better bluff turns."
+      "live_pool_notes": "Live players call down wide on turns. Recognize brick turns and save your chips for better bluff turns.",
+      "key_concept": "A5h on K723 with no equity improvement is a give-up. C shifts to bet 50-67% when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "SRP Turn Barrel — Double Barrel or Give Up? is difficult because many players default to auto-barreling turns without equity improvement, even though A5s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "A5h has no pair and no draw on K723 after the 3c improved BB's 4x hands — with zero equity path and a connected board that favors the caller, checking back is the only line that doesn't spew."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-turn-barrel-double",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn barreling",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp03_02",
@@ -1725,11 +2102,40 @@
         "Checking back strong equity draws on turns",
         "Under-barreling when you improve to a big draw"
       ],
-      "live_pool_notes": "Live players call draws to the turn then give up on rivers — extract on the turn when your equity is highest."
+      "live_pool_notes": "Live players call draws to the turn then give up on rivers — extract on the turn when your equity is highest.",
+      "key_concept": "AhJh on KQ7 with NFD + gutshot to the nuts is a premium barrel hand. C shifts to bet 50-67% when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "SRP Turn Barrel — Good Equity Turn Fire is difficult because many players default to checking back strong equity draws on turns, even though AJs changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Bet 100%+ works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-turn-barrel-good",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn barreling",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp03_03",
@@ -1872,11 +2278,40 @@
         "Missing overbet opportunities when board pairs and reduces BB's nut range",
         "Betting too small with top pair on turn overbet boards"
       ],
-      "live_pool_notes": "Live players frequently call one street overbets with 7x — structure your range so you can follow through on rivers."
+      "live_pool_notes": "Live players frequently call one street overbets with 7x — structure your range so you can follow through on rivers.",
+      "key_concept": "K722 pairs the board and heavily reduces BB's ability to have trips. A shifts to bet 50-67% when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "SRP Turn — Polarize Value Overbet is difficult because many players default to missing overbet opportunities when board pairs and reduces BB's nut range, even though KQs changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Overbet 125%+ works because KQs lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-turn-polarize-value",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn barreling",
+        "expected_reasoning": "The critical update is how the polarized sizing shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with the polarized sizing.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp04_01",
@@ -2000,11 +2435,40 @@
         "Always checking turns OOP even when BTN's flop check-back caps their range",
         "Not probing when you have clear equity advantage after a check-through"
       ],
-      "live_pool_notes": "Probing with middle pair after a check-through is underutilized in live cash. Live BTNs who check back strong hands are rare — their range is weak."
+      "live_pool_notes": "Probing with middle pair after a check-through is underutilized in live cash. Live BTNs who check back strong hands are rare — their range is weak.",
+      "key_concept": "BTN checked back the flop — their range is capped (no premium hands). C shifts to check when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "SRP OOP Turn Probe — Lead or Check? is difficult because many players default to always checking turns OOP even when BTN's flop check-back caps their range, even though J6s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Bet 50% pot works because the earlier checks cap villain enough that this hand can value-bet or pressure the middle of the range immediately."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-oop-turn-probe",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn probing",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp04_02",
@@ -2128,11 +2592,40 @@
         "Over-probing OOP with air after check-backs",
         "Bluffing with hands that have no path to the best hand"
       ],
-      "live_pool_notes": "Probe only when you improve to a hand with equity or when the turn dramatically shifts range advantage."
+      "live_pool_notes": "Probe only when you improve to a hand with equity or when the turn dramatically shifts range advantage.",
+      "key_concept": "Ah7s on K824 picked up a backdoor flush draw but has no pair and no real equity. C shifts to bet 50% pot when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "SRP OOP Turn Probe — No Equity, Check is difficult because many players default to over-probing OOP with air after check-backs, even though A7o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Check works because A7o lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-oop-turn-probe",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn probing",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp04_03",
@@ -2260,11 +2753,40 @@
         "Slow-playing the nuts on a capped range",
         "Checking back to 'trap' when BTN has no strong hands to trap"
       ],
-      "live_pool_notes": "Live BTNs who check back flops are rarely trapping — extract as much as possible from their made hands."
+      "live_pool_notes": "Live BTNs who check back flops are rarely trapping — extract as much as possible from their made hands.",
+      "key_concept": "K88 gives you the nuts essentially (top full house). A shifts to bet 50-67%; and C shifts to bet 50-67%.",
+      "difficulty_reason": "SRP OOP Turn Probe — Two-Pair Lead is difficult because many players default to slow-playing the nuts on a capped range, even though K8o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Overbet 125%+ works because the earlier checks cap villain enough that this hand can value-bet or pressure the middle of the range immediately."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-oop-turn-probe",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn probing",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp05_01",
@@ -2422,11 +2944,40 @@
         "Calling down with top pair vs three-street barreling ranges",
         "Not adjusting river call frequency based on pool bluffing tendencies"
       ],
-      "live_pool_notes": "Most live players under-bluff rivers. Calling three-street barrels with non-nut hands is a common live leak."
+      "live_pool_notes": "Most live players under-bluff rivers. Calling three-street barrels with non-nut hands is a common live leak.",
+      "key_concept": "BTN bet three streets in a SRP and faces a flush-completing river. A shifts to call when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "SRP River Bluff-Catch — Top Pair vs Large Bet is difficult because many players default to calling down with top pair vs three-street barreling ranges, even though K9o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Fold works because K9o lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-river-bluff-catch",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "river bluff catching",
+        "expected_reasoning": "The right answer comes from threshold discipline: how the river line changed range density leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because how the river line changed range density determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp05_02",
@@ -2580,11 +3131,40 @@
         "Ignoring live read data and defaulting to GTO folds",
         "Not tracking bluffing patterns and adjusting call frequency"
       ],
-      "live_pool_notes": "Live reads are valuable currency. When you identify an over-bluffer, widen your river calls — even with weaker made hands."
+      "live_pool_notes": "Live reads are valuable currency. When you identify an over-bluffer, widen your river calls — even with weaker made hands.",
+      "key_concept": "99 is well below the top of your range but you have live reads: BTN over-bluffs rivers. B shifts to fold; and C shifts to fold.",
+      "difficulty_reason": "SRP River Bluff-Catch — Thin Call vs Rec Over-Bluffer is difficult because many players default to ignoring live read data and defaulting to GTO folds, even though 99 changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call works because 99 lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-river-bluff-catch",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "river bluff catching",
+        "expected_reasoning": "The right answer comes from threshold discipline: how the river line changed range density leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because how the river line changed range density determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_srp05_03",
@@ -2744,11 +3324,40 @@
         "Folding blockers to nut combos",
         "Not thinking about which value combos are reduced when board pairs"
       ],
-      "live_pool_notes": "Blocker analysis is rarely performed in live games — if you've developed this skill you have a significant edge on live pools."
+      "live_pool_notes": "Blocker analysis is rarely performed in live games — if you've developed this skill you have a significant edge on live pools.",
+      "key_concept": "As5s: you hold two pair (5s5h + board). B shifts to fold; and C shifts to fold.",
+      "difficulty_reason": "SRP River — Blocker-Informed Bluff-Catch is difficult because many players default to folding blockers to nut combos, even though A5s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "srp-river-blocker-informed",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "river bluff catching",
+        "expected_reasoning": "The right answer comes from threshold discipline: how the river line changed range density leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because how the river line changed range density determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_3bp01_01",
@@ -2875,11 +3484,40 @@
         "Betting too large in 3-bet pots and driving out BB's calling range prematurely",
         "Checking back strong hands in 3-bet pots and allowing free cards"
       ],
-      "live_pool_notes": "Live 3-bet pots are often played at low SPR — prioritize getting stacks in efficiently over single-street sizing."
+      "live_pool_notes": "Live 3-bet pots are often played at low SPR — prioritize getting stacks in efficiently over single-street sizing.",
+      "key_concept": "In 3-bet pots, SPR is low (~3-4). C shifts to bet 67%+ pot when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "3-Bet Pot C-Bet IP — Dry Flop Small or Skip? is difficult because many players default to betting too large in 3-bet pots and driving out BB's calling range prematurely, even though AA changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Bet 25-33% pot works because AA lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "3-bet-pot-c",
+        "prompt": "Why does bet 25-33% pot outperform folding or raising in this spot?",
+        "type": "line_understanding",
+        "concept": "3-bet pot c-betting",
+        "expected_reasoning": "This combo sits in the continue region because the dry texture keeps enough worse hands, bluffs, or realizable equity in play without needing to escalate the pot.",
+        "options": [
+          {
+            "id": "too_weak_fold",
+            "label": "The combo is below threshold here, so continuing mostly pays off stronger hands.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "continue_bucket",
+            "label": "The right read is that the dry texture keeps this hand high enough in the continuing range, but not strong enough to prefer a raise.",
+            "matches_expected": true
+          },
+          {
+            "id": "must_raise",
+            "label": "If the hand is good enough to continue, it should usually raise now rather than call.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_3bp01_02",
@@ -3010,11 +3648,40 @@
         "Slow-playing overpairs on wet boards in 3-bet pots",
         "Betting too small in 3-bet pot where SPR demands commitment"
       ],
-      "live_pool_notes": "3-bet pots with low SPR demand immediate pressure on draw-heavy boards. Checking KK on Jh9h6d is a common mistake."
+      "live_pool_notes": "3-bet pots with low SPR demand immediate pressure on draw-heavy boards. Checking KK on Jh9h6d is a common mistake.",
+      "key_concept": "KK on Jh9h6d in a 3-bet pot faces a dangerous connected wet board. C shifts to bet 33-50% when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "3-Bet Pot IP — Continuation on Wet Board is difficult because many players default to slow-playing overpairs on wet boards in 3-bet pots, even though KK changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Bet 80%+ works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "3-bet-pot-ip",
+        "prompt": "What makes bet 80%+ the highest-EV line here instead of taking the passive option?",
+        "type": "line_understanding",
+        "concept": "3-bet pot c-betting",
+        "expected_reasoning": "The key is the wet board and condensed continue range: this spot gains too much from initiative, fold equity, isolation, or value extraction to passively continue.",
+        "options": [
+          {
+            "id": "passive_line",
+            "label": "Flatting or checking keeps weaker hands in, so aggression mostly burns value or fold equity.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "initiative_edge",
+            "label": "The spot is driven by the wet board and condensed continue range, so building the pot or isolating now captures more value than a passive line.",
+            "matches_expected": true
+          },
+          {
+            "id": "fear_adjustment",
+            "label": "Because this is a baseline live pool, the hand should usually avoid aggression and protect against getting played back at.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_3bp01_03",
@@ -3139,11 +3806,40 @@
         "Over-bluffing 3-bet pots with pure air",
         "Not selecting bluff candidates based on equity in the hand"
       ],
-      "live_pool_notes": "In 3-bet pots the cost of bluffing with pure air is high — stack-to-pot ratio demands commitment on turns and rivers."
+      "live_pool_notes": "In 3-bet pots the cost of bluffing with pure air is high — stack-to-pot ratio demands commitment on turns and rivers.",
+      "key_concept": "A8o on Jh9h6d is pure air. C shifts to bet 33% when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "3-Bet Pot IP — Check Back Marginal Hand is difficult because many players default to over-bluffing 3-bet pots with pure air, even though A8s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Check back works because A8s lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "3-bet-pot-ip",
+        "prompt": "What is the clearest reason this combo falls on the folding side of the line?",
+        "type": "line_understanding",
+        "concept": "3-bet pot c-betting",
+        "expected_reasoning": "The combo is too dominated or too low in the threshold once you account for the flop texture, so continuing would over-defend the spot.",
+        "options": [
+          {
+            "id": "realize_anyway",
+            "label": "Position, disguise, or live-player mistakes are enough that this hand should still continue.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "below_threshold",
+            "label": "Once you weigh the flop texture, this hand lands below the profitable continue bucket and should be released.",
+            "matches_expected": true
+          },
+          {
+            "id": "aggressive_solution",
+            "label": "The better adjustment is to turn the combo into an aggressive continue instead of folding.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_3bp02_01",
@@ -3279,11 +3975,40 @@
         "Folding QQ OOP in 3-bet pots on king-high boards",
         "Check-raising QQ for thin value when you're behind Kx range"
       ],
-      "live_pool_notes": "OOP in 3-bet pots, the default is to check-call your medium pairs and wait for K-x to bet again or give up on turns."
+      "live_pool_notes": "OOP in 3-bet pots, the default is to check-call your medium pairs and wait for K-x to bet again or give up on turns.",
+      "key_concept": "QQ on Kh9d3s in a 3-bet pot OOP: you're behind BTN's K-x hands. C shifts to check-raise when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "3-Bet Pot OOP — Check-Raise vs IP C-Bet is difficult because many players default to folding QQ OOP in 3-bet pots on king-high boards, even though QQ changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call works because QQ lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "3-bet-pot-oop",
+        "prompt": "Why does call outperform folding or raising in this spot?",
+        "type": "line_understanding",
+        "concept": "3-bet pot defense",
+        "expected_reasoning": "This combo sits in the continue region because the flop texture keeps enough worse hands, bluffs, or realizable equity in play without needing to escalate the pot.",
+        "options": [
+          {
+            "id": "too_weak_fold",
+            "label": "The combo is below threshold here, so continuing mostly pays off stronger hands.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "continue_bucket",
+            "label": "The right read is that the flop texture keeps this hand high enough in the continuing range, but not strong enough to prefer a raise.",
+            "matches_expected": true
+          },
+          {
+            "id": "must_raise",
+            "label": "If the hand is good enough to continue, it should usually raise now rather than call.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_3bp02_02",
@@ -3423,11 +4148,40 @@
         "Under-raising top two in 3-bet pots",
         "Slow-playing strong hands in low-SPR pots"
       ],
-      "live_pool_notes": "Check-raising the nuts for value in 3-bet pots is essential. Live players often call check-raises with KQ and commit stacks by turn."
+      "live_pool_notes": "Check-raising the nuts for value in 3-bet pots is essential. Live players often call check-raises with KQ and commit stacks by turn.",
+      "key_concept": "K9 top two in a 3-bet pot is an excellent check-raise hand: you have the near-nuts, BTN can continue with KQ/KJ/overpairs, and the low SPR means building the pot now is critical. C shifts to call when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "3-Bet Pot OOP — Check-Raise Nuts is difficult because many players default to under-raising top two in 3-bet pots, even though K9s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "K9 top two in a 3-bet pot check-raises to build the pot with near-nuts at a low SPR — BTN's continuing range of KQ, KJ, and overpairs will pay off, and calling at this stack depth misses the EV window."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "3-bet-pot-oop",
+        "prompt": "What makes check-raise the highest-EV line here instead of taking the passive option?",
+        "type": "line_understanding",
+        "concept": "3-bet pot defense",
+        "expected_reasoning": "The key is the flop texture: this spot gains too much from initiative, fold equity, isolation, or value extraction to passively continue.",
+        "options": [
+          {
+            "id": "passive_line",
+            "label": "Flatting or checking keeps weaker hands in, so aggression mostly burns value or fold equity.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "initiative_edge",
+            "label": "The spot is driven by the flop texture, so building the pot or isolating now captures more value than a passive line.",
+            "matches_expected": true
+          },
+          {
+            "id": "fear_adjustment",
+            "label": "Because this is a out-of-position defense, the hand should usually avoid aggression and protect against getting played back at.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_3bp02_03",
@@ -3557,11 +4311,40 @@
         "Calling large c-bets OOP in 3-bet pots with weak draws",
         "Getting pot-committed in 3-bet pots with marginal equity"
       ],
-      "live_pool_notes": "3-bet pot discipline requires folding more OOP. Large c-bets in 3-bet pots almost always represent significant strength."
+      "live_pool_notes": "3-bet pot discipline requires folding more OOP. Large c-bets in 3-bet pots almost always represent significant strength.",
+      "key_concept": "A7h with backdoor flush draw in a 3-bet pot OOP facing an 85% c-bet: fold.",
+      "difficulty_reason": "3-Bet Pot OOP — Fold to Large C-Bet is difficult because many players default to calling large c-bets OOP in 3-bet pots with weak draws, even though A7s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "A7h cannot call an 85% c-bet at this SPR — calling nearly commits hero with ace-high and a backdoor draw in a 3-bet pot where the stack-to-pot math does not support continuing."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "3-bet-pot-oop",
+        "prompt": "What is the clearest reason this combo falls on the folding side of the line?",
+        "type": "line_understanding",
+        "concept": "3-bet pot defense",
+        "expected_reasoning": "The combo is too dominated or too low in the threshold once you account for the flop texture, so continuing would over-defend the spot.",
+        "options": [
+          {
+            "id": "realize_anyway",
+            "label": "Position, disguise, or live-player mistakes are enough that this hand should still continue.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "below_threshold",
+            "label": "Once you weigh the flop texture, this hand lands below the profitable continue bucket and should be released.",
+            "matches_expected": true
+          },
+          {
+            "id": "aggressive_solution",
+            "label": "The better adjustment is to turn the combo into an aggressive continue instead of folding.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_mw01_01",
@@ -3694,11 +4477,40 @@
         "Checking back top pair multiway to 'avoid bloating pot'",
         "Betting too large multiway and isolating only strong hands"
       ],
-      "live_pool_notes": "Multiway pots require smaller c-bets — you're charging two players for draws and building pot efficiently with top pair."
+      "live_pool_notes": "Multiway pots require smaller c-bets — you're charging two players for draws and building pot efficiently with top pair.",
+      "key_concept": "AK top pair in a 3-way pot: bet small (33%) to build pot and protect your hand vs draws. C shifts to bet 67%+ when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "Multiway Flop C-Bet — Dry Board, Check or Bet? is difficult because many players default to checking back top pair multiway to 'avoid bloating pot', even though AKo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "AK bets small (33%) in a 3-way pot to protect top pair against draws and extract value from K-x hands — checking back surrenders initiative and gives free equity to the hands that can outdraw you multiway."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "multiway-flop-c-bet",
+        "prompt": "Which range fact matters most when deciding this spot?",
+        "type": "range_construction",
+        "concept": "multiway flop discipline",
+        "expected_reasoning": "Correct reasoning starts with range construction: the dry texture changes which value hands, draws, and marginal continues still make sense.",
+        "options": [
+          {
+            "id": "hand_label_only",
+            "label": "The combo should be played mainly by its absolute hand strength, not by the range interaction.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "range_shape",
+            "label": "The decision comes from how the dry texture reshapes both ranges, not just from hero's hand label.",
+            "matches_expected": true
+          },
+          {
+            "id": "one_blocker",
+            "label": "A single blocker effect outweighs the broader range picture here.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_mw01_02",
@@ -3825,11 +4637,40 @@
         "Auto-c-betting two-player checked-to boards even with air",
         "Not adjusting bluffing frequency for multiway situations"
       ],
-      "live_pool_notes": "Multiway bluffing with pure air is a common live cash leak. Two calling ranges dramatically reduce fold equity."
+      "live_pool_notes": "Multiway bluffing with pure air is a common live cash leak. Two calling ranges dramatically reduce fold equity.",
+      "key_concept": "QJo with no pair or draw on K83r multiway: check back.",
+      "difficulty_reason": "Multiway Flop C-Bet — Weak Hand, Check Back is difficult because many players default to auto-c-betting two-player checked-to boards even with air, even though QJo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Check back works because QJo lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "multiway-flop-c-bet",
+        "prompt": "Which range fact matters most when deciding this spot?",
+        "type": "range_construction",
+        "concept": "multiway flop discipline",
+        "expected_reasoning": "Correct reasoning starts with range construction: the flop texture changes which value hands, draws, and marginal continues still make sense.",
+        "options": [
+          {
+            "id": "hand_label_only",
+            "label": "The combo should be played mainly by its absolute hand strength, not by the range interaction.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "range_shape",
+            "label": "The decision comes from how the flop texture reshapes both ranges, not just from hero's hand label.",
+            "matches_expected": true
+          },
+          {
+            "id": "one_blocker",
+            "label": "A single blocker effect outweighs the broader range picture here.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc_mw01_03",
@@ -3964,10 +4805,39 @@
         "Calling multiway flop check-raises with top pair (non-nut kicker)",
         "Not distinguizing HU check-raise ranges from multiway check-raise ranges"
       ],
-      "live_pool_notes": "Multiway flop check-raises from live players are almost exclusively value. KQ on K83 facing a multiway c/r is a common discipline test."
+      "live_pool_notes": "Multiway flop check-raises from live players are almost exclusively value. KQ on K83 facing a multiway c/r is a common discipline test.",
+      "key_concept": "KQ top pair (second kicker) in a multiway pot vs a BB check-raise: fold.",
+      "difficulty_reason": "Multiway Flop — Disciplined Check-Raise Threshold is difficult because many players default to calling multiway flop check-raises with top pair (non-nut kicker), even though KQo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Fold works because KQo is either too dominated or too awkward on later streets to justify continuing more aggressively."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "multiway-flop-disciplined-check",
+        "prompt": "Which range fact matters most when deciding this spot?",
+        "type": "range_construction",
+        "concept": "multiway flop discipline",
+        "expected_reasoning": "Correct reasoning starts with range construction: the flop texture changes which value hands, draws, and marginal continues still make sense.",
+        "options": [
+          {
+            "id": "hand_label_only",
+            "label": "The combo should be played mainly by its absolute hand strength, not by the range interaction.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "range_shape",
+            "label": "The decision comes from how the flop texture reshapes both ranges, not just from hero's hand label.",
+            "matches_expected": true
+          },
+          {
+            "id": "one_blocker",
+            "label": "A single blocker effect outweighs the broader range picture here.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   }
 ]

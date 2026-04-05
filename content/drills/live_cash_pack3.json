@@ -102,11 +102,40 @@
         "Cold-calling AJs and playing multiway with no initiative",
         "Under-sizing the squeeze and getting called by CO with good odds"
       ],
-      "live_pool_notes": "Live Pool B flatters rarely continue vs squeezes. Squeeze big to isolate UTG and play HU in position."
+      "live_pool_notes": "Live Pool B flatters rarely continue vs squeezes. Squeeze big to isolate UTG and play HU in position.",
+      "key_concept": "AJs is a premium squeeze candidate BTN vs opener + flat.",
+      "difficulty_reason": "AJs BTN — Squeeze vs UTG Open + CO Flat is difficult because many players default to cold-calling AJs and playing multiway with no initiative, even though AJs changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Squeeze to ~$75 works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "ajs-btn-squeeze-vs",
+        "prompt": "What makes squeeze to ~$75 the highest-EV line here instead of taking the passive option?",
+        "type": "line_understanding",
+        "concept": "preflop squeezing",
+        "expected_reasoning": "The key is the preflop range and position dynamic: this spot gains too much from initiative, fold equity, isolation, or value extraction to passively continue.",
+        "options": [
+          {
+            "id": "passive_line",
+            "label": "Flatting or checking keeps weaker hands in, so aggression mostly burns value or fold equity.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "initiative_edge",
+            "label": "The spot is driven by the preflop range and position dynamic, so building the pot or isolating now captures more value than a passive line.",
+            "matches_expected": true
+          },
+          {
+            "id": "fear_adjustment",
+            "label": "Because this is a baseline live pool, the hand should usually avoid aggression and protect against getting played back at.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_sq01_02",
@@ -215,11 +244,40 @@
         "Squeezing small pairs OOP thinking they're 'strong enough'",
         "Not accounting for the 4-bet risk that 77 cannot profitably call off"
       ],
-      "live_pool_notes": "Small pairs OOP want to see cheap flops multiway, not build big pots vs two players out of position."
+      "live_pool_notes": "Small pairs OOP want to see cheap flops multiway, not build big pots vs two players out of position.",
+      "key_concept": "77 OOP vs opener + caller is a call or fold — not a squeeze. A shifts to fold; and C shifts to fold.",
+      "difficulty_reason": "77 SB — Don't Squeeze Small Pair OOP is difficult because many players default to squeezing small pairs OOP thinking they're 'strong enough', even though 77 changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call (complete) works because 77 makes its money by realizing implied odds and getting paid when it connects cleanly, not by forcing a bigger pot now."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "77-sb-don-t",
+        "prompt": "Why does call (complete) outperform folding or raising in this spot?",
+        "type": "line_understanding",
+        "concept": "preflop squeezing",
+        "expected_reasoning": "This combo sits in the continue region because the preflop range and position dynamic keeps enough worse hands, bluffs, or realizable equity in play without needing to escalate the pot.",
+        "options": [
+          {
+            "id": "too_weak_fold",
+            "label": "The combo is below threshold here, so continuing mostly pays off stronger hands.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "continue_bucket",
+            "label": "The right read is that the preflop range and position dynamic keeps this hand high enough in the continuing range, but not strong enough to prefer a raise.",
+            "matches_expected": true
+          },
+          {
+            "id": "must_raise",
+            "label": "If the hand is good enough to continue, it should usually raise now rather than call.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_sq01_03",
@@ -326,11 +384,40 @@
         "Flatting KQo and playing multiway out of position behind the BTN",
         "Folding a premium squeeze candidate vs passive live players"
       ],
-      "live_pool_notes": "KQo has blocker value against common opening ranges. Squeeze to build a pot you'll play HU with position."
+      "live_pool_notes": "KQo has blocker value against common opening ranges. Squeeze to build a pot you'll play HU with position.",
+      "key_concept": "KQo has blockers to KK and QQ and clean fold equity vs both players.",
+      "difficulty_reason": "KQo CO — Squeeze vs HJ Open + BTN Flat is difficult because many players default to flatting KQo and playing multiway out of position behind the BTN, even though KQo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Squeeze to ~$70 works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "kqo-co-squeeze-vs",
+        "prompt": "What makes squeeze to ~$70 the highest-EV line here instead of taking the passive option?",
+        "type": "line_understanding",
+        "concept": "preflop squeezing",
+        "expected_reasoning": "The key is the preflop range and position dynamic: this spot gains too much from initiative, fold equity, isolation, or value extraction to passively continue.",
+        "options": [
+          {
+            "id": "passive_line",
+            "label": "Flatting or checking keeps weaker hands in, so aggression mostly burns value or fold equity.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "initiative_edge",
+            "label": "The spot is driven by the preflop range and position dynamic, so building the pot or isolating now captures more value than a passive line.",
+            "matches_expected": true
+          },
+          {
+            "id": "fear_adjustment",
+            "label": "Because this is a baseline live pool, the hand should usually avoid aggression and protect against getting played back at.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_sq02_01",
@@ -443,11 +530,40 @@
         "Cold-calling a 3-bet IP with AQo 'just to see a flop'",
         "Playing AQo passively between an opener and 3-bettor"
       ],
-      "live_pool_notes": "Cold-calling a 3-bet in a 3-way pot with AQo makes you the weakest player in the pot. 4-bet or fold."
+      "live_pool_notes": "Cold-calling a 3-bet in a 3-way pot with AQo makes you the weakest player in the pot. 4-bet or fold.",
+      "key_concept": "Cold-calling a 3-bet squeeze (UTG + CO in pot) with AQo is the leak. B shifts to fold; and C shifts to fold.",
+      "difficulty_reason": "AQo BTN — 4-Bet or Fold vs UTG Open + CO 3-Bet is difficult because many players default to cold-calling a 3-bet IP with AQo 'just to see a flop', even though AQo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "AQo 4-bets because cold-calling a squeeze between UTG and CO puts hero in a multiway pot OOP with no initiative — 4-betting forces villain to define their range and keeps the decision binary."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "aqo-btn-4-bet",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "preflop continue decisions",
+        "expected_reasoning": "The right answer comes from threshold discipline: the preflop range and position dynamic leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because the preflop range and position dynamic determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_sq02_02",
@@ -561,11 +677,40 @@
         "Folding T9s multiway at deep stacks — giving up too much implied value",
         "Squeezing T9s into 3 players — creating a multiway 3-bet pot with a speculative hand"
       ],
-      "live_pool_notes": "Suited connectors with nut-making potential are excellent overcallers in passive live fields. Embrace multiway pots with T9s."
+      "live_pool_notes": "Suited connectors with nut-making potential are excellent overcallers in passive live fields. Embrace multiway pots with T9s.",
+      "key_concept": "T9s overcalls profitably here with deep stacks and 3 others in the pot. C shifts to fold when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "T9s CO — Overcall Multiway for Implied Odds is difficult because many players default to folding T9s multiway at deep stacks — giving up too much implied value, even though T9s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call (overcall) works because T9s makes its money by realizing implied odds and getting paid when it connects cleanly, not by forcing a bigger pot now."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "t9s-co-overcall-multiway",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "preflop continue decisions",
+        "expected_reasoning": "The right answer comes from threshold discipline: the preflop range and position dynamic leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because the preflop range and position dynamic determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_sq02_03",
@@ -676,11 +821,40 @@
         "4-betting TT vs UTG + HJ 3-bet and stacking off vs QQ/KK/AA",
         "Folding TT IP vs passive 3-bettor when set-mining odds are strong"
       ],
-      "live_pool_notes": "TT is a strong IP call vs passive 3-bettors. Flop a set and stack them; fold on overcards and move on."
+      "live_pool_notes": "TT is a strong IP call vs passive 3-bettors. Flop a set and stack them; fold on overcards and move on.",
+      "key_concept": "TT calls the 3-bet IP with position and set-mining equity against a passive HJ range. C shifts to fold when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "TT BTN — Call 3-Bet IP vs Passive 3-Bettor is difficult because many players default to 4-betting TT vs UTG + HJ 3-bet and stacking off vs QQ/KK/AA, even though TT changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call IP works because TT realizes equity well in position and keeps dominated hands or live mistakes in the pot."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "tt-btn-call-3",
+        "prompt": "Why does this combo land on this side of the threshold?",
+        "type": "threshold",
+        "concept": "preflop continue decisions",
+        "expected_reasoning": "The right answer comes from threshold discipline: the preflop range and position dynamic leaves this hand either high enough to continue or low enough to release.",
+        "options": [
+          {
+            "id": "auto_continue_or_fold",
+            "label": "Hand class alone decides it here, so threshold details are not especially important.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "threshold_bucket",
+            "label": "The combo belongs here because the preflop range and position dynamic determines whether it still clears the defending or value threshold.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_override",
+            "label": "Population tendencies alone should override the threshold placement in this exact node.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_pb01_01",
@@ -804,11 +978,40 @@
         "Checking and giving BTN a free card when their range is demonstrably capped",
         "Only probing with made hands — KJo with OESD equity is a prime semi-bluff probe"
       ],
-      "live_pool_notes": "Live players check back flops with medium-strength hands and weak draws. BTN's check caps their range — probe and collect."
+      "live_pool_notes": "Live players check back flops with medium-strength hands and weak draws. BTN's check caps their range — probe and collect.",
+      "key_concept": "BTN checked back T72r — their range is capped.",
+      "difficulty_reason": "BB KJo — Probe Turn After BTN Checks Dry Flop is difficult because many players default to checking and giving BTN a free card when their range is demonstrably capped, even though KJo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Lead / Probe (40-50% pot) works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-kjo-probe-turn",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn probing",
+        "expected_reasoning": "The critical update is how the dry texture shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with the dry texture.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_pb01_02",
@@ -929,11 +1132,40 @@
         "Probing with any hand when BTN checks back, regardless of board texture",
         "Treating all check-throughs as equal — ace-high boards give IP players more trapping incentive"
       ],
-      "live_pool_notes": "Ace-high boards hit BTN's opening range hard. A check-through on A93 doesn't signal weakness — it often signals a trap."
+      "live_pool_notes": "Ace-high boards hit BTN's opening range hard. A check-through on A93 doesn't signal weakness — it often signals a trap.",
+      "key_concept": "65o on A93 has no equity and no reasonable bluffing story.",
+      "difficulty_reason": "BB 65o — Check Turn vs Ace-High Board After Check-Through is difficult because many players default to probing with any hand when BTN checks back, regardless of board texture, even though 65o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Check (give free card) works because 65o lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-65o-check-turn",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn probing",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_pb01_03",
@@ -1057,11 +1289,40 @@
         "Only probing with pairs and missing high-equity ace-high probe spots",
         "Checking back A8o OOP and allowing BTN to realize free equity on the river"
       ],
-      "live_pool_notes": "A8o on K74 is at the top of BB's continuing range. BTN's check = weakness on king-high boards. Probe and collect or semi-bluff."
+      "live_pool_notes": "A8o on K74 is at the top of BB's continuing range. BTN's check = weakness on king-high boards. Probe and collect or semi-bluff.",
+      "key_concept": "BTN checked back K74 — their range is weak or capped.",
+      "difficulty_reason": "BB A8o — Probe Turn with Ace-High After BTN Checks King-High is difficult because many players default to only probing with pairs and missing high-equity ace-high probe spots, even though A8o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Lead / Probe (35-45% pot) works because the earlier checks cap villain enough that this hand can value-bet or pressure the middle of the range immediately."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-a8o-probe-turn",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn probing",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_pb02_01",
@@ -1189,11 +1450,40 @@
         "Checking OESD draws OOP on the turn when BTN's range is capped",
         "Only probing with made hands — semi-bluff probes with draws are often higher EV"
       ],
-      "live_pool_notes": "Open-ended straight draws OOP are strong probe candidates when IP checked back. Combine fold equity with 8 outs on the river."
+      "live_pool_notes": "Open-ended straight draws OOP are strong probe candidates when IP checked back. Combine fold equity with 8 outs on the river.",
+      "key_concept": "7♦ gives hero 9♦8♠ an open-ended straight draw (6 or T fills).",
+      "difficulty_reason": "BB 98s — Probe Turn OESD After Flop Check-Through is difficult because many players default to checking OESD draws OOP on the turn when BTN's range is capped, even though 98o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Semi-bluff Lead (40-50% pot) works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-98s-probe-turn",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn probing",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_pb02_02",
@@ -1317,11 +1607,40 @@
         "Passively checking KQo twice and never applying pressure after a BTN check-through",
         "Treating a brick turn as a reason to give up — two overcards still have 6 outs"
       ],
-      "live_pool_notes": "KQo's 6 outs combine with fold equity vs BTN's capped range to make this a clear probe on most brick turns."
+      "live_pool_notes": "KQo's 6 outs combine with fold equity vs BTN's capped range to make this a clear probe on most brick turns.",
+      "key_concept": "BTN checked back T82 — their range is capped at medium pairs and busted draws.",
+      "difficulty_reason": "BB KQo — Probe Brick Turn with Two Overcards is difficult because many players default to passively checking KQo twice and never applying pressure after a BTN check-through, even though KQo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Probe (35-50% pot) works because the earlier checks cap villain enough that this hand can value-bet or pressure the middle of the range immediately."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-kqo-probe-brick",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn probing",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_pb02_03",
@@ -1444,11 +1763,40 @@
         "Probing every time BTN checks back, even when hero has strong made hands that benefit from BTN's bluffing range",
         "Leading TPTK into a capped range that will fold — checking extracts more from bluffing hands"
       ],
-      "live_pool_notes": "TPTK is a trap hand OOP after a check-through. Check and allow BTN to bluff-catch or bet with dominated hands on the river."
+      "live_pool_notes": "TPTK is a trap hand OOP after a check-through. Check and allow BTN to bluff-catch or bet with dominated hands on the river.",
+      "key_concept": "AJo TPTK checks back to preserve BTN's bluffing range on the river.",
+      "difficulty_reason": "BB AJo — Check Top Pair, Let BTN Bluff River is difficult because many players default to probing every time BTN checks back, even when hero has strong made hands that benefit from BTN's bluffing range, even though AJo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Check (induce bluff) works because the earlier checks cap villain enough that this hand can value-bet or pressure the middle of the range immediately."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-ajo-check-top",
+        "prompt": "What changed most on this street that should drive the decision?",
+        "type": "street_shift",
+        "concept": "turn probing",
+        "expected_reasoning": "The critical update is how how the turn changed range advantage shifted range advantage and pressure compared with the previous street.",
+        "options": [
+          {
+            "id": "street_static",
+            "label": "The new card changes very little, so the prior street plan should mostly carry through unchanged.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "street_shift",
+            "label": "The new street materially changes range advantage and incentives, so the plan has to update with how the turn changed range advantage.",
+            "matches_expected": true
+          },
+          {
+            "id": "pool_only",
+            "label": "The card matters less than making a pure live-population exploit regardless of range shift.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_cr01_01",
@@ -1579,11 +1927,40 @@
         "Flatting 76s on K72 and allowing BTN to realize free equity with overcards",
         "Only check-raising the nuts or nothing — pair + flush draw is an ideal semi-CR hand"
       ],
-      "live_pool_notes": "Pair + backdoor flush draw is a standard check-raise combo hand OOP. Build the pot, protect equity, and make BTN's overcards pay."
+      "live_pool_notes": "Pair + backdoor flush draw is a standard check-raise combo hand OOP. Build the pot, protect equity, and make BTN's overcards pay.",
+      "key_concept": "76s flops second pair + backdoor flush draw on K72s. A shifts to call; and C shifts to call.",
+      "difficulty_reason": "BB 76s — Check-Raise Second Pair + Flush Draw on K72 is difficult because many players default to flatting 76s on K72 and allowing BTN to realize free equity with overcards, even though 76s changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "76s check-raises second pair + backdoor flush draw on K72 to deny BTN free turn cards, protect pair equity, and build the pot with a hand that has outs even when behind."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-76s-check-raise",
+        "prompt": "Which range fact matters most when deciding this spot?",
+        "type": "range_construction",
+        "concept": "flop check-raising",
+        "expected_reasoning": "Correct reasoning starts with range construction: the flush-completing card changes which value hands, draws, and marginal continues still make sense.",
+        "options": [
+          {
+            "id": "hand_label_only",
+            "label": "The combo should be played mainly by its absolute hand strength, not by the range interaction.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "range_shape",
+            "label": "The decision comes from how the flush-completing card reshapes both ranges, not just from hero's hand label.",
+            "matches_expected": true
+          },
+          {
+            "id": "one_blocker",
+            "label": "A single blocker effect outweighs the broader range picture here.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_cr01_02",
@@ -1712,11 +2089,40 @@
         "Flatting JTs on a wet connected board and losing the pot on a brick turn",
         "Fearing the board is 'too connected' to CR — combo draws thrive with CR on dynamic boards"
       ],
-      "live_pool_notes": "Top pair + combo draw is one of the most profitable check-raise hands. Build the pot while ahead and charge draws."
+      "live_pool_notes": "Top pair + combo draw is one of the most profitable check-raise hands. Build the pot while ahead and charge draws.",
+      "key_concept": "JTs on J87 has top pair + open-ended straight draw + backdoor clubs — an 18+ equity combo.",
+      "difficulty_reason": "BB JTs — Check-Raise Top Pair + Combo Draw on J87 is difficult because many players default to flatting JTs on a wet connected board and losing the pot on a brick turn, even though JTs changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "JTs on J87 has top pair + open-ended straight draw + backdoor clubs — an 18+ equity combo — strong enough to check-raise for max value and deny the many straight draws in BTN's range a free card."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-jts-check-raise",
+        "prompt": "Which range fact matters most when deciding this spot?",
+        "type": "range_construction",
+        "concept": "flop check-raising",
+        "expected_reasoning": "Correct reasoning starts with range construction: the flop texture changes which value hands, draws, and marginal continues still make sense.",
+        "options": [
+          {
+            "id": "hand_label_only",
+            "label": "The combo should be played mainly by its absolute hand strength, not by the range interaction.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "range_shape",
+            "label": "The decision comes from how the flop texture reshapes both ranges, not just from hero's hand label.",
+            "matches_expected": true
+          },
+          {
+            "id": "one_blocker",
+            "label": "A single blocker effect outweighs the broader range picture here.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_cr01_03",
@@ -1841,11 +2247,40 @@
         "Check-raising TPTK on every board — dry boards are best played with slow-play or thin call lines",
         "Collapsing BTN's bluffing range by CR too often with strong made hands"
       ],
-      "live_pool_notes": "On dry boards, TPTK is best protected by calling. Check-raises on A-high dry boards tell a range story that eliminates all bluffs."
+      "live_pool_notes": "On dry boards, TPTK is best protected by calling. Check-raises on A-high dry boards tell a range story that eliminates all bluffs.",
+      "key_concept": "TPTK on a dry A93 board calls the small bet and lets BTN barrel.",
+      "difficulty_reason": "BB A6o — Call TPTK, Don't Check-Raise Dry Board is difficult because many players default to check-raising TPTK on every board — dry boards are best played with slow-play or thin call lines, even though A6o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call works because A6o lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-a6o-call-tptk",
+        "prompt": "Which range fact matters most when deciding this spot?",
+        "type": "range_construction",
+        "concept": "flop check-raising",
+        "expected_reasoning": "Correct reasoning starts with range construction: the dry texture changes which value hands, draws, and marginal continues still make sense.",
+        "options": [
+          {
+            "id": "hand_label_only",
+            "label": "The combo should be played mainly by its absolute hand strength, not by the range interaction.",
+            "diagnosis": "range_construction_error"
+          },
+          {
+            "id": "range_shape",
+            "label": "The decision comes from how the dry texture reshapes both ranges, not just from hero's hand label.",
+            "matches_expected": true
+          },
+          {
+            "id": "one_blocker",
+            "label": "A single blocker effect outweighs the broader range picture here.",
+            "diagnosis": "blocker_blindness"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_cr02_01",
@@ -1990,11 +2425,40 @@
         "Flatting two pair + OESD on a dynamic board and losing to a river straight card",
         "Only check-raising the nuts on the turn — two pair with OESD is a clear check-raise"
       ],
-      "live_pool_notes": "Turn check-raises with combo draws protect vulnerable two pair and charge straight draws. Don't let BTN get there for free."
+      "live_pool_notes": "Turn check-raises with combo draws protect vulnerable two pair and charge straight draws. Don't let BTN get there for free.",
+      "key_concept": "T♠9♥ on T♥7♦3♣/8♠ flopped top pair, turned two pair + OESD (6 or J fills). C shifts to call when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "BB T9s — Check-Raise Two Pair + OESD on Turn is difficult because many players default to flatting two pair + OESD on a dynamic board and losing to a river straight card, even though T9o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "T9 has two pair + 8 outs to the straight on the turn — check-raising maximizes EV by building the pot with a vulnerable made hand while denying BTN free cards to complete the straight."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-t9s-check-raise",
+        "prompt": "What makes check-raise to ~2.5x the highest-EV line here instead of taking the passive option?",
+        "type": "line_understanding",
+        "concept": "turn check-raising",
+        "expected_reasoning": "The key is how the turn changed range advantage: this spot gains too much from initiative, fold equity, isolation, or value extraction to passively continue.",
+        "options": [
+          {
+            "id": "passive_line",
+            "label": "Flatting or checking keeps weaker hands in, so aggression mostly burns value or fold equity.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "initiative_edge",
+            "label": "The spot is driven by how the turn changed range advantage, so building the pot or isolating now captures more value than a passive line.",
+            "matches_expected": true
+          },
+          {
+            "id": "fear_adjustment",
+            "label": "Because this is a out-of-position defense, the hand should usually avoid aggression and protect against getting played back at.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_cr02_02",
@@ -2139,11 +2603,40 @@
         "Check-raising into a polarized overbet range with only top pair — hero gets destroyed by KT/AQ/AA/QQ",
         "Folding top pair TPTK to an overbet on a dynamic broadway board"
       ],
-      "live_pool_notes": "Overbets on broadway boards are polarized. AKo is a call-down hand, not a fold and not a jam. Peel the river."
+      "live_pool_notes": "Overbets on broadway boards are polarized. AKo is a call-down hand, not a fold and not a jam. Peel the river.",
+      "key_concept": "AKo TPTK on AQJ calls the overbet — hero is not folding top pair to a polarized overbet with backdoor spades on a broadway board. C shifts to fold when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "BB AKo — Call vs BTN Turn Overbet on AQJ/2 is difficult because many players default to check-raising into a polarized overbet range with only top pair — hero gets destroyed by KT/AQ/AA/QQ, even though AKo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "AKo calls the overbet on AQJ because TPTK does not fold to a polarized bet on a broadway board — check-raising jams dead vs AA/QQ/KT, so calling and evaluating the river is the cleanest line."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-ako-call-vs",
+        "prompt": "Why does call outperform folding or raising in this spot?",
+        "type": "line_understanding",
+        "concept": "turn check-raising",
+        "expected_reasoning": "This combo sits in the continue region because the polarized sizing keeps enough worse hands, bluffs, or realizable equity in play without needing to escalate the pot.",
+        "options": [
+          {
+            "id": "too_weak_fold",
+            "label": "The combo is below threshold here, so continuing mostly pays off stronger hands.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "continue_bucket",
+            "label": "The right read is that the polarized sizing keeps this hand high enough in the continuing range, but not strong enough to prefer a raise.",
+            "matches_expected": true
+          },
+          {
+            "id": "must_raise",
+            "label": "If the hand is good enough to continue, it should usually raise now rather than call.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_cr02_03",
@@ -2288,11 +2781,40 @@
         "Slow-playing trips on paired boards and missing value when BTN checks back river",
         "Not check-raising trips in fear of folding out BTN's range — they still have Kx hands that call"
       ],
-      "live_pool_notes": "Trips on paired boards are best played aggressively while BTN still has Kx and pair hands. Check-raise to build the pot now."
+      "live_pool_notes": "Trips on paired boards are best played aggressively while BTN still has Kx and pair hands. Check-raise to build the pot now.",
+      "key_concept": "K♦Q♠ on K♠9♥4♦/K♣ = trips with top kicker. C shifts to call (slow-play) when the pool tightens or widens enough to change the threshold.",
+      "difficulty_reason": "BB KQo — Check-Raise Trips on Turn is difficult because many players default to slow-playing trips on paired boards and missing value when BTN checks back river, even though KQo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Check-Raise (extract) works because KQo lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "bb-kqo-check-raise",
+        "prompt": "What makes check-raise (extract) the highest-EV line here instead of taking the passive option?",
+        "type": "line_understanding",
+        "concept": "turn check-raising",
+        "expected_reasoning": "The key is how the turn changed range advantage: this spot gains too much from initiative, fold equity, isolation, or value extraction to passively continue.",
+        "options": [
+          {
+            "id": "passive_line",
+            "label": "Flatting or checking keeps weaker hands in, so aggression mostly burns value or fold equity.",
+            "diagnosis": "line_misunderstanding"
+          },
+          {
+            "id": "initiative_edge",
+            "label": "The spot is driven by how the turn changed range advantage, so building the pot or isolating now captures more value than a passive line.",
+            "matches_expected": true
+          },
+          {
+            "id": "fear_adjustment",
+            "label": "Because this is a out-of-position defense, the hand should usually avoid aggression and protect against getting played back at.",
+            "diagnosis": "pool_assumption_error"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_rv03_01",
@@ -2456,11 +2978,40 @@
         "Calling river check-raises with second pair 'to keep them honest'",
         "Not having a bet-fold range — every value bet must have a fold action vs raises"
       ],
-      "live_pool_notes": "Live players check-raise rivers almost exclusively for value. If you can't call a raise, bet-fold. Never call a river CR with second pair."
+      "live_pool_notes": "Live players check-raise rivers almost exclusively for value. If you can't call a raise, bet-fold. Never call a river CR with second pair.",
+      "key_concept": "In live pools, river check-raises are overwhelmingly value.",
+      "difficulty_reason": "IP 2nd Pair — Fold to Check-Raise After Value Bet is difficult because many players default to calling river check-raises with second pair 'to keep them honest', even though 99 changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "River check-raises in live pools are overwhelmingly value — 99 is second pair on AKJ53 and should be bet-folded, because calling raises with a pair below the top of the board is a reliable live leak."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "ip-2nd-pair-fold",
+        "prompt": "What is the clearest reason this combo falls on the folding side of the line?",
+        "type": "line_understanding",
+        "concept": "river bluff catching",
+        "expected_reasoning": "The combo is too dominated or too low in the threshold once you account for how the river line changed range density, so continuing would over-defend the spot.",
+        "options": [
+          {
+            "id": "realize_anyway",
+            "label": "Position, disguise, or live-player mistakes are enough that this hand should still continue.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "below_threshold",
+            "label": "Once you weigh how the river line changed range density, this hand lands below the profitable continue bucket and should be released.",
+            "matches_expected": true
+          },
+          {
+            "id": "aggressive_solution",
+            "label": "The better adjustment is to turn the combo into an aggressive continue instead of folding.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_rv03_02",
@@ -2607,11 +3158,40 @@
         "Folding TPTK to a small donk bet on the river — small bets are not monster bets",
         "Raising a small donk bet with TPTK and turning it into a bluff-catcher situation"
       ],
-      "live_pool_notes": "Live small river donks are mostly protection or thin value. TPTK is a mandatory call — distinguish small bets from big polarized bets."
+      "live_pool_notes": "Live small river donks are mostly protection or thin value. TPTK is a mandatory call — distinguish small bets from big polarized bets.",
+      "key_concept": "Small river donk bets in live pools are usually blocking/protection bets or thin value from second pair, not monsters.",
+      "difficulty_reason": "IP TPTK — Call Villain's Small River Donk Bet is difficult because many players default to folding TPTK to a small donk bet on the river — small bets are not monster bets, even though AQo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Small river donk bets in live pools are usually blocking bets from second pair or protection from marginal made hands — TPTK calls and wins enough of those spots to make the call clearly profitable."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "ip-tptk-call-villain",
+        "prompt": "Why does call outperform folding or raising in this spot?",
+        "type": "line_understanding",
+        "concept": "river bluff catching",
+        "expected_reasoning": "This combo sits in the continue region because how the river line changed range density keeps enough worse hands, bluffs, or realizable equity in play without needing to escalate the pot.",
+        "options": [
+          {
+            "id": "too_weak_fold",
+            "label": "The combo is below threshold here, so continuing mostly pays off stronger hands.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "continue_bucket",
+            "label": "The right read is that how the river line changed range density keeps this hand high enough in the continuing range, but not strong enough to prefer a raise.",
+            "matches_expected": true
+          },
+          {
+            "id": "must_raise",
+            "label": "If the hand is good enough to continue, it should usually raise now rather than call.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_rv03_03",
@@ -2774,11 +3354,40 @@
         "Calling river min-raises with TPGK thinking 'it's only a min-raise'",
         "Not having clear bet-fold discipline — any raise on the river vs passive live player = strong"
       ],
-      "live_pool_notes": "In live pools, min-raises on rivers are as polarized as overbets. The size is small to look weak — the hand is usually a monster."
+      "live_pool_notes": "In live pools, min-raises on rivers are as polarized as overbets. The size is small to look weak — the hand is usually a monster.",
+      "key_concept": "River min-raise after calling down 3 streets in a live pool is almost always a value hand (KK, 99, 77, K9, K7).",
+      "difficulty_reason": "IP TPGK — Fold to Villain River Min-Raise is difficult because many players default to calling river min-raises with TPGK thinking 'it's only a min-raise', even though KJo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "A river min-raise after calling down 3 streets in a live pool is almost always a strong made hand (KK, 99, 77, K9, K7) — TPGK folds because you only get called by better when you call a raise."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "ip-tpgk-fold-to",
+        "prompt": "What is the clearest reason this combo falls on the folding side of the line?",
+        "type": "line_understanding",
+        "concept": "river bluff catching",
+        "expected_reasoning": "The combo is too dominated or too low in the threshold once you account for how the river line changed range density, so continuing would over-defend the spot.",
+        "options": [
+          {
+            "id": "realize_anyway",
+            "label": "Position, disguise, or live-player mistakes are enough that this hand should still continue.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "below_threshold",
+            "label": "Once you weigh how the river line changed range density, this hand lands below the profitable continue bucket and should be released.",
+            "matches_expected": true
+          },
+          {
+            "id": "aggressive_solution",
+            "label": "The better adjustment is to turn the combo into an aggressive continue instead of folding.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_rv04_01",
@@ -2945,11 +3554,40 @@
         "Calling a river CR after a scare card with second pair because 'we put in two streets'",
         "Not recognizing broadway boards make every river card dangerous for medium strength hands"
       ],
-      "live_pool_notes": "Scare card rivers on broadway boards dramatically tighten villain's check-raise range. Fold anything below two-pair-or-better vs live player river check-raises."
+      "live_pool_notes": "Scare card rivers on broadway boards dramatically tighten villain's check-raise range. Fold anything below two-pair-or-better vs live player river check-raises.",
+      "key_concept": "Ace rivers complete KT (Broadway straight) for villain on QJ8/3/A.",
+      "difficulty_reason": "IP Two Pair — Fold to CR After Ace Rivers is difficult because many players default to calling a river CR after a scare card with second pair because 'we put in two streets', even though QTo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "The ace completes Broadway (KT) on QJ8/3/A and villain check-raises after calling two streets — their range is crushed with KT, AQ, AJ, and A8, making QT two pair a clear fold against that distribution."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "ip-two-pair-fold",
+        "prompt": "What is the clearest reason this combo falls on the folding side of the line?",
+        "type": "line_understanding",
+        "concept": "river bluff catching",
+        "expected_reasoning": "The combo is too dominated or too low in the threshold once you account for how the river line changed range density, so continuing would over-defend the spot.",
+        "options": [
+          {
+            "id": "realize_anyway",
+            "label": "Position, disguise, or live-player mistakes are enough that this hand should still continue.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "below_threshold",
+            "label": "Once you weigh how the river line changed range density, this hand lands below the profitable continue bucket and should be released.",
+            "matches_expected": true
+          },
+          {
+            "id": "aggressive_solution",
+            "label": "The better adjustment is to turn the combo into an aggressive continue instead of folding.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_rv04_02",
@@ -3113,11 +3751,40 @@
         "Calling a river CR with top pair after a flush completes because 'they might not have it'",
         "Continuing to bet top pair into flush-completing rivers and then not having a fold vs a raise"
       ],
-      "live_pool_notes": "If you bet a flush-completing river and get raised by a passive player who called twice, they have the flush. Fold immediately."
+      "live_pool_notes": "If you bet a flush-completing river and get raised by a passive player who called twice, they have the flush. Fold immediately.",
+      "key_concept": "8♠ completes the flush draw.",
+      "difficulty_reason": "IP Top Pair — Fold to CR When Flush Completes River is difficult because many players default to calling a river CR with top pair after a flush completes because 'they might not have it', even though ATo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "The 8♠ completes the flush and villain check-raised after calling flop and turn — their check-raise range on the flush-completing card is the flush and straights, leaving top pair with no equity."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "ip-top-pair-fold",
+        "prompt": "What is the clearest reason this combo falls on the folding side of the line?",
+        "type": "line_understanding",
+        "concept": "river bluff catching",
+        "expected_reasoning": "The combo is too dominated or too low in the threshold once you account for the flush-completing card, so continuing would over-defend the spot.",
+        "options": [
+          {
+            "id": "realize_anyway",
+            "label": "Position, disguise, or live-player mistakes are enough that this hand should still continue.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "below_threshold",
+            "label": "Once you weigh the flush-completing card, this hand lands below the profitable continue bucket and should be released.",
+            "matches_expected": true
+          },
+          {
+            "id": "aggressive_solution",
+            "label": "The better adjustment is to turn the combo into an aggressive continue instead of folding.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_rv04_03",
@@ -3270,11 +3937,40 @@
         "Calling off with a straight on a paired river when villain has no reason to bluff",
         "Thinking 'I have a straight, I can't fold' — straights lose to full houses and flush"
       ],
-      "live_pool_notes": "In live pools, OOP donk-leads on paired rivers are almost always full houses. Fold the straight; this is not a hero call spot."
+      "live_pool_notes": "In live pools, OOP donk-leads on paired rivers are almost always full houses. Fold the straight; this is not a hero call spot.",
+      "key_concept": "Q♦ pairs the board.",
+      "difficulty_reason": "IP Straight — Fold to Big River Bet When Board Pairs is difficult because many players default to calling off with a straight on a paired river when villain has no reason to bluff, even though JTo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Q♦ pairs the board and villain led 75% pot after calling two streets — a donk-lead on the paired card from a passive player means full houses (KQ, Q9, QQ), and the straight is no longer the best hand."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "ip-straight-fold-to",
+        "prompt": "What is the clearest reason this combo falls on the folding side of the line?",
+        "type": "line_understanding",
+        "concept": "river bluff catching",
+        "expected_reasoning": "The combo is too dominated or too low in the threshold once you account for the straight-completing card, so continuing would over-defend the spot.",
+        "options": [
+          {
+            "id": "realize_anyway",
+            "label": "Position, disguise, or live-player mistakes are enough that this hand should still continue.",
+            "diagnosis": "threshold_error"
+          },
+          {
+            "id": "below_threshold",
+            "label": "Once you weigh the straight-completing card, this hand lands below the profitable continue bucket and should be released.",
+            "matches_expected": true
+          },
+          {
+            "id": "aggressive_solution",
+            "label": "The better adjustment is to turn the combo into an aggressive continue instead of folding.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_ex02_01",
@@ -3428,11 +4124,40 @@
         "Checking back TPTK on the river to 'avoid a check-raise' — stations don't raise",
         "Over-thinking thin value decisions vs passive pools — just bet"
       ],
-      "live_pool_notes": "Passive stations literally cannot raise the river without the nuts. Bet every value hand 3 streets. No check-backs."
+      "live_pool_notes": "Passive stations literally cannot raise the river without the nuts. Bet every value hand 3 streets. No check-backs.",
+      "key_concept": "Passive stations call 3 streets with second and third pair.",
+      "difficulty_reason": "Passive Station — Bet All 3 Streets for Max Value is difficult because many players default to checking back TPTK on the river to 'avoid a check-raise' — stations don't raise, even though AKo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Passive stations call 3 streets with second and third pair and never raise without the nuts — TPTK bets the river every time because checking back forfeits value that a station will pay on every street they are given."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "passive-station-bet-all",
+        "prompt": "Which population assumption should actually drive this decision?",
+        "type": "pool_assumption",
+        "concept": "exploitative value betting",
+        "expected_reasoning": "Correct reasoning uses the right live-pool assumption without abandoning baseline combo placement or positional logic.",
+        "options": [
+          {
+            "id": "extreme_read",
+            "label": "Assume the pool is at an extreme and let that flip the action even if the combo placement is weak.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "calibrated_pool",
+            "label": "Use a calibrated read on the passive pool while still respecting the combo's baseline role in the node.",
+            "matches_expected": true
+          },
+          {
+            "id": "ignore_pool",
+            "label": "Ignore live-pool behavior entirely because baseline theory should always dominate this spot.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_ex02_02",
@@ -3584,11 +4309,40 @@
         "Checking back second pair vs a station who calls too wide",
         "Betting too large and pricing out the calling range that makes the thin value profitable"
       ],
-      "live_pool_notes": "Thin value betting vs passive stations is a core live-cash skill. Size small, target their wide calling range, and collect extra chips."
+      "live_pool_notes": "Thin value betting vs passive stations is a core live-cash skill. Size small, target their wide calling range, and collect extra chips.",
+      "key_concept": "K9 on K-high with second pair is thin value vs a passive station. A shifts to check-back (pot control); and C shifts to check-back (pot control).",
+      "difficulty_reason": "Passive Station — Thin River Value with Second Pair is difficult because many players default to checking back second pair vs a station who calls too wide, even though K9o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "K9 second pair bets small (30-40%) against a passive station who calls with Jx, 5x, and weak pairs — larger sizing loses value because stations fold their weakest holdings to pressure they perceive as strong."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "passive-station-thin-river",
+        "prompt": "Which population assumption should actually drive this decision?",
+        "type": "pool_assumption",
+        "concept": "exploitative value betting",
+        "expected_reasoning": "Correct reasoning uses the right live-pool assumption without abandoning baseline combo placement or positional logic.",
+        "options": [
+          {
+            "id": "extreme_read",
+            "label": "Assume the pool is at an extreme and let that flip the action even if the combo placement is weak.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "calibrated_pool",
+            "label": "Use a calibrated read on the passive pool while still respecting the combo's baseline role in the node.",
+            "matches_expected": true
+          },
+          {
+            "id": "ignore_pool",
+            "label": "Ignore live-pool behavior entirely because baseline theory should always dominate this spot.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_ex02_03",
@@ -3736,11 +4490,40 @@
         "Firing a third barrel bluff vs a passive station who 'has to be weak'",
         "Confusing frequency with profitability — even if stations fold sometimes, they don't fold enough"
       ],
-      "live_pool_notes": "Bluffing passive stations is the most expensive mistake in live cash. When you have air vs a station, check. Save bluffs for players who can fold."
+      "live_pool_notes": "Bluffing passive stations is the most expensive mistake in live cash. When you have air vs a station, check. Save bluffs for players who can fold.",
+      "key_concept": "Never bluff passive stations.",
+      "difficulty_reason": "Passive Station — Never Bluff, Check River with Air is difficult because many players default to firing a third barrel bluff vs a passive station who 'has to be weak', even though T8o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Give up / Check-back works because it isolates the weaker part of villain's range or denies equity before that range gets to realize too cheaply."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "passive-station-never-bluff",
+        "prompt": "Which population assumption should actually drive this decision?",
+        "type": "pool_assumption",
+        "concept": "exploitative value betting",
+        "expected_reasoning": "Correct reasoning uses the right live-pool assumption without abandoning baseline combo placement or positional logic.",
+        "options": [
+          {
+            "id": "extreme_read",
+            "label": "Assume the pool is at an extreme and let that flip the action even if the combo placement is weak.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "calibrated_pool",
+            "label": "Use a calibrated read on the passive pool while still respecting the combo's baseline role in the node.",
+            "matches_expected": true
+          },
+          {
+            "id": "ignore_pool",
+            "label": "Ignore live-pool behavior entirely because baseline theory should always dominate this spot.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_ex03_01",
@@ -3898,11 +4681,40 @@
         "Folding top pair vs aggro recs who over-bluff because 'they could have it'",
         "Not adjusting bluff-catching thresholds based on villain type"
       ],
-      "live_pool_notes": "Aggro recs over-bluff by 2-3x GTO frequency. Call wider than you think vs their 3-barrel lines. Top pair is a standard call."
+      "live_pool_notes": "Aggro recs over-bluff by 2-3x GTO frequency. Call wider than you think vs their 3-barrel lines. Top pair is a standard call.",
+      "key_concept": "Aggro recs fire all 3 streets with a bluff frequency far above GTO. A shifts to fold (over-fold); B shifts to fold (over-fold); and C shifts to fold (over-fold).",
+      "difficulty_reason": "Aggro Rec — Call Down 3 Barrels with Bluff Catcher is difficult because many players default to folding top pair vs aggro recs who over-bluff because 'they could have it', even though Q8o changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call down works because Q8o lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "aggro-rec-call-down",
+        "prompt": "Which population assumption should actually drive this decision?",
+        "type": "pool_assumption",
+        "concept": "bluff-catching vs aggression",
+        "expected_reasoning": "Correct reasoning uses the right live-pool assumption without abandoning baseline combo placement or positional logic.",
+        "options": [
+          {
+            "id": "extreme_read",
+            "label": "Assume the pool is at an extreme and let that flip the action even if the combo placement is weak.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "calibrated_pool",
+            "label": "Use a calibrated read on the aggressive pool while still respecting the combo's baseline role in the node.",
+            "matches_expected": true
+          },
+          {
+            "id": "ignore_pool",
+            "label": "Ignore live-pool behavior entirely because baseline theory should always dominate this spot.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_ex03_02",
@@ -4060,11 +4872,40 @@
         "Checking back TPTK when aggro rec checks river — missing thin value from their busted draws",
         "Fearing an aggro rec check-raise when they showed weakness by checking"
       ],
-      "live_pool_notes": "When aggro recs check the river after 2 barrels, they often gave up. Bet for thin value with top pair — extract from their wide calling range."
+      "live_pool_notes": "When aggro recs check the river after 2 barrels, they often gave up. Bet for thin value with top pair — extract from their wide calling range.",
+      "key_concept": "Aggro recs who check rivers after barreling twice usually gave up with a bluff or have a medium-strength hand. B shifts to check-back (pot control); and C shifts to check-back (pot control).",
+      "difficulty_reason": "Aggro Rec Checks River — Bet for Value After Trap is difficult because many players default to checking back TPTK when aggro rec checks river — missing thin value from their busted draws, even though KQo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Bet for value (50-65%) works because KQo lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "aggro-rec-checks-river",
+        "prompt": "Which population assumption should actually drive this decision?",
+        "type": "pool_assumption",
+        "concept": "bluff-catching vs aggression",
+        "expected_reasoning": "Correct reasoning uses the right live-pool assumption without abandoning baseline combo placement or positional logic.",
+        "options": [
+          {
+            "id": "extreme_read",
+            "label": "Assume the pool is at an extreme and let that flip the action even if the combo placement is weak.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "calibrated_pool",
+            "label": "Use a calibrated read on the aggressive pool while still respecting the combo's baseline role in the node.",
+            "matches_expected": true
+          },
+          {
+            "id": "ignore_pool",
+            "label": "Ignore live-pool behavior entirely because baseline theory should always dominate this spot.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   },
   {
     "drill_id": "lc3_ex03_03",
@@ -4214,10 +5055,39 @@
         "Folding top pair vs aggro recs who over-bluff river overbets",
         "Not adjusting to player type — AJ is a fold vs passive player but a call vs aggro rec"
       ],
-      "live_pool_notes": "Aggro recs love pot-sized river bluffs with missed draws. AJo on AKQ75 is a clear call vs an identified over-bluffer. Trap and let them bluff."
+      "live_pool_notes": "Aggro recs love pot-sized river bluffs with missed draws. AJo on AKQ75 is a clear call vs an identified over-bluffer. Trap and let them bluff.",
+      "key_concept": "Aggro rec bet flop, checked turn, then overbets river — this is a classic aggro rec bluff pattern. B shifts to fold (give up); and C shifts to fold (give up).",
+      "difficulty_reason": "Aggro Rec Overbet River — Call Down with Bluff Catcher is difficult because many players default to folding top pair vs aggro recs who over-bluff river overbets, even though AJo changes value once you follow the actual line and pool assumptions in the drill.",
+      "why_preferred_line_works": "Call (bluff catcher) works because AJo lands on the right side of the value-versus-bluff threshold for the exact line described in the drill."
     },
     "metadata": {
       "source": "manual"
-    }
+    },
+    "diagnostic_prompts": [
+      {
+        "id": "aggro-rec-overbet-river",
+        "prompt": "Which population assumption should actually drive this decision?",
+        "type": "pool_assumption",
+        "concept": "bluff-catching vs aggression",
+        "expected_reasoning": "Correct reasoning uses the right live-pool assumption without abandoning baseline combo placement or positional logic.",
+        "options": [
+          {
+            "id": "extreme_read",
+            "label": "Assume the pool is at an extreme and let that flip the action even if the combo placement is weak.",
+            "diagnosis": "pool_assumption_error"
+          },
+          {
+            "id": "calibrated_pool",
+            "label": "Use a calibrated read on the aggressive pool while still respecting the combo's baseline role in the node.",
+            "matches_expected": true
+          },
+          {
+            "id": "ignore_pool",
+            "label": "Ignore live-pool behavior entirely because baseline theory should always dominate this spot.",
+            "diagnosis": "line_misunderstanding"
+          }
+        ]
+      }
+    ]
   }
 ]
