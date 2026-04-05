@@ -242,9 +242,10 @@ pnpm drill:followups-audit
 
 ### Status
 
-- Sprint status: `not_started`
+- Sprint status: `in_progress`
 - Primary owner: `codex`
 - Secondary owner: `claude`
+- Started: 2026-04-05
 
 ### Sprint goal
 
@@ -258,31 +259,67 @@ Make the daily workflow feel like one coach guiding the user through today’s w
 - [ ] Coaching voice is consistent across command center, session, and summary
 - [ ] Daily workflow feels coherent end to end
 
+### Pre-sprint audit (completed 2026-04-05)
+
+Claude audited the current state of all Sprint 2 target surfaces. Findings:
+
+#### What Sprint 1 already wired (do not re-implement)
+
+- `daily-plan-session-bridge.ts` is built and wired — daily plan launches sessions with focus concept, block kind, and intent
+- `follow_up` and `follow_up_concepts` from authored drill data surface in both CommandCenter and SessionSummary
+- Follow-up concept buttons route to `buildConceptFollowUpSessionHref` — one-click to concept-focused session launch
+- `adaptive.surfaceSignals.*` differentiates by 6 learner tendencies with distinct strings per surface
+
+#### What is still broken or weak
+
+**Command Center `coachBriefing`** (`apps/table-sim/src/lib/command-center.ts:66–72`, `287–295`):
+
+1. **No explicit “why this today” field.** The `reminder` carries the adaptive signal (e.g., “Frame today around practical thresholds...”) but there is no field that explains why this concept was prioritized from the learner model (e.g., “3 misses on this concept in the last two sessions”).
+2. **`recommendation` text is a mechanical concatenation.** It is built as:
+   `${nextSessionFocusSentence} ${patternTail} ${commandCenterAdaptiveSignal}` in `intervention-planner.ts:707`, then optionally has `” Coach assignment: ${planFollowUp.detail}”` appended in `command-center.ts:290–292`. Three fragments glued with no grammatical or tonal structure.
+3. **”Coach assignment: “ prefix is a template label, not coaching language.** It marks the seam where authored and generated text are joined. Remove it; let the authored text speak directly.
+4. **No success condition.** There is no field for “here’s what a good session on this block looks like.”
+5. **Early-profile fallback string is a meta-statement:** “The learner profile is still early, so today should stay anchored on the strongest live concept signal.” This tells the user about the system, not what to do today. Not useful.
+
+**Session Summary `coachDebrief`** (`apps/table-sim/src/lib/session-review.ts:47–58`, `apps/table-sim/src/components/session/SessionSummary.tsx:183–200`):
+
+1. **`nextFocus` fallback is assembled fragments.** Fallback path builds: `${interventionPlan.recommendedSessionTitle}: ${nextFocusSummary.recommendations[0].rationale} ${adaptive.surfaceSignals.sessionReview}` — a title colon-joined with rationale and an adaptive signal. Reads like parts, not a prescription.
+2. **No fallback CTA when `follow_up_concepts` is empty.** For 148/241 drills without authored follow_up, the “Coach assignment” and concept buttons disappear entirely. User ends the session with a text prescription but no action button.
+3. **`takeaway`, `leak`, `pattern` field content** — these come from `buildCompletedSessionSummary` and `buildInterventionPlan`. Verify these produce coach-register language, not analytics labels. If they produce strings like “River bluff-catch: 3 misses out of 5 attempts”, they need reframing.
+
+**Follow-up routing:**
+
+1. `buildConceptFollowUpSessionHref` is implemented and wired. ✓
+2. **Dead-end risk:** If a concept has zero matching drills in the selected pool, session launch returns an empty plan. The session page must handle this gracefully — not a blank screen.
+
 ### Must-do tasks
 
 #### Command Center
 
-- [ ] Tighten daily focus assignment logic
-- [ ] Make "why this today" explicit
-- [ ] Make targeted leak/focus concept explicit
-- [ ] Make success condition explicit
+- [ ] Add `whyToday: string` to `coachBriefing` in `CommandCenterSnapshot` — one sentence from learner model: what evidence caused this concept to be assigned today (miss count, recency, regression signal, retention check)
+- [ ] Add `successCondition: string` to `coachBriefing` — one sentence: what a good block on this focus looks like
+- [ ] Remove `”Coach assignment: “` prefix from `recommendation` construction in `command-center.ts:290–292`
+- [ ] Fix `buildNextSessionFocus` in `intervention-planner.ts:707` — do not append `commandCenterAdaptiveSignal` directly into `nextSessionFocus`; keep it as a separate field consumed by `reminder` only
+- [ ] Replace early-profile `commandCenter` fallback with an actionable instruction, not a system-state statement
+- [ ] Render `whyToday` and `successCondition` in `CoachBriefingCard` in `CommandCenter.tsx`
 
 #### Session summary
 
-- [ ] Aggregate recurring miss patterns
-- [ ] Carry authored follow-up truth into summary
-- [ ] Present next assigned block clearly
+- [ ] Fix `nextFocus` fallback construction in `session-review.ts` — do not concatenate `recommendedSessionTitle + recommendations[0].rationale + sessionReviewSignal`; produce one clean prescription sentence
+- [ ] Add a fallback action button in `SessionSummary.tsx` when `followUpConcepts` is empty — minimum: a “Run another block” CTA that launches a standard session
+- [ ] Verify `takeaway`, `leak`, `pattern` produce coach-register sentences (not analytics labels) — patch `buildCompletedSessionSummary` or `buildInterventionPlan` if they do not
+- [ ] Carry authored `follow_up` text as the primary source when present, fallback only when absent
 
 #### Follow-up execution
 
-- [ ] Ensure follow-up concepts launch actionable work
-- [ ] Preserve concept-aware review flow where useful
-- [ ] Prevent dead-end navigation
+- [ ] Audit what happens in `apps/table-sim/src/app/app/session/page.tsx` when session plan returns zero drills for a concept — add a graceful empty-state message, not a blank screen
+- [ ] Confirm `buildConceptFollowUpSessionHref` launches correctly from both CommandCenter and SessionSummary (no dead links)
 
 #### Coaching voice
 
-- [ ] Remove generic recap copy
-- [ ] Normalize tone across key surfaces
+- [ ] After all data changes, review the three CommandCenter briefing fields (`headline`, `reminder`, `recommendation`) side by side — they must sound like one coach, not three assembled strings
+- [ ] Review the four SessionSummary debrief fields (`takeaway`, `leak`, `pattern`, `nextFocus`) the same way
+- [ ] Remove any remaining “Coach assignment:”, “Key concept:”, or label-style prefixes in rendered coaching text
 
 ### Out of scope
 
@@ -302,14 +339,17 @@ pnpm verify
 
 ### Acceptance gate
 
-- [ ] User can open app and know what to study today
-- [ ] User can finish a session and receive a believable next assignment
+- [ ] User can open app and immediately understand what to study today and why
+- [ ] User can finish a session and receive a prescription — one clear next action, not a recap paragraph
+- [ ] Follow-up concept buttons appear and land somewhere useful
 - [ ] Product reads like a coach, not like analytics software
 
 ### Failure conditions
 
-- [ ] Command Center still sounds generic
-- [ ] Summary still sounds like a report instead of a prescription
+- [ ] Command Center still has “Coach assignment:” prefix or assembled-fragment recommendation
+- [ ] Session summary still has no action button when follow_up_concepts is empty
+- [ ] “Why this today” is still absent from Command Center
+- [ ] Success condition is still absent from Command Center
 
 ### Evidence
 
@@ -330,14 +370,41 @@ pnpm verify
 
 #### Codex
 
-- [ ] Audit command center/session summary/follow-up flow end to end
-- [ ] Implement coaching-copy and flow-order improvements
-- [ ] Ensure follow-up concepts open actionable work
-- [ ] Define exact acceptance checks for “daily coach” quality
+Primary implementation files:
+
+- `packages/core/src/intervention-planner.ts` — fix `buildNextSessionFocus` (line 687–707): do not bake `commandCenterAdaptiveSignal` into the focus sentence; keep it separate
+- `packages/core/src/adaptive-coaching.ts` — fix early-profile `commandCenter` fallback (line 94): replace system-state message with an actionable default instruction
+- `apps/table-sim/src/lib/command-center.ts` — add `whyToday` and `successCondition` to `CommandCenterSnapshot.coachBriefing` interface (line 66–72) and construction (line 287–295); remove “Coach assignment: “ prefix
+- `apps/table-sim/src/components/command/CommandCenter.tsx` — render `whyToday` and `successCondition` in `CoachBriefingCard`
+- `apps/table-sim/src/lib/session-review.ts` — fix `nextFocus` fallback construction; verify `takeaway`, `leak`, `pattern` are coach-register
+- `apps/table-sim/src/components/session/SessionSummary.tsx` — add fallback “Run another block” CTA when `followUpConcepts` is empty
+- `apps/table-sim/src/app/app/session/page.tsx` — add graceful empty-state when plan returns zero drills for a concept
+
+Update or add tests for:
+- `command-center.test.ts` — assert `whyToday` and `successCondition` are non-empty strings
+- `session-review.test.ts` — assert `nextFocus` is a single clean sentence, not assembled fragments
 
 #### Claude
 
-- [ ] Execute targeted UI test/verification commands
+- [ ] Run `pnpm vitest run` targeted tests after each Codex change and report pass/fail
+- [ ] Run `pnpm verify` after all changes land and confirm green
+- [ ] Review the final coaching voice copy across all six fields (headline, reminder, recommendation, takeaway, leak, nextFocus) and flag any that still read as assembled fragments or analytics labels
+- [ ] Report any dead-end navigation discovered during review
+
+#### Human
+
+- [ ] Judge whether “why this today” feels credible and specific
+- [ ] Judge whether the session summary prescription reads like a coach or like a report
+- [ ] Approve or reject the coaching voice tone across CommandCenter and SessionSummary
+
+### Proof required to close
+
+- [ ] `pnpm verify` passes
+- [ ] `whyToday` and `successCondition` fields exist in `coachBriefing` and render
+- [ ] “Coach assignment:” prefix is gone
+- [ ] Session summary has an action button even when no authored follow_up_concepts
+- [ ] Empty-state handled in session page when concept has no drills
+- [ ] Claude copy review sign-off: no assembled-fragment fields remain
 - [ ] Draft copy refinements for weak coach-language surfaces if requested
 - [ ] Report any screen or flow that still reads generic
 
