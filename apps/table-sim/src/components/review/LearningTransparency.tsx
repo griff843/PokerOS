@@ -219,6 +219,26 @@ export function RangeSupportCard({
           ) : null}
         </div>
       ) : null}
+
+      {(rangeView.followUp || rangeView.followUpConcepts.length > 0) ? (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 space-y-3">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/85">Coach Follow-Up</p>
+            {rangeView.followUp ? (
+              <p className="mt-1 text-sm leading-6 text-amber-50/90">{rangeView.followUp}</p>
+            ) : null}
+          </div>
+          {rangeView.followUpConcepts.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {rangeView.followUpConcepts.map((concept) => (
+                <span key={concept} className="rounded-full border border-amber-500/25 bg-black/20 px-3 py-1 text-xs font-medium text-amber-50/90">
+                  {concept}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -64,6 +64,8 @@ export interface TransparencyRangeView {
   handFocus?: TransparencyRangeSpotlight;
   blockerNotes: string[];
   thresholdNotes: string[];
+  followUp?: string;
+  followUpConcepts: string[];
   available: boolean;
 }
 
@@ -323,11 +325,15 @@ function buildRangeView(attempt: DrillAttempt): TransparencyRangeView {
       : undefined,
     blockerNotes: [...(rangeSupport?.blocker_notes ?? [])],
     thresholdNotes: [...(rangeSupport?.threshold_notes ?? [])],
+    followUp: context?.follow_up,
+    followUpConcepts: [...(context?.follow_up_concepts ?? [])],
     available: sections.length > 0
       || streetShifts.length > 0
       || !!rangeSupport?.hero_hand_bucket
       || (rangeSupport?.blocker_notes?.length ?? 0) > 0
-      || (rangeSupport?.threshold_notes?.length ?? 0) > 0,
+      || (rangeSupport?.threshold_notes?.length ?? 0) > 0
+      || Boolean(context?.follow_up)
+      || (context?.follow_up_concepts?.length ?? 0) > 0,
   };
 }
 

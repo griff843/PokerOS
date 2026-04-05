@@ -217,6 +217,8 @@ describe("learning transparency adapter", () => {
           "Overweighting blocker effects when the value region also expands.",
         ],
         why_preferred_line_works: "Folding works once the scare card removes too many natural bluffs.",
+        follow_up: "Review more paired-river bluff catches where improved top pair still slips below threshold.",
+        follow_up_concepts: ["concept:bluff_catching", "concept:range_density"],
         range_support: {
           value_buckets: [
             {
@@ -278,5 +280,7 @@ describe("learning transparency adapter", () => {
     expect(snapshot.rangeView.thresholdNotes[0]).toContain("bottom of the continuing region");
     expect(snapshot.rangeView.blockerNotes[0]).toContain("Holding an ace blocks some bluffs");
     expect(snapshot.rangeView.points.some((point) => point.includes("What makes it difficult"))).toBe(true);
+    expect(snapshot.rangeView.followUp).toContain("paired-river bluff catches");
+    expect(snapshot.rangeView.followUpConcepts).toEqual(["concept:bluff_catching", "concept:range_density"]);
   });
 });

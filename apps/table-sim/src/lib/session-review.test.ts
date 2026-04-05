@@ -17,6 +17,8 @@ interface AttemptOptions {
   matchedTags?: string[];
   assignmentBucket?: "exact_match" | "turn_line_transfer" | "sizing_stability" | "bridge_reconstruction" | "memory_decisive";
   assignmentRationale?: string;
+  followUp?: string;
+  followUpConcepts?: string[];
 }
 
 function makeAttempt(options: AttemptOptions): DrillAttempt {
@@ -58,6 +60,10 @@ function makeAttempt(options: AttemptOptions): DrillAttempt {
     },
     tags: [options.conceptTag ?? "concept:blocker_effect", "decision:bluff_catch"],
     difficulty: 2,
+    coaching_context: options.followUp ? {
+      follow_up: options.followUp,
+      follow_up_concepts: options.followUpConcepts ?? [],
+    } : undefined,
   };
 
   return {
@@ -139,7 +145,7 @@ describe("session review snapshot", () => {
   it("builds a coach-led debrief with selective review targets", () => {
     const snapshot = buildSessionReviewSnapshot(makeState([
       makeAttempt({ score: 0.35, correct: false, confidence: "certain", missedTags: ["paired_top_river"] }),
-      makeAttempt({ score: 0.45, correct: false, confidence: "certain", missedTags: ["paired_top_river"], drillId: "d2", nodeId: "hu_river_02", title: "River Bluff Catch 2" }),
+      makeAttempt({ score: 0.45, correct: false, confidence: "certain", missedTags: ["paired_top_river"], drillId: "d2", nodeId: "hu_river_02", title: "River Bluff Catch 2", followUp: "Review more paired-river bluff catches where improved top pair still slips below threshold.", followUpConcepts: ["concept:bluff_catching", "concept:range_density"] }),
       makeAttempt({ score: 0.82, correct: true, confidence: "not_sure", matchedTags: ["blocker_effect"], kind: "new", reason: "weakness_new", drillId: "d3", nodeId: "hu_river_03", title: "Turn Float" }),
     ]));
 
@@ -149,6 +155,9 @@ describe("session review snapshot", () => {
     expect(snapshot.importantDrills[0]?.reviewTag).toBe("paired_top_river");
     expect(snapshot.coachDebrief.leak.length).toBeGreaterThan(0);
     expect(snapshot.coachDebrief.pattern.length).toBeGreaterThan(0);
+    expect(snapshot.coachDebrief.followUp).toContain("paired-river bluff catches");
+    expect(snapshot.coachDebrief.followUpConcepts).toContain("concept:bluff_catching");
+    expect(snapshot.importantDrills.some((drill) => drill.coachFollowUp?.includes("paired-river bluff catches"))).toBe(true);
     expect(snapshot.recommendedTrainingBlock?.plan.recommendedSessionTitle.length).toBeGreaterThan(0);
     expect(snapshot.nextAction.primary.action).toBe("review_incorrect");
   });
@@ -173,6 +182,8 @@ describe("session review snapshot", () => {
           assignmentBucket: "memory_decisive",
           assignmentRationale: "Chosen because this rep forces you to resolve which turn version actually happened before trusting the river answer.",
           missedTags: ["paired_top_river"],
+          followUp: "Rebuild the turn story first, then retest the river bluff-catch threshold.",
+          followUpConcepts: ["concept:street_story", "concept:bluff_catching"],
         }),
         makeAttempt({
           drillId: "d-followup-2",
@@ -211,6 +222,7 @@ describe("session review snapshot", () => {
     expect(snapshot.assignmentAudit?.correctiveFocus).toBe("Corrective weighting applied: memory-decisive.");
     expect(snapshot.importantDrills[0]?.assignmentBucket).toBe("memory_decisive");
     expect(snapshot.importantDrills[0]?.assignmentRationale).toContain("turn version");
+    expect(snapshot.coachDebrief.followUp).toContain("turn story first");
   });
 
   it("flags audit warnings when the follow-up mix does not match the uncertainty profile", () => {

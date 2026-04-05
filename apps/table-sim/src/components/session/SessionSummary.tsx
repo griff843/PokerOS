@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { RecommendedTrainingBlockCard } from "@/components/training/RecommendedTrainingBlockCard";
+import { buildConceptFollowUpSessionHref } from "@/lib/daily-plan-session-bridge";
 import type { SessionState } from "@/lib/session-types";
 import type { SessionAction } from "@/lib/session-reducer";
 import { buildSessionReviewSnapshot, type SessionReviewAction } from "@/lib/session-review";
@@ -16,6 +17,10 @@ interface SessionSummaryProps {
 export function SessionSummary({ state, dispatch, onNewSession }: SessionSummaryProps) {
   const router = useRouter();
   const snapshot = useMemo(() => buildSessionReviewSnapshot(state), [state]);
+
+  function handleFollowUpConcept(concept: string) {
+    router.push(buildConceptFollowUpSessionHref({ conceptTag: concept }));
+  }
 
   function handleAction(action: SessionReviewAction) {
     if (action.action === "command_center") {
@@ -51,7 +56,7 @@ export function SessionSummary({ state, dispatch, onNewSession }: SessionSummary
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
         <PerformanceOverview items={snapshot.performance.items} />
-        <CoachDebriefCard debrief={snapshot.coachDebrief} />
+        <CoachDebriefCard debrief={snapshot.coachDebrief} onFollowUpConcept={handleFollowUpConcept} />
       </div>
 
       {snapshot.planningContext ? (
@@ -71,6 +76,7 @@ export function SessionSummary({ state, dispatch, onNewSession }: SessionSummary
       <ImportantDrillsSection
         drills={snapshot.importantDrills}
         emptyMessage={snapshot.importantDrillsEmptyMessage}
+        onFollowUpConcept={handleFollowUpConcept}
         onReview={(tagFilter) => {
           dispatch({ type: "START_REVIEW", filter: "incorrect", tagFilter });
           router.push("/app/review");
@@ -172,8 +178,10 @@ function WhatMovedToday({
 
 function CoachDebriefCard({
   debrief,
+  onFollowUpConcept,
 }: {
-  debrief: { takeaway: string; leak: string; pattern: string; nextFocus: string };
+  debrief: { takeaway: string; leak: string; pattern: string; nextFocus: string; followUp?: string; followUpConcepts: string[] };
+  onFollowUpConcept: (concept: string) => void;
 }) {
   return (
     <section className="rounded-[30px] border border-white/8 bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(9,14,27,0.84))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-sm">
@@ -183,6 +191,21 @@ function CoachDebriefCard({
         <DebriefPanel title="Root leak diagnosis" text={debrief.leak} tone="warning" />
         <DebriefPanel title="Recurring pattern" text={debrief.pattern} tone="neutral" />
         <DebriefPanel title="Next recommended focus" text={debrief.nextFocus} tone="good" />
+        {debrief.followUp ? <DebriefPanel title="Coach assignment" text={debrief.followUp} tone="good" /> : null}
+        {debrief.followUpConcepts.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {debrief.followUpConcepts.map((concept) => (
+              <button
+                key={concept}
+                type="button"
+                onClick={() => onFollowUpConcept(concept)}
+                className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-100 transition hover:border-emerald-400/35 hover:bg-emerald-500/16"
+              >
+                {concept}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
     </section>
   );
@@ -204,20 +227,24 @@ function PlanningContextCard({
 function ImportantDrillsSection({
   drills,
   emptyMessage,
+  onFollowUpConcept,
   onReview,
 }: {
-  drills: Array<{
-    drillId: string;
-    title: string;
-    nodeId: string;
-    outcome: string;
-    detail: string;
-    confidence: string;
-    reviewTag: string | null;
-    assignmentRationale?: string;
-    assignmentBucket?: string | null;
-  }>;
+    drills: Array<{
+      drillId: string;
+      title: string;
+      nodeId: string;
+      outcome: string;
+      detail: string;
+      confidence: string;
+      reviewTag: string | null;
+      coachFollowUp?: string;
+      followUpConcepts: string[];
+      assignmentRationale?: string;
+      assignmentBucket?: string | null;
+    }>;
   emptyMessage?: string;
+  onFollowUpConcept: (concept: string) => void;
   onReview: (tagFilter: string | null) => void;
 }) {
   return (
@@ -242,6 +269,26 @@ function ImportantDrillsSection({
                   </div>
                   <p className="text-sm font-medium text-amber-200">{drill.outcome}</p>
                   <p className="text-sm leading-6 text-slate-300">{drill.detail}</p>
+                  {drill.coachFollowUp ? (
+                    <div className="rounded-[18px] border border-emerald-500/16 bg-emerald-500/8 px-3 py-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-200/85">Coach Follow-Up</p>
+                      <p className="mt-1 text-xs leading-5 text-emerald-50/90">{drill.coachFollowUp}</p>
+                      {drill.followUpConcepts.length > 0 ? (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {drill.followUpConcepts.map((concept) => (
+                            <button
+                              key={concept}
+                              type="button"
+                              onClick={() => onFollowUpConcept(concept)}
+                              className="rounded-full border border-emerald-500/20 bg-black/20 px-2.5 py-1 text-[11px] font-medium text-emerald-100 transition hover:border-emerald-400/35 hover:bg-emerald-500/14"
+                            >
+                              {concept}
+                            </button>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                   {drill.assignmentBucket || drill.assignmentRationale ? (
                     <div className="rounded-[18px] border border-sky-500/14 bg-sky-500/8 px-3 py-2">
                       {drill.assignmentBucket ? (

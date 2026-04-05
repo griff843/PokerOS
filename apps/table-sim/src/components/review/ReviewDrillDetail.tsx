@@ -98,22 +98,6 @@ export function ReviewDrillDetail({
 
       <ReviewSummaryHeader attempt={attempt} />
 
-      <StreetHistoryCard history={transparency.history} />
-
-      <TransparencyVerdictCard verdict={transparency.verdict} />
-
-      <ReplayControls
-        streets={transparency.streets}
-        currentStreet={currentStreet}
-        onSelectStreet={setCurrentStreet}
-        onStepForward={() => setCurrentStreet(transparency.streets[Math.min(currentStreetIndex + 1, transparency.streets.length - 1)] ?? currentStreet)}
-        onStepBack={() => setCurrentStreet(transparency.streets[Math.max(currentStreetIndex - 1, 0)] ?? currentStreet)}
-      />
-
-      <StrategyFrequencyCard frequencyView={transparency.frequencies} />
-
-      <CoachModeSelector activeMode={coachMode} onSelect={setCoachMode} />
-
       <DrillCoachingSummary
         snapshot={coachingSnapshot}
         activePool={activePool}
@@ -127,6 +111,26 @@ export function ReviewDrillDetail({
         }}
       />
 
+      {!attempt.correct ? <CoachDiagnosisCard diagnosis={transparency.diagnosis} /> : null}
+
+      <RangeSupportCard rangeView={transparency.rangeView} />
+
+      <CoachModeSelector activeMode={coachMode} onSelect={setCoachMode} />
+
+      <TransparencyVerdictCard verdict={transparency.verdict} />
+
+      <StreetHistoryCard history={transparency.history} />
+
+      <ReplayControls
+        streets={transparency.streets}
+        currentStreet={currentStreet}
+        onSelectStreet={setCurrentStreet}
+        onStepForward={() => setCurrentStreet(transparency.streets[Math.min(currentStreetIndex + 1, transparency.streets.length - 1)] ?? currentStreet)}
+        onStepBack={() => setCurrentStreet(transparency.streets[Math.max(currentStreetIndex - 1, 0)] ?? currentStreet)}
+      />
+
+      <StrategyFrequencyCard frequencyView={transparency.frequencies} />
+
       {adaptiveSignal ? (
         <div className="rounded-2xl border border-sky-500/20 bg-sky-500/8 p-4 shadow-[0_18px_60px_rgba(14,165,233,0.08)]">
           <p className="text-[11px] uppercase tracking-[0.22em] text-sky-200">Coaching Emphasis</p>
@@ -134,9 +138,7 @@ export function ReviewDrillDetail({
         </div>
       ) : null}
 
-      <RangeSupportCard rangeView={transparency.rangeView} />
-
-      <CoachDiagnosisCard diagnosis={transparency.diagnosis} />
+      {attempt.correct ? <CoachDiagnosisCard diagnosis={transparency.diagnosis} /> : null}
 
       <div>
         <label className="block text-xs text-gray-400 mb-1.5 font-medium uppercase tracking-wide">

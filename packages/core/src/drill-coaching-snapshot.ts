@@ -39,6 +39,7 @@ export interface DrillCoachingSnapshot {
   whyMistake: DrillCoachingMoment | null;
   keyConcept: DrillCoachingMoment;
   nextAdjustment: DrillCoachingMoment;
+  difficultyReason?: string;
   exploitContrast: DrillCoachingExploitContrast;
   concepts: {
     requiredTags: string[];
@@ -84,8 +85,8 @@ export function buildDrillCoachingSnapshot(
       );
 
   const keyConceptHeadline = authoredTruth.keyConcept
-    ? `Key concept: ${authoredTruth.keyConcept}`
-    : `Key concept: ${formatTag(resolvedAnswer.required_tags[0] ?? "core trigger")}`;
+    ? authoredTruth.keyConcept
+    : formatTag(resolvedAnswer.required_tags[0] ?? "Core Trigger");
   const keyConceptDetail = authoredTruth.whyPreferredLineWorks
     ?? pickSectionText(correctAnswer, ["Concept Focus", "Range Logic"]);
 
@@ -102,6 +103,7 @@ export function buildDrillCoachingSnapshot(
       nextAdjustment.headline,
       mergeDetail(emphasis.nextAdjustment, pickSectionText(nextAdjustment, ["Next Adjustment", "Concept Focus"]))
     ),
+    difficultyReason: authoredTruth.difficultyReason,
     exploitContrast: {
       applies: Boolean(poolContrast.llmPayload.poolContrast),
       selectedPool: activePool,

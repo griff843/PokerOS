@@ -60,6 +60,13 @@ export function DrillCoachingSummary({ snapshot, activePool, focus }: DrillCoach
         <CoachingTile moment={snapshot.nextAdjustment} tone="amber" />
       </div>
 
+      {snapshot.difficultyReason ? (
+        <div className="rounded-[22px] border border-slate-500/20 bg-slate-500/8 p-4 space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-300/80">Why This Spot Is Hard</p>
+          <p className="text-sm leading-6 text-gray-300">{snapshot.difficultyReason}</p>
+        </div>
+      ) : null}
+
       {(snapshot.concepts.missedTags.length > 0 || snapshot.concepts.matchedTags.length > 0) ? (
         <div className="rounded-[22px] border border-white/8 bg-black/20 p-4 space-y-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-500">Concept Signal</p>

@@ -47,6 +47,8 @@ export interface SessionReviewSnapshot {
     leak: string;
     pattern: string;
     nextFocus: string;
+    followUp?: string;
+    followUpConcepts: string[];
   };
   planningContext?: {
     title: string;
@@ -64,17 +66,19 @@ export interface SessionReviewSnapshot {
     warnings: string[];
     correctiveFocus?: string;
   };
-  importantDrills: Array<{
-    drillId: string;
-    title: string;
-    nodeId: string;
-    outcome: string;
-    detail: string;
-    confidence: string;
-    reviewTag: string | null;
-    assignmentRationale?: string;
-    assignmentBucket?: string | null;
-  }>;
+    importantDrills: Array<{
+      drillId: string;
+      title: string;
+      nodeId: string;
+      outcome: string;
+      detail: string;
+      confidence: string;
+      reviewTag: string | null;
+      coachFollowUp?: string;
+      followUpConcepts: string[];
+      assignmentRationale?: string;
+      assignmentBucket?: string | null;
+    }>;
   importantDrillsEmptyMessage?: string;
   recommendedTrainingBlock?: {
     plan: InterventionPlan;
@@ -185,6 +189,7 @@ export function buildSessionReviewSnapshot(
   const calibration = buildCalibrationSignal(attempts);
   const reviewVsNew = buildReviewVsNewSignal(attempts);
   const importantDrills = rankImportantDrills(attempts);
+  const authoredFollowUp = buildAuthoredFollowUpSummary(importantDrills);
   const recurringMistakeLabel = topMissedTag ? formatSessionLabel(topMissedTag.key) : weakestNode ? formatSessionLabel(weakestNode.key) : "No repeated leak";
   const recurringMistakeDetail = topMissedTag
     ? `${topMissedTag.count} misses clustered around this rule tag, making it the clearest review thread from the block.`
@@ -283,9 +288,11 @@ export function buildSessionReviewSnapshot(
       takeaway: completedSummary.headline,
       leak: `${interventionPlan.rootLeakDiagnosis} ${adaptive.surfaceSignals.sessionReview}`.trim(),
       pattern: leadPattern ? `${leadPattern.title}: ${leadPattern.detail}` : "No recurring cross-hand pattern separated strongly enough to outrank the session leak yet.",
-      nextFocus: nextFocusSummary.recommendations[0]
+      nextFocus: authoredFollowUp?.summary ?? (nextFocusSummary.recommendations[0]
         ? `${interventionPlan.recommendedSessionTitle}: ${nextFocusSummary.recommendations[0].rationale} ${adaptive.surfaceSignals.sessionReview}`.trim()
-        : `${interventionPlan.recommendedSessionTitle}: ${interventionPlan.nextSessionFocus}`,
+        : `${interventionPlan.recommendedSessionTitle}: ${interventionPlan.nextSessionFocus}`),
+      followUp: authoredFollowUp?.detail,
+      followUpConcepts: authoredFollowUp?.concepts ?? [],
     },
     planningContext: planningContextNote
       ? {
@@ -305,6 +312,8 @@ export function buildSessionReviewSnapshot(
       detail: buildImportantDrillDetail(attempt, adaptive.surfaceSignals.review),
       confidence: formatDecisionConfidence(attempt.confidence),
       reviewTag: attempt.missedTags[0] ?? attempt.drill.answer.required_tags[0] ?? null,
+      coachFollowUp: attempt.drill.coaching_context?.follow_up,
+      followUpConcepts: [...(attempt.drill.coaching_context?.follow_up_concepts ?? [])],
       assignmentRationale: attempt.selection.metadata.assignmentRationale,
       assignmentBucket: attempt.selection.metadata.assignmentBucket ?? null,
     })),
@@ -630,6 +639,37 @@ function buildImportantDrillDetail(attempt: DrillAttempt, adaptiveSignal: string
   }
 
   return `This decision landed, but it was still one of the softest scores in the block and is worth a second pass if you want a deeper review. ${adaptiveSignal}`.trim();
+}
+
+function buildAuthoredFollowUpSummary(attempts: DrillAttempt[]): {
+  summary: string;
+  detail?: string;
+  concepts: string[];
+} | undefined {
+  const followUps = attempts
+    .map((attempt) => ({
+      text: attempt.drill.coaching_context?.follow_up?.trim(),
+      concepts: attempt.drill.coaching_context?.follow_up_concepts ?? [],
+    }))
+    .filter((entry): entry is { text: string; concepts: string[] } => Boolean(entry.text));
+
+  if (followUps.length === 0) {
+    return undefined;
+  }
+
+  const conceptCounts = new Map<string, number>();
+  for (const concept of followUps.flatMap((entry) => entry.concepts)) {
+    conceptCounts.set(concept, (conceptCounts.get(concept) ?? 0) + 1);
+  }
+
+  return {
+    summary: `Coach assignment: ${followUps[0].text}`,
+    detail: followUps.length > 1 ? `${followUps[0].text} Similar follow-up work appears across ${followUps.length} priority drills.` : followUps[0].text,
+    concepts: [...conceptCounts.entries()]
+      .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+      .slice(0, 3)
+      .map(([concept]) => concept),
+  };
 }
 
 function buildOutcomeFraming(accuracy: number, averageScore: number): string {

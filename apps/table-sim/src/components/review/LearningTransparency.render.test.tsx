@@ -60,6 +60,8 @@ describe("LearningTransparency cards", () => {
       },
       blockerNotes: ["Holding a jack trims value."],
       thresholdNotes: ["This combo stays above threshold."],
+      followUp: "Review more paired-river bluff catches where the scare card removes natural bluffs.",
+      followUpConcepts: ["concept:bluff_catching", "concept:range_density"],
       available: true,
     };
 
@@ -72,6 +74,9 @@ describe("LearningTransparency cards", () => {
     expect(html).toContain("The turn check removed clean double-barrel value and preserved delayed floats.");
     expect(html).toContain("Blocker Logic");
     expect(html).toContain("Threshold Logic");
+    expect(html).toContain("Coach Follow-Up");
+    expect(html).toContain("Review more paired-river bluff catches where the scare card removes natural bluffs.");
+    expect(html).toContain("concept:bluff_catching");
     expect(html).toContain("Mostly call");
   });
 

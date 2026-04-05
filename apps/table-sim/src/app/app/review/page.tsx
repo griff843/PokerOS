@@ -79,7 +79,8 @@ export default function ReviewPage() {
         if (tagFilter) {
           const hasRequired = attempt.drill.answer.required_tags.includes(tagFilter);
           const hasMissed = attempt.missedTags.includes(tagFilter);
-          if (!hasRequired && !hasMissed) return false;
+          const hasClassification = attempt.drill.tags.includes(tagFilter);
+          if (!hasRequired && !hasMissed && !hasClassification) return false;
         }
         return true;
       });

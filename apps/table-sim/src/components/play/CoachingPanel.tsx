@@ -33,6 +33,7 @@ export function CoachingPanel({ attempt, onAdvance, onCaptureDiagnostic, isLast,
 
   return (
     <section className="rounded-[30px] border border-white/8 bg-gray-900/80 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.36)] backdrop-blur-sm space-y-5">
+      {/* Header: verdict badge + pool context */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">
@@ -49,7 +50,7 @@ export function CoachingPanel({ attempt, onAdvance, onCaptureDiagnostic, isLast,
               {attempt.correct ? "Correct line" : "Incorrect line"}
             </span>
             <span className="rounded-full border border-white/8 bg-black/25 px-3.5 py-1.5 text-sm font-semibold text-white">
-              Total score {Math.round(attempt.score * 100)}%
+              {Math.round(attempt.score * 100)}%
             </span>
           </div>
         </div>
@@ -62,63 +63,11 @@ export function CoachingPanel({ attempt, onAdvance, onCaptureDiagnostic, isLast,
         </div>
       </div>
 
-      <TransparencyVerdictCard verdict={transparency.verdict} />
-
-      <StreetHistoryCard history={transparency.history} />
-
-      <DrillCoachingSummary snapshot={snapshot} activePool={attempt.activePool} />
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-[24px] border border-white/8 bg-black/20 p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500">Line read</p>
-          <div className="mt-3 space-y-2 text-sm text-gray-300">
-            <div className="flex items-center justify-between gap-3">
-              <span>Your line</span>
-              <span className="font-semibold text-white">{formatActionLine(attempt.userAction, attempt.userSizeBucket)}</span>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <span>Resolved line</span>
-              <span className="font-semibold text-white">
-                {formatActionLine(attempt.resolvedAnswer.correct, attempt.resolvedAnswer.correct_size?.size_bucket ?? null)}
-              </span>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <span>Decision time</span>
-              <span className="font-semibold text-white">{(attempt.elapsedMs / 1000).toFixed(1)}s</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-[24px] border border-white/8 bg-black/20 p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500">Score split</p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            {breakdown.map((item) => (
-              <div key={item.label} className="rounded-2xl border border-white/8 bg-gray-950/80 px-3 py-2.5">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-gray-500">{item.label}</p>
-                <p className="mt-1 text-sm font-semibold text-white">{item.value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <StrategyFrequencyCard frequencyView={transparency.frequencies} title="Solver honesty" />
-
-      {adaptiveSignal ? (
-        <div className="rounded-[24px] border border-sky-500/18 bg-sky-500/8 p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200/85">Coaching Emphasis</p>
-          <p className="mt-2 text-sm leading-6 text-slate-200">{adaptiveSignal}</p>
-        </div>
-      ) : null}
-
-      <RangeSupportCard rangeView={transparency.rangeView} title="Range logic" />
-
-      <CoachDiagnosisCard diagnosis={transparency.diagnosis} />
-
+      {/* Reasoning check: capture while the decision is fresh, before the coaching reveal */}
       {diagnosticPrompt && !attempt.diagnostic ? (
         <div className="rounded-[24px] border border-white/8 bg-black/20 p-4 space-y-3">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500">Quick Reasoning Check</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500">Reasoning Check</p>
             <p className="mt-2 text-sm leading-6 text-gray-300">{diagnosticPrompt.prompt}</p>
           </div>
           <div className="grid gap-2">
@@ -154,9 +103,66 @@ export function CoachingPanel({ attempt, onAdvance, onCaptureDiagnostic, isLast,
               </button>
             ))}
           </div>
-          <p className="text-xs leading-5 text-gray-500">Optional. This helps the coach separate a line miss from a reasoning miss.</p>
+          <p className="text-xs leading-5 text-gray-500">Answer before reading the coaching below — this tells the coach whether the miss was a line error or a reasoning error.</p>
         </div>
       ) : null}
+
+      {/* Core coaching: verdict → why → concept → difficulty → adjustment */}
+      <DrillCoachingSummary snapshot={snapshot} activePool={attempt.activePool} />
+
+      {/* Diagnosis: available once the reasoning check has been answered */}
+      <CoachDiagnosisCard diagnosis={transparency.diagnosis} />
+
+      {/* Street context before range — understand the story, then the shape */}
+      <StreetHistoryCard history={transparency.history} />
+
+      <TransparencyVerdictCard verdict={transparency.verdict} />
+
+      <RangeSupportCard rangeView={transparency.rangeView} title="Range logic" />
+
+      <StrategyFrequencyCard frequencyView={transparency.frequencies} title="Solver honesty" />
+
+      {adaptiveSignal ? (
+        <div className="rounded-[24px] border border-sky-500/18 bg-sky-500/8 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200/85">Coaching Emphasis</p>
+          <p className="mt-2 text-sm leading-6 text-slate-200">{adaptiveSignal}</p>
+        </div>
+      ) : null}
+
+      {/* Metadata last — action facts, score breakdown */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="rounded-[24px] border border-white/8 bg-black/20 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500">Line read</p>
+          <div className="mt-3 space-y-2 text-sm text-gray-300">
+            <div className="flex items-center justify-between gap-3">
+              <span>Your line</span>
+              <span className="font-semibold text-white">{formatActionLine(attempt.userAction, attempt.userSizeBucket)}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span>Resolved line</span>
+              <span className="font-semibold text-white">
+                {formatActionLine(attempt.resolvedAnswer.correct, attempt.resolvedAnswer.correct_size?.size_bucket ?? null)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span>Decision time</span>
+              <span className="font-semibold text-white">{(attempt.elapsedMs / 1000).toFixed(1)}s</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-[24px] border border-white/8 bg-black/20 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-gray-500">Score split</p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {breakdown.map((item) => (
+              <div key={item.label} className="rounded-2xl border border-white/8 bg-gray-950/80 px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-gray-500">{item.label}</p>
+                <p className="mt-1 text-sm font-semibold text-white">{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <button
         type="button"
