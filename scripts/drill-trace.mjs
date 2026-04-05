@@ -92,7 +92,13 @@ console.log("");
 console.log("Coaching context");
 Object.entries(payload.coaching_context).forEach(([key, value]) => {
   if (Array.isArray(value)) {
-    console.log(`- ${key}: ${value.length > 0 ? value.join(" | ") : "none"}`);
+    if (value.length === 0) {
+      console.log(`- ${key}: none`);
+    } else if (typeof value[0] === "object" && value[0] !== null) {
+      value.forEach((item, i) => console.log(`- ${key}[${i}]: ${JSON.stringify(item)}`));
+    } else {
+      console.log(`- ${key}: ${value.join(" | ")}`);
+    }
     return;
   }
   console.log(`- ${key}: ${value ?? "none"}`);

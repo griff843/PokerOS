@@ -3,21 +3,25 @@
 Ground truth for repo state. Updated after verified changes land.
 Both Claude and Codex must read this before making claims about what is or isn't built.
 
-Last verified: 2026-04-04
+Last verified: 2026-04-05
 
 ---
 
 ## Toolchain
 
-**Verification must always run on the user's local machine, not in Codex's sandbox.**
-Codex runs in an isolated environment where `better-sqlite3` is not compiled and pnpm symlinks may be stale. This is expected. Codex's job ends when patch files land in `pending/`. All `pnpm validate:canonical` and `pnpm verify` calls are the user's responsibility.
+Verification is currently runnable from this workspace. Do not assume Codex is blocked from `pnpm` or `better-sqlite3` in this repo without re-checking first.
 
 | Command | Status | Notes |
 |---|---|---|
 | `pnpm typecheck` | PASSING | Clean, no errors |
-| `pnpm vitest run` | PASSING | 53 files, 369 tests |
+| `pnpm vitest run` | PASSING | 53 files, 370 tests |
 | `pnpm validate:canonical` | PASSING | 7 files, 241 drills |
 | `pnpm verify` | PASSING | typecheck + tests + Next.js build |
+| `pnpm drill:coverage` | PASSING | Audit CLI — reports depth, street/pot mix |
+| `pnpm drill:lane-gaps` | PASSING | Audit CLI — reports critical gaps and imbalances |
+| `pnpm drill:followups-audit` | PASSING | Audit CLI — reports follow_up and concept coverage |
+| `pnpm drill:trace` | PASSING | Audit CLI — traces a single drill's full coaching chain |
+| `pnpm drill:patch-quality` | PASSING | Quality gate for pending batches — checks completeness and template drift |
 | `better-sqlite3` | COMPILED | Built with VS Build Tools 2022 (version 18 path). If pnpm install wipes it, rebuild with: `npx node-gyp rebuild --msvs_version=2022` from `node_modules/.pnpm/better-sqlite3@11.10.0/node_modules/better-sqlite3` |
 
 ---
@@ -42,16 +46,18 @@ Codex runs in an isolated environment where `better-sqlite3` is not compiled and
 
 ## Content
 
+Strict coaching-context completeness = all 8 core fields present: `key_concept`, `difficulty_reason`, `why_preferred_line_works`, `follow_up`, `follow_up_concepts`, `range_context`, `range_notes`, `range_support`. Use `pnpm drill:coverage` for current counts.
+
 | File | Drills | `diagnostic_prompts` | `coaching_context` depth |
 |---|---|---|---|
-| `live_cash_gold_btn_bb_river.json` | 88 | 88/88 (100%) | Full (12 fields) |
-| `hu_seed.json` | 30 | 30/30 (100%) | Partial (key_concept, difficulty_reason, why_preferred_line_works) |
-| `live_cash_pack1.json` | 30 | 30/30 (100%) | Full (key_concept, difficulty_reason, why_preferred_line_works + base fields) |
-| `live_cash_pack2.json` | 30 | 30/30 (100%) | Full |
-| `live_cash_pack3.json` | 30 | 30/30 (100%) | Full |
-| `live_cash_pack4.json` | 30 | 30/30 (100%) | Full |
-| `live_cash_exploit.json` | 3 | 3/3 (100%) | Partial (key_concept, difficulty_reason) |
-| **Total** | **241** | **241/241 (100%)** | |
+| `live_cash_gold_btn_bb_river.json` | 88 | 88/88 (100%) | Deep: all 11+ fields present; 18/88 pass strict 8-field check (gaps are missing `follow_up_concepts` and `range_support` on some drills) |
+| `hu_seed.json` | 30 | 30/30 (100%) | Sparse: 4/30 pass the strict 8-field check; most drills still lack follow_up and richer range fields |
+| `live_cash_pack1.json` | 30 | 30/30 (100%) | Prose depth: 30/30 have key_concept + difficulty_reason + why_preferred_line_works; 0/30 have follow_up, range fields |
+| `live_cash_pack2.json` | 30 | 30/30 (100%) | Prose depth: same as pack1 |
+| `live_cash_pack3.json` | 30 | 30/30 (100%) | Prose depth: same as pack1 |
+| `live_cash_pack4.json` | 30 | 30/30 (100%) | Prose depth: same as pack1 |
+| `live_cash_exploit.json` | 3 | 3/3 (100%) | Minimal: no strict-complete coaching_context entries yet |
+| **Total** | **241** | **241/241 (100%)** | Strict complete: 22/241 (9.1%) |
 
 ---
 
@@ -73,11 +79,13 @@ Codex runs in an isolated environment where `better-sqlite3` is not compiled and
 
 ## Known gaps (not bugs — planned work)
 
-- `range_context`, `range_notes`, `what_changed_by_street`, `follow_up`, `follow_up_concepts`, `range_support` on pack1–4 are still shallow or absent — deep range authoring pass needed.
-- `hu_seed.json` and `live_cash_exploit.json` coaching_context is partial — range and follow-up fields not yet authored.
-- No preflop opening/4-bet content. No limped pot content outside exploit pack.
-- SessionSummary does not yet synthesize `key_concept` or `difficulty_reason` from drill data into debrief cards — cross-drill pattern synthesis is a future improvement.
-- CommandCenter `follow_up_concepts` not yet driving recommended block selection.
+- `follow_up`, `follow_up_concepts`, `range_context`, `range_notes`, `range_support` on pack1–4 are missing — range and follow-up authoring pass needed (Sprint 11).
+- `hu_seed.json`: 25/30 drills have no coaching_context — full context pass needed.
+- `live_cash_exploit.json`: coaching_context partial — follow_up and range fields not authored.
+- No 4BP drills. No squeeze drills. Preflop and flop are underweight vs river (57.3% river) — Sprint 3/4 work.
+- Duplicate diagnostic prompt text in pack1–4 (detected by `pnpm drill:patch-quality`) — prompts like "Which range fact matters most?" reused across 6 drills. Quality issue, not a schema error.
+- SessionSummary does not yet synthesize `key_concept` or `difficulty_reason` cross-drill into debrief cards.
+- CommandCenter `follow_up_concepts` routing is wired but concept block assignment logic is shallow — Sprint 2 work.
 
 ---
 

@@ -11,6 +11,8 @@ This document tracks which capabilities required for **coach-level training** ar
 It should be updated as development progresses.
 
 > **Audit completed (2026-03-28):** Issue #15 truth audit reconciled every `Missing*` row against current code. All suspected-stale claims are now resolved with exact evidence. See `out/reports/issue-15-truth-audit.md` for full findings.
+>
+> **Sprint 1 truth refresh (2026-04-05):** Reconciled again after diagnostic prompt rollout, coaching-context enrichment, follow-up concept routing, and content audit CLI additions. The main remaining blockers are now repo-green discipline, content breadth, range visibility, solver-backed truth, and real-hand import depth.
 
 ---
 
@@ -47,7 +49,7 @@ It should be updated as development progresses.
 | Concept snapshots | Complete |
 | Weakness inference | Complete |
 | Recommendation engine | Partial |
-| Intervention planning | Partial | Routes and pages exist: `/app/concepts/[conceptId]/execution/page.tsx`, `/app/training/session/[id]/page.tsx`, `/api/intervention-plan`, `/api/intervention-execution/[conceptId]`. DB tables (`coaching_interventions`, `intervention_decision_snapshots`) and functions exist. `syncInterventionDecisionSnapshots()` called from Command Center GET. Gap: play session → `coaching_diagnoses` write chain not wired. |
+| Intervention planning | Partial | Routes and pages exist: `/app/concepts/[conceptId]/execution/page.tsx`, `/app/training/session/[id]/page.tsx`, `/api/intervention-plan`, `/api/intervention-execution/[conceptId]`. DB tables (`coaching_interventions`, `intervention_decision_snapshots`) and functions exist. `syncInterventionDecisionSnapshots()` is called from Command Center GET, and attempt persistence now syncs coaching memory. Remaining gap: intervention planning and execution are still not deep enough to feel like a full coach-owned repair loop. |
 
 ---
 
@@ -67,9 +69,9 @@ It should be updated as development progresses.
 | Capability | Status |
 |------------|--------|
 | Persistent learner model | Partial |
-| Persistent session attempts | Partial | `POST /api/attempts` route exists. Play page calls `submitDecision()` which POSTs to `/api/attempts`. Attempts persisted to **local JSON** via `persistAttempt()`. `insertAttempt()` exists in `packages/db/src/repository.ts` but is not called from web app. SQLite write path not connected. |
-| Persistent review queue | Partial | `GET /api/review-queue` route exists, calls `buildPersistentReviewSnapshot()`. Read path functional; downstream quality depends on attempt data. |
-| Cross-session coaching memory | Partial | Tables exist: `coaching_diagnoses`, `coaching_interventions`, `intervention_decision_snapshots`, `transfer_evaluation_snapshots`, `retention_schedules`. `syncInterventionDecisionSnapshots()` and `syncTransferEvaluationSnapshots()` called from `GET /api/command-center`. Gap: play session never writes to `coaching_diagnoses`. |
+| Persistent session attempts | Complete | `POST /api/attempts` persists via `persistAttempt()` in `apps/table-sim/src/lib/study-persistence.ts`, which calls `insertAttempt()` into SQLite and updates coaching memory. `loadLocalStudyData()` reads attempts back from the local DB. |
+| Persistent review queue | Partial | `GET /api/review-queue` route exists and downstream read paths are functional. Remaining gap: review quality still depends on richer breadth, richer coaching truth, and stronger learner-memory usage rather than simple persistence wiring. |
+| Cross-session coaching memory | Partial | Tables exist: `coaching_diagnoses`, `coaching_interventions`, `intervention_decision_snapshots`, `transfer_evaluation_snapshots`, `retention_schedules`. Attempt persistence now syncs diagnoses and reflections into coaching memory, and command-center reads sync intervention/transfer snapshots. Remaining gap: intervention execution depth and longitudinal assignment quality are still partial. |
 
 ---
 
@@ -77,8 +79,8 @@ It should be updated as development progresses.
 
 | Capability | Status |
 |------------|--------|
-| Reasoning prompts | Missing | `diagnostic_prompts[]` schema exists on drills and `DrillAttempt.diagnostic` type is defined (`session-types.ts`). `CoachingPanel.tsx` has a generic `setDiagnostic()` callback but it is not wired to `drill.diagnostic_prompts[]`. Authored prompts in drills are never rendered in the play UI. |
-| Misunderstanding classification | Missing | `coaching_diagnoses` table and `createDiagnosis()` exist in `packages/db/src/repository.ts`. Never called from web app play flow. |
+| Reasoning prompts | Complete | `CoachingPanel.tsx` now pulls the primary authored diagnostic prompt with `getPrimaryDiagnosticPrompt()`, renders the options in the play feedback loop, and stores the selected reasoning result on the attempt. Current content coverage is `241/241` drills with `diagnostic_prompts`. |
+| Misunderstanding classification | Partial | `coaching_diagnoses` are now written through the attempt persistence/coaching-memory sync path. Remaining gap: repeated misunderstanding categories still need stronger downstream use in intervention planning, concept views, and longitudinal coaching. |
 | Concept misunderstanding detection | Partial |
 
 ---
@@ -90,7 +92,7 @@ It should be updated as development progresses.
 | Rich drill schema | Partial |
 | Action history per drill | Partial | Present in gold live-cash lane (`content/drills/live_cash_gold_btn_bb_river.json` and sibling families). Missing from most other drill families. |
 | Strategy mix per drill | Missing | No solver data. `strategy_mix` field not populated anywhere. |
-| Coaching context per drill | Partial | Present in gold live-cash lane. Missing from most other drill families. |
+| Coaching context per drill | Partial | Gold lane is deep, and live cash packs now have materially better coaching prose, but full gold-lane-style coaching-context depth is still sparse across the total corpus. Current audit tooling shows complete coaching-context depth remains limited relative to total drill count. |
 
 ---
 
@@ -108,11 +110,11 @@ It should be updated as development progresses.
 
 The next development phases should focus on:
 
-1. SQLite write path from web sessions (attempts + SRS via `insertAttempt()` / `upsertSrs()`)
-2. Play → `coaching_diagnoses` write chain
-3. Diagnostic prompt surfacing in play UI
-4. Rich drill truth depth outside the gold live-cash lane
-5. Range/bucket visualization from existing authored data
+1. Repo-green discipline and verification reliability
+2. Rich drill truth depth and breadth outside the current gold lane
+3. Range/bucket visualization from existing authored data
+4. Stronger intervention planning and longitudinal learner-memory usage
+5. Real-hand import depth and practice-to-play transfer quality
 
 ---
 
@@ -120,4 +122,4 @@ The next development phases should focus on:
 
 The current Poker OS architecture is already ahead of most poker training tools.
 
-The primary remaining challenge is **increasing training truth and coaching depth**, not adding more product surfaces.
+The primary remaining challenge is **increasing training truth, breadth, and coaching depth**, not adding more product surfaces.

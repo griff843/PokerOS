@@ -30,6 +30,7 @@ pnpm drill:coverage            # drill count by street, pot type, concept
 pnpm drill:lane-gaps           # identify undertaught lanes
 pnpm drill:followups-audit     # follow_up and follow_up_concepts coverage
 pnpm drill:trace               # trace a single drill's coaching chain
+pnpm drill:patch-quality       # pre-merge quality gate: completeness + template drift detection
 
 # Content patch application
 pnpm apply:diagnostic-patch

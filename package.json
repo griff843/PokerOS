@@ -27,6 +27,7 @@
     "drill:lane-gaps": "node scripts/drill-lane-gaps.mjs",
     "drill:followups-audit": "node scripts/drill-followups-audit.mjs",
     "drill:trace": "node scripts/drill-trace.mjs",
+    "drill:patch-quality": "node scripts/drill-patch-quality.mjs",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "vitest run --pool=forks",
     "test:watch": "vitest --pool=forks",
