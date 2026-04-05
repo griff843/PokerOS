@@ -12,3 +12,7 @@ out/
 apps/table-sim/.next/
 apps/table-sim/out/
 apps/table-sim/.env.local
+
+# Local tool configs (not project state)
+.claude/settings.local.json
+.codex/
